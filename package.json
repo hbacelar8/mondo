@@ -2,7 +2,7 @@
   "name": "mondo",
   "productName": "mondo",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "The one anime client",
   "main": "src/index.js",
   "scripts": {
     "start": "electron-forge start",
@@ -35,7 +35,9 @@
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "productName": "Mondo"
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",
