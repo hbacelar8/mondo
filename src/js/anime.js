@@ -12,10 +12,38 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getUrlParam } from './utils.js'
+import {getUrlParam, convertSecondsToDHM} from './utils.js'
+
+
+const MEDIA_STATUS = {
+    FINISHED: 'Finished',
+    RELEASING: 'Releasing',
+    NOT_YET_RELEASED: 'Not Yet Released',
+    CANCELLED: 'Cancelled'
+}
+
+const MEDIA_SOURCE = {
+    ORIGINAL: 'Original',
+    MANGA: 'Manga',
+    LIGHT_NOVEL: 'Light Novel',
+    VISUAL_NOVEL: 'Visual Novel',
+    VIDEO_GAME: 'Video Game',
+    OTHER: 'Other',
+    NOVEL: 'Novel',
+    DOUJINSHI: 'Doujinshi',
+    ANIME: 'Anime'
+}
+
+const MEDIA_SEASON = {
+    WINTER: 'Winter',
+    SPRING: 'Spring',
+    SUMMER: 'Summer',
+    FALL: 'Fall'
+}
+
 const animeId = getUrlParam('id', null)
 
 fetchAnime(animeId)
@@ -35,6 +63,35 @@ function fetchAnime(id) {
                     romaji,
                     native
                 },
+                format,
+                status,
+                startDate {
+                    month,
+                    year
+                },
+                endDate {
+                    month,
+                    year
+                },
+                season,
+                seasonYear,
+                episodes,
+                duration,
+                countryOfOrigin,
+                source,
+                averageScore,
+                meanScore,
+                popularity,
+                favourites,
+                studios {
+                    nodes {
+                        name
+                    }
+                },
+                nextAiringEpisode {
+                    timeUntilAiring,
+                    episode
+                },
                 coverImage {
                     large
                 },
@@ -45,7 +102,9 @@ function fetchAnime(id) {
                         relationType,
                         node {
                             title {
-                                english
+                                english,
+                                romaji,
+                                native
                             }
                         }
                     }
@@ -92,6 +151,24 @@ function handleResponse(response) {
  */
 function handleData(data) {
     const anime = data.data.Media
+    console.log(data)
+
+    const overviewData = {
+        airing: anime.nextAiringEpisode ? `Ep. ${anime.nextAiringEpisode.episode}: ${convertSecondsToDHM(anime.nextAiringEpisode.timeUntilAiring)}` : null,
+        format: anime.format,
+        episodes: anime.episodes,
+        Episode_Duration: anime.duration ? anime.duration + 'mins': null,
+        status: anime.status,
+        Start_Date: anime.startDate.month ? anime.startDate.month + ', ' + anime.startDate.year : null,
+        End_Date: anime.endDate.month ? anime.endDate.month + ', ' + anime.endDate.year: null,
+        season: anime.season ? [anime.season, anime.seasonYear] : null,
+        Average_Score: anime.averageScore ? anime.averageScore + '%': null,
+        Mean_Score: anime.meanScore ? anime.meanScore + '%': null,
+        popularity: anime.popularity,
+        favorites: anime.favourites,
+        studio: anime.studios.nodes.length ? anime.studios.nodes[0].name : null,
+        source: anime.source
+    }
 
     if (anime.title.english) {
         var title = anime.title.english
@@ -110,6 +187,8 @@ function handleData(data) {
     }
 
     addAnimeToPage(title, cover, banner, synopsis)
+    addOverviewToPage(overviewData)
+    setEventListeners()
 }
 
 /**
@@ -117,7 +196,7 @@ function handleData(data) {
  * @param {object} error Array with error information
  */
 function handleError(error) {
-    alert('Error, check console');
+    alert('Error loading anime content.');
     console.error(error);
 }
 
@@ -129,79 +208,163 @@ function handleError(error) {
  * @param {string} synopsis Anime's synopsis
  */
 function addAnimeToPage(title, cover, banner, synopsis) {
-    var headerDiv = document.querySelector('.header'),
-        animeBannerDiv = document.createElement('div'),
-        animeCoverInfoDiv = document.createElement('div'),
-        animeCoverDiv = document.createElement('div'),
-        animeInfoDiv = document.createElement('div'),
-        animeAboutDiv = document.createElement('div'),
+    const animeBannerDiv = document.querySelector('.banner'),
+        animeCoverDiv = document.querySelector('.cover'),
+        animeAboutDiv = document.querySelector('.about'),
+        readMoreBtnP = document.querySelector('.read-more'),
         animeBannerImg = document.createElement('img'),
         animeCoverImg = document.createElement('img'),
-        watchBtnA = document.createElement('a'),
         animeTitleP = document.createElement('p'),
-        animeSynopsisP = document.createElement('p'),
-        readMoreBtnP = document.createElement('p'),
-        readMoreBtnA = document.createElement('a')
+        animeSynopsisP = document.createElement('p')
 
-    animeBannerDiv.classList.add('banner')
-    animeCoverInfoDiv.classList.add('cover-info-wrap')
-    animeCoverDiv.classList.add('cover')
-    animeInfoDiv.classList.add('info')
-    animeAboutDiv.classList.add('about')
     animeTitleP.classList.add('title')
     animeSynopsisP.classList.add('synopsis')
-    readMoreBtnP.classList.add('read-more')
-    readMoreBtnA.classList.add('button')
 
     animeBannerImg.src = banner
     animeCoverImg.src = cover
-    watchBtnA.innerText = 'Watch'
     animeTitleP.innerText = title
     animeSynopsisP.innerText = synopsis
-    readMoreBtnA.innerText = 'Read More'
+    animeSynopsisP.style.lineHeight = '25px'
 
-    readMoreBtnP.appendChild(readMoreBtnA)
-    animeAboutDiv.appendChild(animeTitleP)
-    animeAboutDiv.appendChild(animeSynopsisP)
-    animeAboutDiv.appendChild(readMoreBtnP)
-    animeInfoDiv.appendChild(animeAboutDiv)
-    animeCoverDiv.appendChild(animeCoverImg)
-    animeCoverDiv.appendChild(watchBtnA)
-    animeCoverInfoDiv.appendChild(animeCoverDiv)
-    animeCoverInfoDiv.appendChild(animeInfoDiv)
-    animeBannerDiv.appendChild(animeBannerImg)
+    animeAboutDiv.insertBefore(animeTitleP, animeAboutDiv.children[0])
+    animeAboutDiv.insertBefore(animeSynopsisP, animeCoverDiv.children[1])
+    animeCoverDiv.insertBefore(animeCoverImg, animeCoverDiv.children[0])
 
-    headerDiv.appendChild(animeBannerDiv)
-    headerDiv.appendChild(animeCoverInfoDiv)
+    if (banner) {
+        animeBannerDiv.appendChild(animeBannerImg)
+    } else {
+        const mainDiv = document.querySelector('.main')
+        mainDiv.style.transform = 'translateY(-200px)'
+    }
 
     if (animeAboutDiv.scrollHeight - animeAboutDiv.clientHeight) {
         readMoreBtnP.style.display = 'block'
     } else {
         readMoreBtnP.style.display = 'none'
     }
+}
 
-    readMoreBtnA.addEventListener('click', function () {
-        animeAboutDiv.style.height = 'unset'
-        readMoreBtnP.style.display = 'none'
-    })
+/**
+ * Add anime overview information to HTML page
+ * @param {object} overviewData Overview information from anime
+ */
+function addOverviewToPage(overviewData) {
+    const overviewDiv = document.querySelector('.overview')
+    console.log(overviewData)
 
-    setEventListeners()
+    for (let [key, value] of Object.entries(overviewData)) {
+        switch (key) {
+            case 'airing':
+                if (value) {
+                    var div = document.createElement('div')
+                    var p1 = document.createElement('p')
+                    var p2 = document.createElement('p')
+                    p2.style.color = getComputedStyle(document.body).getPropertyValue('--line-color')
+    
+                    p1.innerText = 'Airing'
+                    p2.innerText = value
+    
+                    div.appendChild(p1)
+                    div.appendChild(p2)
+                    overviewDiv.appendChild(div)
+                }
+                break
+
+            case 'status':
+                var div = document.createElement('div')
+                var p1 = document.createElement('p')
+                var p2 = document.createElement('p')
+
+                p1.innerText = 'Status'
+                p2.innerText = MEDIA_STATUS[value]
+
+                div.appendChild(p1)
+                div.appendChild(p2)
+                overviewDiv.appendChild(div)
+                break
+
+            case 'season':
+                if (value) {
+                    var div = document.createElement('div')
+                    var p1 = document.createElement('p')
+                    var p2 = document.createElement('p')
+    
+                    p1.innerText = 'Season'
+                    p2.innerText = MEDIA_SEASON[value[0]] + ', ' + value[1]
+    
+                    div.appendChild(p1)
+                    div.appendChild(p2)
+                    overviewDiv.appendChild(div)
+                }
+                break
+            
+            case 'source':
+                if (value) {
+                    var div = document.createElement('div')
+                    var p1 = document.createElement('p')
+                    var p2 = document.createElement('p')
+    
+                    p1.innerText = 'Source'
+                    p2.innerText = MEDIA_SOURCE[value]
+    
+                    div.appendChild(p1)
+                    div.appendChild(p2)
+                    overviewDiv.appendChild(div)
+                }
+                break
+
+            default:
+                if (value) {
+                    var div = document.createElement('div')
+                    var p1 = document.createElement('p')
+                    var p2 = document.createElement('p')
+    
+                    p1.innerText = (key.charAt(0).toUpperCase() + key.slice(1)).replace('_', ' ')
+                    p2.innerText = value
+    
+                    div.appendChild(p1)
+                    div.appendChild(p2)
+                    overviewDiv.appendChild(div)
+                }
+                break
+        }
+    }
 }
 
 /**
  * Set general event listeners
  */
 function setEventListeners() {
-    const animeAbout = document.querySelector('.about'),
-        readMoreBtn = document.querySelector('.read-more')
+    const animeAboutDiv = document.querySelector('.about'),
+        readMoreBtnP = document.querySelector('.read-more'),
+        readMoreBtnA = document.querySelector('.button'),
+        menuTabs = document.getElementsByClassName('tab'),
+        tabContent = document.getElementsByClassName('tab-content')
+
+    readMoreBtnA.addEventListener('click', function () {
+        animeAboutDiv.style.height = 'unset'
+        readMoreBtnP.style.display = 'none'
+    })
+
+    Array.prototype.forEach.call(menuTabs, tab => {
+        tab.addEventListener('click', function () {
+            const target = document.querySelector(tab.dataset.tabTarget)
+
+            Array.prototype.forEach.call(tabContent, content => {
+                content.classList.remove('active')
+            })
+
+            target.classList.add('active')
+        })
+    })
 
     window.addEventListener('resize', function () {
-        animeAbout.style.height = '185px'
+        animeAboutDiv.style.height = '185px'
 
-        if (animeAbout.scrollHeight - animeAbout.clientHeight) {
-            readMoreBtn.style.display = 'block'
+        if (animeAboutDiv.scrollHeight - animeAboutDiv.clientHeight) {
+            readMoreBtnP.style.display = 'block'
         } else {
-            readMoreBtn.style.display = 'none'
+            readMoreBtnP.style.display = 'none'
         }
     })
 }

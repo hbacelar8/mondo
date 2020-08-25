@@ -12,10 +12,11 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+ * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 const dataAnilist = localStorage.getItem('dataAnilist')
+const usernameAnilist = localStorage.getItem('anilistUsername')
 const searchBar = document.querySelector('.anime-search')
 
 if (!dataAnilist) {
@@ -246,16 +247,13 @@ function addAnimeToView(id, title, cover, episodes, progress, score) {
     newAnimeP = document.createElement('p')
     newAnimeSpan1 = document.createElement('span')
     newAnimeSpan2 = document.createElement('span')
-    newAnimeTitle = document.createTextNode(title)
-    newAnimeProgress = document.createTextNode(`${progress}/${episodes}`)
-    newAnimeScore = document.createTextNode(score == 0 ? '-' : score)
 
     newAnimeDiv.classList.add('anime')
     newAnimeImg.src = cover
     newAnimeImg.loading = 'lazy'
-    newAnimeP.appendChild(newAnimeTitle)
-    newAnimeSpan1.appendChild(newAnimeProgress)
-    newAnimeSpan2.appendChild(newAnimeScore)
+    newAnimeP.innerText = title
+    newAnimeSpan1.innerText = `${progress}/${episodes}`
+    newAnimeSpan2.innerText = score == 0 ? '-' : score
 
     newAnimeDiv.appendChild(newAnimeImg)
     newAnimeDiv.appendChild(newAnimeP)
