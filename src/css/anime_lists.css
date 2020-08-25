@@ -10,7 +10,8 @@
 
     --darker-bg-color: #2f3640;
     --lighter-bg-color: #353b48;
-    --line-color: #4cd137;
+    --line-color: #487eb0;
+    --line-color-rgb: 72, 126, 176
 }
 
 *:focus {
@@ -211,7 +212,7 @@ body {
     height: 100%;
     position: absolute;
     object-fit: cover;
-    border-radius: 2px;
+    border-top-right-radius: 10px;
 }
 
 .anime p {
