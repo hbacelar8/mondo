@@ -1,0 +1,270 @@
+* {
+    margin: 0;
+    padding: 0;
+    color: white;
+    font-size: 24px;
+    font-family: Arial, Helvetica, sans-serif;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+
+    --darker-bg-color: #2f3640;
+    --lighter-bg-color: #353b48;
+    --lighter-bg-color-rgb: 53, 59, 72;
+    --line-color: #487eb0;
+    --line-color-rgb: 72, 126, 176;
+}
+
+*:focus {
+    outline: none;
+}
+
+body {
+    background-color: var(--darker-bg-color);
+}
+
+
+/* ----------- Scrollbar -----------*/
+/* width */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: var(--darker-bg-color);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--line-color);
+    border-radius: 2px;
+}
+/* ----------- Scrollbar -----------*/
+
+
+.side-bar {
+    width: 50px;
+    height: 100%;
+    font-size: 1.5rem;
+    transition: 0.3s;
+    z-index: 1;
+    background-color: rgba(53, 59, 72, 0.97);
+    position: fixed;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.side-bar:hover {
+    width: 200px;
+}
+
+.anime-lists {
+    margin: 20px 0 20px 15px;
+}
+
+.anime-lists-btn {
+    cursor: pointer;
+}
+
+.anime-lists-btn i {
+    margin-right: 20px;
+}
+
+.anime-lists-menu {
+    height: 0;
+    transition: 0.3s;
+    overflow: hidden;
+}
+
+.anime-lists-menu a {
+    display: block;
+    margin: 20px 20px 0 44px;
+    font-size: 0.7rem;
+    position: relative;
+}
+
+.anime-lists-menu a::before {
+    content: "";
+    width: 2px;
+    height: 150%;
+    background-color: var(--line-color);
+    position: absolute;
+    top: -25%;
+    left: -20px;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+.anime-lists-menu a:hover::before {
+    opacity: 1;
+}
+
+.anime-lists:hover > .anime-lists-menu {
+    height: 210px;
+}
+
+.settings-btn {
+    margin: 20px 0 20px 15px;
+    bottom: 0;
+    position: absolute;
+}
+
+.settings-btn i {
+    margin-right: 20px;
+}
+
+.main {
+    height: 100vh;
+    margin-left: 50px;
+    min-width: 800px;
+    display: grid;
+    grid-template-rows: 200px auto;
+    transition: 0.5s;
+}
+
+.side-bar:hover + .main {
+    filter: brightness(50%);
+}
+
+.header-wrap {
+    margin-top: 50px;
+    position: relative;
+}
+
+.header-wrap::after {
+    content: "";
+    width: 80%;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: var(--line-color);
+    position: absolute;
+    margin-left: -40%;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.header h1 {
+    margin-left: 50px;
+    font-size: 2rem;
+}
+
+.anime-search {
+    right: 0;
+    margin-right: 50px;
+    position: absolute;
+    border: 1px solid var(--line-color);
+    background: transparent;
+    border-radius: 30px;
+    padding: 5px 20px 5px 20px;
+    font-size: 0.8rem;
+}
+
+.content {
+    margin: 20px;
+}
+
+.login {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.login-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    height: 350px;
+    padding: 30px;
+    transform: translate(-50%, -50%);
+    background: rgba(var(--lighter-bg-color-rgb), 0.5);
+    box-sizing: border-box;
+    box-shadow: 0 0 20px rgba(0, 0, 0, .6);
+    border-radius: 10px;
+}
+
+.login-box a {
+    background-color: var(--line-color);
+    padding: 10px 20px 10px 20px;
+    transition: .2s;
+    border-radius: 5px;
+}
+
+.login-box a:hover {
+    box-shadow: 0px 0px 15px 1px rgba(var(--line-color-rgb), 0.8);
+}
+
+.connect-view {
+    display: none;
+}
+
+.connect-view.active {
+    display: block;
+}
+
+.disconnect-view {
+    display: none;
+}
+
+.disconnect-view.active {
+    display: block;
+}
+
+.disconnect-btn {
+    text-align: center;
+    margin-top: 125px;
+    cursor: pointer;
+}
+
+.login-anilist-btn {
+    margin-top: 15px;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.login-btn {
+    margin-top: 30px;
+    margin-bottom: 60px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.login-box .user-box {
+    position: relative;
+}
+  
+.login-box .user-box input {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    margin-bottom: 30px;
+    border: none;
+    border-bottom: 1px solid #fff;
+    outline: none;
+    background: transparent;
+}
+
+.login-box .user-box label {
+    position: absolute;
+    top:0;
+    left: 0;
+    padding: 10px 0;
+    font-size: 16px;
+    pointer-events: none;
+    transition: .5s;
+}
+
+.login-box .user-box input:focus ~ label,
+.login-box .user-box input:valid ~ label {
+    top: -20px;
+    left: 0;
+    color: var(--line-color);
+    font-size: 12px;
+}
