@@ -44,6 +44,19 @@ const MEDIA_SEASON = {
     FALL: 'Fall'
 }
 
+const RELATION_TYPE = {
+    ADAPTATION: 'Adaptation',
+    PREQUEL: 'Prequel',
+    SEQUEL: 'Sequel',
+    ALTERNATIVE: 'Alternative',
+    SPIN_OFF: 'Spin Off',
+    SIDE_STORY: 'Side Story',
+    CHARACTER: 'Character',
+    SUMMARY: 'Summary',
+    OTHER: 'Other',
+    PARENT: 'Parent'
+}
+
 const animeId = getUrlParam('id', null)
 
 fetchAnime(animeId)
@@ -101,10 +114,9 @@ function fetchAnime(id) {
                     edges {
                         relationType,
                         node {
-                            title {
-                                english,
-                                romaji,
-                                native
+                            id,
+                            coverImage {
+                                large
                             }
                         }
                     }
@@ -151,6 +163,7 @@ function handleResponse(response) {
  */
 function handleData(data) {
     const anime = data.data.Media
+    const relationsData = data.data.Media.relations.edges
     console.log(data)
 
     const overviewData = {
@@ -188,6 +201,7 @@ function handleData(data) {
 
     addAnimeToPage(title, cover, banner, synopsis)
     addOverviewToPage(overviewData)
+    addRelationsToPage(relationsData)
     setEventListeners()
 }
 
@@ -331,6 +345,29 @@ function addOverviewToPage(overviewData) {
     }
 }
 
+function addRelationsToPage(relationsData) {
+    const animeRelationsDiv = document.querySelector('.anime-relations')
+
+    for (let i = 0; i < relationsData.length; i++) {
+        if (relationsData[i].relationType == 'ADAPTATION') {
+            continue
+        }
+
+        let relationDiv = document.createElement('div')
+        let relationImg = document.createElement('img')
+        let relationP = document.createElement('p')
+
+        relationDiv.classList.add('relation-div')
+        relationImg.src = relationsData[i].node.coverImage.large
+        relationP.innerText = RELATION_TYPE[relationsData[i].relationType]
+        relationDiv.id = relationsData[i].node.id
+
+        relationDiv.appendChild(relationImg)
+        relationDiv.appendChild(relationP)
+        animeRelationsDiv.appendChild(relationDiv)
+    }
+}
+
 /**
  * Set general event listeners
  */
@@ -339,7 +376,8 @@ function setEventListeners() {
         readMoreBtnP = document.querySelector('.read-more'),
         readMoreBtnA = document.querySelector('.button'),
         menuTabs = document.getElementsByClassName('tab'),
-        tabContent = document.getElementsByClassName('tab-content')
+        tabContent = document.getElementsByClassName('tab-content'),
+        relations = document.getElementsByClassName('relation-div')
 
     readMoreBtnA.addEventListener('click', function () {
         animeAboutDiv.style.height = 'unset'
@@ -367,4 +405,10 @@ function setEventListeners() {
             readMoreBtnP.style.display = 'none'
         }
     })
+
+    for (let i = 0; i < relations.length; i++) {
+        relations[i].addEventListener('click', () => {
+            window.location.href = `anime.html?id=${relations[i].id}`
+        })
+    }
 }

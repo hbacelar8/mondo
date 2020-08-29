@@ -19,10 +19,14 @@ const dataAnilist = localStorage.getItem('dataAnilist')
 const usernameAnilist = localStorage.getItem('anilistUsername')
 const searchBar = document.querySelector('.anime-search')
 
-if (!dataAnilist) {
-    fetchMediaCollection('hbacelar8')
-} else {
+if (dataAnilist) {
     handleData(JSON.parse(dataAnilist))
+} else {
+    if (usernameAnilist) {
+        fetchMediaCollection(usernameAnilist)
+    } else {
+        addNoListToView()
+    }
 }
 
 setEventListeners()
@@ -181,6 +185,8 @@ function handleData(data) {
                     )
                 }
             })
+        } else {
+            addNoListToView()
         }
 
         return
@@ -212,13 +218,7 @@ function handleData(data) {
             )
         })
     } else {
-        const animeWrap = document.querySelector('.anime-wrap')
-        const noListDiv = document.createElement('div')
-
-        noListDiv.classList.add('no-list')
-        noListDiv.innerHTML = 'Nothing to show around here'
-
-        animeWrap.appendChild(noListDiv)
+        addNoListToView()
     }
 }
 
@@ -291,4 +291,17 @@ function setEventListeners() {
             window.location.href = `search.html?str=${searchBar.value}`
         }
     })
+}
+
+/**
+ * Displays a message when no anime content to show
+ */
+function addNoListToView() {
+    const animeWrap = document.querySelector('.anime-wrap')
+    const noListDiv = document.createElement('div')
+
+    noListDiv.classList.add('no-list')
+    noListDiv.innerHTML = 'Nothing to show around here'
+
+    animeWrap.appendChild(noListDiv)
 }
