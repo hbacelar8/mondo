@@ -3,7 +3,7 @@
     padding: 0;
     color: white;
     font-size: 24px;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Nunito', sans-serif;
     box-sizing: border-box;
     text-decoration: none;
     list-style: none;
@@ -45,19 +45,17 @@ body {
 
 
 .side-bar {
-    width: 50px;
+    width: 230px;
     height: 100%;
     font-size: 1.5rem;
-    transition: 0.3s;
     z-index: 1;
-    background-color: rgba(53, 59, 72, 0.97);
     position: fixed;
     white-space: nowrap;
     overflow: hidden;
-}
-
-.side-bar:hover {
-    width: 200px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-blend-mode: exclusion;
+    background: rgba(53, 59, 72, 0.6);
 }
 
 .anime-lists {
@@ -65,44 +63,40 @@ body {
 }
 
 .anime-lists-btn {
-    cursor: pointer;
-}
-
-.anime-lists-btn i {
-    margin-right: 20px;
+    font-size: 0.55rem;
+    font-weight: 800;
+    color: var(--line-color);
 }
 
 .anime-lists-menu {
-    height: 0;
-    transition: 0.3s;
-    overflow: hidden;
+    padding-top: 5px;
 }
 
 .anime-lists-menu a {
     display: block;
-    margin: 20px 20px 0 44px;
+    margin: 10px 20px 0 0;
     font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 1px;
     position: relative;
 }
 
-.anime-lists-menu a::before {
-    content: "";
-    width: 2px;
-    height: 150%;
-    background-color: var(--line-color);
+.anime-lists-menu p {
+    display: inline-block;
+    font-size: 0.6rem;
+    right: 0;
     position: absolute;
-    top: -25%;
-    left: -20px;
-    opacity: 0;
-    transition: 0.2s;
 }
 
-.anime-lists-menu a:hover::before {
-    opacity: 1;
+.anime-lists-menu i {
+    margin-right: 15px;
+    font-size: 0.65rem;
+    color: rgba(169, 169, 169, 0.5);
+    transition: 0.3s;
 }
 
-.anime-lists:hover > .anime-lists-menu {
-    height: 210px;
+.anime-lists-menu a:hover > .far {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .settings-btn {
@@ -117,14 +111,9 @@ body {
 
 .main {
     height: 100vh;
-    margin-left: 50px;
+    margin-left: 230px;
     min-width: 600px;
     display: grid;
-    transition: filter 0.5s;
-}
-
-.side-bar:hover + .main {
-    filter: brightness(50%);
 }
 
 .header {
@@ -180,7 +169,7 @@ body {
 
 .cover a {
     width: 100%;
-    top: 215px;
+    top: 210px;
     border-radius: 5px;
     font-size: 0.85rem;
     font-weight: 600;
@@ -192,8 +181,12 @@ body {
     transition: .2s;
 }
 
+.cover .edit-btn {
+    top: 250px;
+}
+
 .cover a:hover {
-    box-shadow: 0px 0px 15px 1px rgba(var(--line-color-rgb), 0.8);
+    box-shadow: 0px 0px 10px 1px rgba(var(--line-color-rgb), 0.8);
 }
 
 .info {
@@ -347,7 +340,74 @@ body {
 .download {
     min-height: 270px;
     margin-top: 20px;
-    margin-left: 10%;
+}
+
+.download table {
+    width: 90%;
+    margin: auto;
+    text-align: center;
+    border-collapse: collapse;
+    background-color: var(--lighter-bg-color);
+}
+
+.download th, td {
+    font-size: 0.6rem;
+    padding: 6px;
+    max-width: 500px;
+    border-bottom: 1px solid var(--line-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.download th {
+    cursor: pointer;
+}
+
+.download th:nth-of-type(4) {
+    cursor: unset;
+}
+
+.download th::after {
+    content: attr(data-after);
+    margin-left: 5px;
+    font-size: 0.35rem;
+    position: absolute;
+    transform: translateY(4px);
+}
+
+.download td {
+    font-size: 0.52rem;
+}
+
+.download table th:nth-of-type(2), td:nth-of-type(2) {
+    text-align: left;
+}
+
+.download tr:nth-of-type(even) {
+    background-color: var(--darker-bg-color);
+}
+
+.download table i {
+    font-size: 0.55rem;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.edit-box {
+    width: 0px;
+    height: 0px;
+    left: 50%;
+    top: 50%;
+    border-radius: 5px;
+    transform: translate(-200px, -130px);
+    position: fixed;
+    background-color: var(--lighter-bg-color);
+    -webkit-box-shadow: 0px 0px 41px 8px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 0px 41px 8px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 41px 8px rgba(0,0,0,0.75);
+    transition: 0.2s;
+    overflow: hidden;
 }
 
 @media (max-width: 1250px) {
