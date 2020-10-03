@@ -15,8 +15,14 @@
  * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {getUrlParam, convertSecondsToDHM} from './utils.js'
+import {getUrlParam, convertSecondsToDHM, compareParams} from './utils.js'
+import {getTorrents} from './scrap.js'
 
+const dataAnilist = localStorage.getItem('dataAnilist')
+const accesCode = localStorage.getItem('accessCode')
+const animeId = getUrlParam('id', null)
+
+var torrents = []
 
 const MEDIA_STATUS = {
     FINISHED: 'Finished',
@@ -57,7 +63,38 @@ const RELATION_TYPE = {
     PARENT: 'Parent'
 }
 
-const animeId = getUrlParam('id', null)
+if (dataAnilist) {
+    const lists = JSON.parse(dataAnilist).data.MediaListCollection.lists
+    const animeLists = {
+        watching: null,
+        completed: new Array(),
+        planning: null,
+        paused: null,
+        dropped: null
+    }
+
+    for (let i = 0; i < lists.length; i++) {
+        if (lists[i].name == 'Watching') {
+            animeLists.watching = lists[i].entries
+        } else if (lists[i].name == 'Planning') {
+            animeLists.planning = lists[i].entries
+        } else if (lists[i].name == 'Paused') {
+            animeLists.paused = lists[i].entries
+        } else if (lists[i].name == 'Dropped') {
+            animeLists.dropped = lists[i].entries
+        } else {
+            animeLists.completed.push(lists[i].entries)
+        }
+    }
+
+    if (animeLists.completed.length) {
+        animeLists.completed = animeLists.completed.concat(...animeLists.completed)
+        animeLists.completed.splice(0, 1)
+        animeLists.completed.splice(0, 1)
+    }
+
+    addAnimeListCounters(animeLists)
+}
 
 fetchAnime(animeId)
 
@@ -105,6 +142,9 @@ function fetchAnime(id) {
                     timeUntilAiring,
                     episode
                 },
+                mediaListEntry {
+                    progress
+                },
                 coverImage {
                     large
                 },
@@ -133,6 +173,7 @@ function fetchAnime(id) {
         options = {
             method: 'POST',
             headers: {
+                'Authorization': 'Bearer ' + accesCode,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
@@ -164,7 +205,6 @@ function handleResponse(response) {
 function handleData(data) {
     const anime = data.data.Media
     const relationsData = data.data.Media.relations.edges
-    console.log(data)
 
     const overviewData = {
         airing: anime.nextAiringEpisode ? `Ep. ${anime.nextAiringEpisode.episode}: ${convertSecondsToDHM(anime.nextAiringEpisode.timeUntilAiring)}` : null,
@@ -199,10 +239,11 @@ function handleData(data) {
         synopsis = synopsis.replace(/<br>|<\/br>|<i>|<\/i>/g, '')
     }
 
-    addAnimeToPage(title, cover, banner, synopsis)
+    addAnimeToPage(title, cover, banner, synopsis, anime.mediaListEntry ? anime.mediaListEntry.progress : 0, anime.episodes)
     addOverviewToPage(overviewData)
     addRelationsToPage(relationsData)
-    setEventListeners()
+    setEventListeners(anime)
+    getTorrents(anime.title).then(handleTorrents)
 }
 
 /**
@@ -221,7 +262,7 @@ function handleError(error) {
  * @param {string} banner Link to anime's banner image
  * @param {string} synopsis Anime's synopsis
  */
-function addAnimeToPage(title, cover, banner, synopsis) {
+function addAnimeToPage(title, cover, banner, synopsis, progress, episodes) {
     const animeBannerDiv = document.querySelector('.banner'),
         animeCoverDiv = document.querySelector('.cover'),
         animeAboutDiv = document.querySelector('.about'),
@@ -229,7 +270,8 @@ function addAnimeToPage(title, cover, banner, synopsis) {
         animeBannerImg = document.createElement('img'),
         animeCoverImg = document.createElement('img'),
         animeTitleP = document.createElement('p'),
-        animeSynopsisP = document.createElement('p')
+        animeSynopsisP = document.createElement('p'),
+        animeWatchBtn = document.querySelector('.watch-btn')
 
     animeTitleP.classList.add('title')
     animeSynopsisP.classList.add('synopsis')
@@ -241,7 +283,7 @@ function addAnimeToPage(title, cover, banner, synopsis) {
     animeSynopsisP.style.lineHeight = '25px'
 
     animeAboutDiv.insertBefore(animeTitleP, animeAboutDiv.children[0])
-    animeAboutDiv.insertBefore(animeSynopsisP, animeCoverDiv.children[1])
+    animeAboutDiv.insertBefore(animeSynopsisP, animeAboutDiv.children[1])
     animeCoverDiv.insertBefore(animeCoverImg, animeCoverDiv.children[0])
 
     if (banner) {
@@ -256,6 +298,8 @@ function addAnimeToPage(title, cover, banner, synopsis) {
     } else {
         readMoreBtnP.style.display = 'none'
     }
+
+    animeWatchBtn.innerHTML = `Watch Ep. ${progress == episodes ? progress : progress + 1}/${episodes}`
 }
 
 /**
@@ -264,7 +308,6 @@ function addAnimeToPage(title, cover, banner, synopsis) {
  */
 function addOverviewToPage(overviewData) {
     const overviewDiv = document.querySelector('.overview')
-    console.log(overviewData)
 
     for (let [key, value] of Object.entries(overviewData)) {
         switch (key) {
@@ -345,6 +388,10 @@ function addOverviewToPage(overviewData) {
     }
 }
 
+/**
+ * Add anime relations information to HTML page
+ * @param {object} relationsData Anime relations info
+ */
 function addRelationsToPage(relationsData) {
     const animeRelationsDiv = document.querySelector('.anime-relations')
 
@@ -370,14 +417,18 @@ function addRelationsToPage(relationsData) {
 
 /**
  * Set general event listeners
+ * @param {object} animeInfo Anime information
  */
-function setEventListeners() {
+function setEventListeners(animeInfo) {
     const animeAboutDiv = document.querySelector('.about'),
         readMoreBtnP = document.querySelector('.read-more'),
         readMoreBtnA = document.querySelector('.button'),
         menuTabs = document.getElementsByClassName('tab'),
         tabContent = document.getElementsByClassName('tab-content'),
-        relations = document.getElementsByClassName('relation-div')
+        relations = document.getElementsByClassName('relation-div'),
+        tableThs = document.getElementsByTagName('TH'),
+        editBtn = document.querySelector('.edit-btn'),
+        editBox = document.querySelector('.edit-box')
 
     readMoreBtnA.addEventListener('click', function () {
         animeAboutDiv.style.height = 'unset'
@@ -410,5 +461,133 @@ function setEventListeners() {
         relations[i].addEventListener('click', () => {
             window.location.href = `anime.html?id=${relations[i].id}`
         })
+    }
+
+    for (let i = 0; i < tableThs.length; i++) {
+        if (i != 3) {
+            tableThs[i].setAttribute('data-after', '▲')
+
+            tableThs[i].addEventListener('click', () => {
+                var tableTrs = document.getElementsByTagName('TR')
+                let length = tableTrs.length
+    
+                for (let i = 1; i < length; i++) {
+                    tableTrs[1].remove()
+                }
+    
+                if (tableThs[i].getAttribute('data-after') == '▲') {
+                    tableThs[i].setAttribute('data-after', '▼')
+    
+                    handleTorrents(torrents.sort(compareParams(tableThs[i].id, 'desc')))
+                } else {
+                    tableThs[i].setAttribute('data-after', '▲')
+    
+                    handleTorrents(torrents.sort(compareParams(tableThs[i].id, 'asc')))
+                }
+            })
+        }
+    }
+
+    editBtn.addEventListener('click', () => {
+        editBox.style.width = '500px'
+        editBox.style.height = '300px'
+    })
+
+    document.addEventListener('keydown', (evt) => {
+        if (evt.key == 'Escape') {
+            editBox.style.width = '0px'
+            editBox.style.height = '0px'
+        }
+    })
+}
+
+/**
+ * Add anime list count to side menu
+ * @param {object} animeLists Object conatining all anime lists
+ */
+function addAnimeListCounters(animeLists) {
+    const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('P')
+
+    for (let i = 0; i < counters.length; i++) {
+        let listLinkName = counters[i].previousSibling.nodeValue
+
+        switch (listLinkName) {
+            case 'Watching':
+                counters[i].innerHTML = animeLists.watching ? animeLists.watching.length : 0
+                break;
+
+            case 'Completed':
+                counters[i].innerHTML = animeLists.completed ? animeLists.completed.length : 0
+                break;
+
+            case 'Planning':
+                counters[i].innerHTML = animeLists.planning ? animeLists.planning.length : 0
+                break;
+
+            case 'Paused':
+                counters[i].innerHTML = animeLists.paused ? animeLists.paused.length : 0
+                break;
+
+            case 'Dropped':
+                counters[i].innerHTML = animeLists.dropped ? animeLists.dropped.length : 0
+                break;
+        
+            default:
+                break;
+        }
+    }
+}
+
+/**
+ * Add torrents table to HTML page
+ * @param {object} data List of torrents information
+ */
+function handleTorrents(data) {
+    const table = document.querySelector('.table-content')
+    const loadMoreBtn = document.querySelector('.load-more-btn')
+
+    // Avoid updating gloval variable torrents when sorting
+    if (torrents.length != data.length || torrents.length == 75) {
+        Array.prototype.push.apply(torrents, data)
+    }
+
+    for (let i = 0; i < data.length; i++) {
+        let tr = document.createElement('tr')
+        let sourceTd = document.createElement('td')
+        let nameTd = document.createElement('td')
+        let episodeTd = document.createElement('td')
+        let linkTd = document.createElement('td')
+        let sizeTd = document.createElement('td')
+        let seedTd = document.createElement('td')
+        let leechTd = document.createElement('td')
+        let downloadTd = document.createElement('td')
+        let downloadLink = document.createElement('a')
+        let magneticLink = document.createElement('a')
+
+        sourceTd.innerHTML = data[i].source
+        nameTd.innerHTML = data[i].name
+        episodeTd.innerHTML = data[i].episode
+        sizeTd.innerHTML = data[i].size
+        seedTd.innerHTML = data[i].seeds
+        leechTd.innerHTML = data[i].leechs
+        downloadTd.innerHTML = data[i].downloadNumber
+        downloadLink.href = data[i].downloadLink
+        magneticLink.href = data[i].magneticLink
+        downloadLink.innerHTML = '<i class="fas fa-download"></i>'
+        magneticLink.innerHTML = '<i class="fas fa-magnet"></i>'
+
+        linkTd.appendChild(downloadLink)
+        linkTd.appendChild(magneticLink)
+        
+        tr.appendChild(sourceTd)
+        tr.appendChild(nameTd)
+        tr.appendChild(episodeTd)
+        tr.appendChild(linkTd)
+        tr.appendChild(sizeTd)
+        tr.appendChild(seedTd)
+        tr.appendChild(leechTd)
+        tr.appendChild(downloadTd)
+
+        table.appendChild(tr)
     }
 }

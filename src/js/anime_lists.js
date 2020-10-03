@@ -57,6 +57,8 @@ function fetchMediaCollection(username) {
                             }
                         }
                     }
+                    isSplitCompletedList,
+                    status
                 }
             }
         }
@@ -100,100 +102,66 @@ function handleResponse(response) {
  */
 function handleData(data) {
     const currentPage = window.location.pathname.split('/').pop()
-    const animeLists = data.data.MediaListCollection.lists
+    const lists = data.data.MediaListCollection.lists
+    const animeLists = {
+        watching: null,
+        completed: new Array(),
+        planning: null,
+        paused: null,
+        dropped: null
+    }
 
     if (!dataAnilist) {
         localStorage.setItem('dataAnilist', JSON.stringify(data))
     }
 
+    for (let i = 0; i < lists.length; i++) {
+        if (lists[i].name == 'Watching') {
+            animeLists.watching = lists[i].entries
+        } else if (lists[i].name == 'Planning') {
+            animeLists.planning = lists[i].entries
+        } else if (lists[i].name == 'Paused') {
+            animeLists.paused = lists[i].entries
+        } else if (lists[i].name == 'Dropped') {
+            animeLists.dropped = lists[i].entries
+        } else {
+            animeLists.completed.push(lists[i].entries)
+        }
+    }
+
+    if (animeLists.completed.length) {
+        animeLists.completed = animeLists.completed.concat(...animeLists.completed)
+        animeLists.completed.splice(0, 1)
+        animeLists.completed.splice(0, 1)
+    }
+
     switch (currentPage) {
         case 'watching.html':
-            for (let i = 0; i < animeLists.length; i++) {
-                if (animeLists[i].name == 'Watching') {
-                    var animeList = animeLists[i].entries
-                    break;
-                }
-            }
+            var currentPageList = animeLists.watching
             break;
 
         case 'completed.html':
-            var animeList = new Array()
-
-            for (let i = 0; i < animeLists.length; i++) {
-                if (animeLists[i].name.includes('Completed')) {
-                    animeList.push(animeLists[i].entries)
-                }
-            }
+            var currentPageList = animeLists.completed
             break;
 
         case 'planning.html':
-            for (let i = 0; i < animeLists.length; i++) {
-                if (animeLists[i].name == 'Planning') {
-                    var animeList = animeLists[i].entries
-                    break;
-                }
-            }
+            var currentPageList = animeLists.planning
             break;
 
         case 'paused.html':
-            for (let i = 0; i < animeLists.length; i++) {
-                if (animeLists[i].name == 'Paused') {
-                    var animeList = animeLists[i].entries
-                    break;
-                }
-            }
+            var currentPageList = animeLists.paused
             break;
 
         case 'dropped.html':
-            for (let i = 0; i < animeLists.length; i++) {
-                if (animeLists[i].name == 'Dropped') {
-                    var animeList = animeLists[i].entries
-                    break;
-                }
-            }
+            var currentPageList = animeLists.dropped
             break;
 
         default:
             break;
     }
 
-    if (currentPage == 'completed.html') {
-        if (animeList.length) {
-            animeList.forEach(function (list) {
-                for (let i = 0; i < list.length; i++) {
-                    if (list[i].media.title.english) {
-                        var animeTitle = list[i].media.title.english
-                    } else if (list[i].media.title.romaji) {
-                        var animeTitle = list[i].media.title.romaji
-                    } else {
-                        var animeTitle = list[i].media.title.native
-                    }
-
-                    const animeId = list[i].media.id
-                    const animeCover = list[i].media.coverImage.large
-                    const animeEpisodes = list[i].media.episodes
-                    const userProgress = list[i].progress
-                    const userScore = list[i].score
-
-                    addAnimeToView(
-                        animeId,
-                        animeTitle,
-                        animeCover,
-                        animeEpisodes,
-                        userProgress,
-                        userScore
-                    )
-                }
-            })
-        } else {
-            addNoListToView()
-        }
-
-        return
-    }
-
-    if (animeList) {
-        animeList.forEach(function (list) {
+    if (currentPageList) {
+        currentPageList.forEach(function (list) {
             if (list.media.title.english) {
                 var animeTitle = list.media.title.english
             } else if (list.media.title.romaji) {
@@ -220,6 +188,8 @@ function handleData(data) {
     } else {
         addNoListToView()
     }
+
+    addAnimeListCounters(animeLists)
 }
 
 /**
@@ -252,7 +222,7 @@ function addAnimeToView(id, title, cover, episodes, progress, score) {
     newAnimeImg.src = cover
     newAnimeImg.loading = 'lazy'
     newAnimeP.innerText = title
-    newAnimeSpan1.innerText = `${progress}/${episodes}`
+    newAnimeSpan1.innerText = `${progress}/${episodes ? episodes : '?'}`
     newAnimeSpan2.innerText = score == 0 ? '-' : score
 
     newAnimeDiv.appendChild(newAnimeImg)
@@ -304,4 +274,37 @@ function addNoListToView() {
     noListDiv.innerHTML = 'Nothing to show around here'
 
     animeWrap.appendChild(noListDiv)
+}
+
+function addAnimeListCounters(animeLists) {
+    const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('P')
+
+    for (let i = 0; i < counters.length; i++) {
+        let listLinkName = counters[i].previousSibling.nodeValue
+
+        switch (listLinkName) {
+            case 'Watching':
+                counters[i].innerHTML = animeLists.watching ? animeLists.watching.length : 0
+                break;
+
+            case 'Completed':
+                counters[i].innerHTML = animeLists.completed ? animeLists.completed.length : 0
+                break;
+
+            case 'Planning':
+                counters[i].innerHTML = animeLists.planning ? animeLists.planning.length : 0
+                break;
+
+            case 'Paused':
+                counters[i].innerHTML = animeLists.paused ? animeLists.paused.length : 0
+                break;
+
+            case 'Dropped':
+                counters[i].innerHTML = animeLists.dropped ? animeLists.dropped.length : 0
+                break;
+        
+            default:
+                break;
+        }
+    }
 }

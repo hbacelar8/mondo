@@ -15,6 +15,7 @@
  * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+const dataAnilist = localStorage.getItem('dataAnilist')
 const usernameAnilist = localStorage.getItem('anilistUsername')
 const connectView = document.querySelector('.connect-view')
 const disconnectView = document.querySelector('.disconnect-view')
@@ -25,6 +26,39 @@ if (usernameAnilist) {
 } else {
     connectView.classList.add('active')
     disconnectView.classList.remove('active')
+}
+
+if (dataAnilist) {
+    const lists = JSON.parse(dataAnilist).data.MediaListCollection.lists
+    const animeLists = {
+        watching: null,
+        completed: new Array(),
+        planning: null,
+        paused: null,
+        dropped: null
+    }
+
+    for (let i = 0; i < lists.length; i++) {
+        if (lists[i].name == 'Watching') {
+            animeLists.watching = lists[i].entries
+        } else if (lists[i].name == 'Planning') {
+            animeLists.planning = lists[i].entries
+        } else if (lists[i].name == 'Paused') {
+            animeLists.paused = lists[i].entries
+        } else if (lists[i].name == 'Dropped') {
+            animeLists.dropped = lists[i].entries
+        } else {
+            animeLists.completed.push(lists[i].entries)
+        }
+    }
+
+    if (animeLists.completed.length) {
+        animeLists.completed = animeLists.completed.concat(...animeLists.completed)
+        animeLists.completed.splice(0, 1)
+        animeLists.completed.splice(0, 1)
+    }
+
+    addAnimeListCounters(animeLists)
 }
 
 setEventListeners()
@@ -70,4 +104,37 @@ function setEventListeners() {
         connectView.classList.add('active')
         disconnectView.classList.remove('active')
     })
+}
+
+function addAnimeListCounters(animeLists) {
+    const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('P')
+
+    for (let i = 0; i < counters.length; i++) {
+        let listLinkName = counters[i].previousSibling.nodeValue
+
+        switch (listLinkName) {
+            case 'Watching':
+                counters[i].innerHTML = animeLists.watching ? animeLists.watching.length : 0
+                break;
+
+            case 'Completed':
+                counters[i].innerHTML = animeLists.completed ? animeLists.completed.length : 0
+                break;
+
+            case 'Planning':
+                counters[i].innerHTML = animeLists.planning ? animeLists.planning.length : 0
+                break;
+
+            case 'Paused':
+                counters[i].innerHTML = animeLists.paused ? animeLists.paused.length : 0
+                break;
+
+            case 'Dropped':
+                counters[i].innerHTML = animeLists.dropped ? animeLists.dropped.length : 0
+                break;
+        
+            default:
+                break;
+        }
+    }
 }
