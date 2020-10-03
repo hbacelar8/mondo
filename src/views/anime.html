@@ -6,24 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mondo</title>
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css"
-        integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/anime.css">
 
     <script type="module" src="../js/anime.js" defer></script>
+    <script type="module" src="../js/scrap.js" defer></script>
 </head>
 
 <body>
 
     <nav class="side-bar">
         <li class="anime-lists">
-            <a class="anime-lists-btn"><i class="fas fa-list"></i>Anime Lists</a>
+            <a class="anime-lists-btn">ANIME LISTS</a>
             <div class="anime-lists-menu">
-                <a href="watching.html">Watching</a>
-                <a href="completed.html">Completed</a>
-                <a href="planning.html">Planning</a>
-                <a href="paused.html">Paused</a>
-                <a href="dropped.html">Dropped</a>
+                <a href="watching.html"><i class="far fa-bookmark"></i>Watching<p>0</p></a>
+                <a href="completed.html"><i class="far fa-bookmark"></i>Completed<p>0</p></a>
+                <a href="planning.html"><i class="far fa-bookmark"></i>Planning<p>0</p></a>
+                <a href="paused.html"><i class="far fa-bookmark"></i>Paused<p>0</p></a>
+                <a href="dropped.html"><i class="far fa-bookmark"></i>Dropped<p>0</p></a>
             </div>
         </li>
 
@@ -39,7 +40,8 @@
             <div class="cover-info-wrap">
                 <div class="cover">
                     <!-- <img src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx112301-P1K5zjiQfacn.jpg" alt=""> -->
-                    <a href="">Watch</a>
+                    <a class="watch-btn">Watch</a>
+                    <a class="edit-btn">Edit</a>
                 </div>
 
                 <div class="info">
@@ -65,8 +67,28 @@
                 <div class="anime-relations"></div>
             </div>
             <div class="tab-content" id="download">
-                <div class="download"></div>
+                <div class="download">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th id="source">Source</th>
+                                <th id="name">Name</th>
+                                <th id="episode">Episode</th>
+                                <th id="link">Link</th>
+                                <th id="size">Size</th>
+                                <th id="seeds">Seeds</th>
+                                <th id="leechs">Leechs</th>
+                                <th id="downloadNumber">Downloads</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-content"></tbody>
+                    </table>
+                </div>
             </div>
+        </div>
+
+        <div class="edit-box">
+            
         </div>
     </div>
 
