@@ -7,7 +7,6 @@
     box-sizing: border-box;
     text-decoration: none;
     list-style: none;
-    -webkit-font-smoothing: antialiased;
 
     --darker-bg-color: #2f3640;
     --lighter-bg-color: #353b48;
@@ -23,6 +22,16 @@ body {
     background-color: var(--darker-bg-color);
 }
 
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+}
+
+hr {
+    border: 0;
+	border-top: 1px solid #487eb0;
+}
 
 /* ----------- Scrollbar -----------*/
 /* width */
@@ -43,6 +52,37 @@ body {
 }
 /* ----------- Scrollbar -----------*/
 
+.window-btns {
+    width: 120px;
+    right: 1%;
+    top: 1%;
+    z-index: 1;
+    background-color: rgba(47, 54, 64, 0.6);
+    display: flex;
+    position: fixed;
+    justify-content: space-evenly;
+}
+
+.window-btns div {
+    width: 100%;
+    transition: 0.2s;
+    cursor: pointer;
+    text-align: center;
+}
+
+.window-btns i {
+    font-size: 0.4rem;
+    transform: translateY(-3px);
+}
+
+.min:hover,
+.max:hover {
+    background-color: var(--line-color);
+}
+
+.close:hover {
+    background-color: #870202;
+}
 
 .side-bar {
     width: 230px;
@@ -101,12 +141,14 @@ body {
 
 .settings-btn {
     margin: 20px 0 20px 15px;
+    font-size: 0.8rem;
     bottom: 0;
     position: absolute;
 }
 
 .settings-btn i {
-    margin-right: 20px;
+    margin-right: 10px;
+    font-size: 0.8rem;
 }
 
 .main {
@@ -171,7 +213,7 @@ body {
     width: 100%;
     top: 210px;
     border-radius: 5px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     padding: 3px;
     cursor: pointer;
@@ -187,6 +229,14 @@ body {
 
 .cover a:hover {
     box-shadow: 0px 0px 10px 1px rgba(var(--line-color-rgb), 0.8);
+}
+
+.cover i {
+    position: absolute;
+    align-items: center;
+    right: 10px;
+    top: 8px;
+    font-size: 0.7rem;
 }
 
 .info {
@@ -288,7 +338,7 @@ body {
 }
 
 .anime-relations {
-    min-height: 300px;
+    min-height: 350px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 20px;
@@ -394,20 +444,206 @@ body {
     margin-left: 5px;
 }
 
+.anime-config {
+    min-height: 300px;
+    margin: 20px;
+}
+
+.sel-folder-div {
+    width: 800px;
+    height: 100px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.sel-folder-div .title {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    position: relative;
+}
+
+.sel-folder-div .title::after {
+    content: "";
+    width: 800px;
+    height: 1px;
+    bottom: 10px;
+    left: 0;
+    position: absolute;
+    background-color: var(--line-color);
+}
+
+.sel-folder-div button {
+    width: 150px;
+    height: 30px;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-size: 0.8rem;
+    border-radius: 5px;
+    background-color: transparent;
+    border: 1px solid var(--line-color);
+    cursor: pointer;
+    transition: .4s;
+}
+
+.sel-folder-div button:hover {
+    background-color: var(--line-color);
+}
+
+.sel-folder-div input {
+    width: 100%;
+    height: 30px;
+    font-size: 0.6rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--line-color);
+    color: black;
+    padding-left: 5px;
+}
+
 .edit-box {
-    width: 0px;
+    width: 350px;
     height: 0px;
     left: 50%;
     top: 50%;
-    border-radius: 5px;
-    transform: translate(-200px, -130px);
+    outline: 1px solid var(--line-color);
+    outline-offset: -3px;
+    transform: translate(-160px, -160px);
     position: fixed;
     background-color: var(--lighter-bg-color);
-    -webkit-box-shadow: 0px 0px 41px 8px rgba(0,0,0,0.75);
-    -moz-box-shadow: 0px 0px 41px 8px rgba(0,0,0,0.75);
-    box-shadow: 0px 0px 41px 8px rgba(0,0,0,0.75);
     transition: 0.2s;
     overflow: hidden;
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    row-gap: 5px;
+}
+
+.edit-box p {
+    position: fixed;
+    right: 15px;
+    top: 5px;
+    cursor: pointer;
+}
+
+.edit-box i {
+    font-size: 0.6rem;
+}
+
+.dropdown-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+}
+
+.dropdown-status::before {
+    content: "Status";
+    font-size: 0.5rem;
+    margin-bottom: 1px;
+    color: whitesmoke;
+    transform: translateX(-80px);
+}
+
+.dropdown-status-btn {
+    width: 200px;
+    height: 35px;
+    border: none;
+    background-color: var(--darker-bg-color);
+    border-radius: 4px;
+    font-size: 0.6rem;
+    cursor: pointer;
+}
+
+.dropdown-status-menu {
+    width: 200px;
+    height: 0;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--darker-bg-color);
+    overflow: hidden;
+    transition: 0.2s;
+}
+
+.dropdown-status-menu a {
+    width: 100%;
+    font-size: 0.6rem;
+    padding: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.dropdown-status-menu a:hover {
+    background-color: var(--lighter-bg-color);
+}
+
+.progress-input-div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-input-div::before {
+    content: "Episode Progress";
+    font-size: 0.5rem;
+    margin-bottom: 1px;
+    color: whitesmoke;
+    transform: translateX(-50px);
+}
+
+.edit-box input {
+    width: 200px;
+    height: 35px;
+    border: none;
+    background-color: var(--darker-bg-color);
+    border-radius: 4px;
+    font-size: 0.6rem;
+    text-align: center;
+}
+
+.score-input-div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-input-div::before {
+    content: "Score";
+    font-size: 0.5rem;
+    margin-bottom: 1px;
+    color: whitesmoke;
+    transform: translateX(-80px);
+}
+
+.save-btn-div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.save-btn-div a {
+    width: 100px;
+    padding-left: 10px;
+    padding-right: 10px;
+    transform: translateY(-10px);
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 3px;
+    cursor: pointer;
+    text-align: center;
+    background-color: var(--line-color);
+    transition: .2s;
+}
+
+.save-btn a:hover {
+    box-shadow: 0px 0px 10px 1px rgba(var(--line-color-rgb), 0.8);
 }
 
 @media (max-width: 1250px) {

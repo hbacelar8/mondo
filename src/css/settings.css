@@ -43,6 +43,37 @@ body {
 }
 /* ----------- Scrollbar -----------*/
 
+.window-btns {
+    width: 120px;
+    right: 1%;
+    top: 1%;
+    z-index: 1;
+    background-color: rgba(47, 54, 64, 0.6);
+    display: flex;
+    position: fixed;
+    justify-content: space-evenly;
+}
+
+.window-btns div {
+    width: 100%;
+    transition: 0.2s;
+    cursor: pointer;
+    text-align: center;
+}
+
+.window-btns i {
+    font-size: 0.4rem;
+    transform: translateY(-3px);
+}
+
+.min:hover,
+.max:hover {
+    background-color: var(--line-color);
+}
+
+.close:hover {
+    background-color: #870202;
+}
 
 .side-bar {
     width: 230px;
@@ -101,12 +132,14 @@ body {
 
 .settings-btn {
     margin: 20px 0 20px 15px;
+    font-size: 0.8rem;
     bottom: 0;
     position: absolute;
 }
 
 .settings-btn i {
-    margin-right: 20px;
+    margin-right: 10px;
+    font-size: 0.8rem;
 }
 
 .main {
