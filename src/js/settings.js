@@ -15,10 +15,31 @@
  * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+const remote = require('electron').remote
 const dataAnilist = localStorage.getItem('dataAnilist')
 const usernameAnilist = localStorage.getItem('anilistUsername')
 const connectView = document.querySelector('.connect-view')
 const disconnectView = document.querySelector('.disconnect-view')
+
+document.querySelector('.min').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+    window.minimize()
+})
+
+document.querySelector('.max').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+
+    if (!window.isMaximized()) {
+        window.maximize()    
+    } else {
+        window.unmaximize()
+    }
+})
+
+document.querySelector('.close').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+    window.close()
+})
 
 if (usernameAnilist) {
     connectView.classList.remove('active')

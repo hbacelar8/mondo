@@ -20,6 +20,27 @@ import { getUrlParam } from './utils.js'
 const dataAnilist = localStorage.getItem('dataAnilist')
 const searchStr = getUrlParam('str', null).replace(/%20/g, ' ')
 const searchBar = document.querySelector('.anime-search')
+const remote = require('electron').remote
+
+document.querySelector('.min').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+    window.minimize()
+})
+
+document.querySelector('.max').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+
+    if (!window.isMaximized()) {
+        window.maximize()    
+    } else {
+        window.unmaximize()
+    }
+})
+
+document.querySelector('.close').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+    window.close()
+})
 
 if (dataAnilist) {
     const lists = JSON.parse(dataAnilist).data.MediaListCollection.lists

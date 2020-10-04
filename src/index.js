@@ -11,15 +11,16 @@ const createWindow = () => {
   const mainWindow = new BrowserWindow({
     width: 1600,
     height: 800,
+    frame: false,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true
     }
   });
 
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'views/watching.html'));
   mainWindow.setMenuBarVisibility(false)
-  mainWindow.maximize()
 };
 
 // This method will be called when Electron has finished

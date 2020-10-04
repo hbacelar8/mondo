@@ -18,17 +18,42 @@
 import {getUrlParam, convertSecondsToDHM, compareParams} from './utils.js'
 import {getTorrents} from './scrap.js'
 
+const remote = require('electron').remote
+const childProcess = require('child_process')
+const anitomy = require('anitomy-js')
+const pathModule = require('path')
+const fs = require('fs')
+
 const dataAnilist = localStorage.getItem('dataAnilist')
 const accesCode = localStorage.getItem('accessCode')
 const animeId = getUrlParam('id', null)
 
+var anime
 var torrents = []
+var localEpisodes = {}
+var animeFolders = localStorage.getItem('animeFolders')
 
 const MEDIA_STATUS = {
     FINISHED: 'Finished',
     RELEASING: 'Releasing',
     NOT_YET_RELEASED: 'Not Yet Released',
     CANCELLED: 'Cancelled'
+}
+
+const MEDIA_ENTRY_STATUS = {
+    CURRENT: 'Watching',
+    PLANNING: 'Planning',
+    COMPLETED: 'Completed',
+    DROPPED: 'Dropped',
+    PAUSED: 'Paused',
+    REPEATING: 'Repeating',
+    NONE: 'Edit',
+    Watching: 'CURRENT',
+    Planning: 'PLANNING',
+    Completed: 'COMPLETED',
+    Dropped: 'DROPPED',
+    Paused: 'PAUSED',
+    Repeating: 'REPEATING'
 }
 
 const MEDIA_SOURCE = {
@@ -63,6 +88,26 @@ const RELATION_TYPE = {
     PARENT: 'Parent'
 }
 
+document.querySelector('.min').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+    window.minimize()
+})
+
+document.querySelector('.max').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+
+    if (!window.isMaximized()) {
+        window.maximize()    
+    } else {
+        window.unmaximize()
+    }
+})
+
+document.querySelector('.close').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+    window.close()
+})
+
 if (dataAnilist) {
     const lists = JSON.parse(dataAnilist).data.MediaListCollection.lists
     const animeLists = {
@@ -94,6 +139,18 @@ if (dataAnilist) {
     }
 
     addAnimeListCounters(animeLists)
+}
+
+if (animeFolders) {
+    animeFolders = JSON.parse(animeFolders)
+
+    if (animeFolders[animeId]) {
+        const selFolderInput = document.querySelector('.sel-folder-input')
+
+        selFolderInput.value = animeFolders[animeId]
+    
+        fs.readdir(animeFolders[animeId], getLocalEpisodes)
+    }
 }
 
 fetchAnime(animeId)
@@ -143,7 +200,9 @@ function fetchAnime(id) {
                     episode
                 },
                 mediaListEntry {
-                    progress
+                    progress,
+                    status,
+                    score(format: POINT_100)
                 },
                 coverImage {
                     large
@@ -203,7 +262,7 @@ function handleResponse(response) {
  * @param {object} data Data received from server
  */
 function handleData(data) {
-    const anime = data.data.Media
+    anime = data.data.Media
     const relationsData = data.data.Media.relations.edges
 
     const overviewData = {
@@ -223,6 +282,12 @@ function handleData(data) {
         source: anime.source
     }
 
+    const animeUserInfo = {
+        progress: anime.mediaListEntry ? anime.mediaListEntry.progress : 0,
+        status: anime.mediaListEntry ? anime.mediaListEntry.status : 'NONE',
+        score: anime.mediaListEntry ? anime.mediaListEntry.score : 0
+    }
+
     if (anime.title.english) {
         var title = anime.title.english
     } else if (anime.title.romaji) {
@@ -239,10 +304,10 @@ function handleData(data) {
         synopsis = synopsis.replace(/<br>|<\/br>|<i>|<\/i>/g, '')
     }
 
-    addAnimeToPage(title, cover, banner, synopsis, anime.mediaListEntry ? anime.mediaListEntry.progress : 0, anime.episodes)
+    addAnimeToPage(title, cover, banner, synopsis, animeUserInfo)
     addOverviewToPage(overviewData)
     addRelationsToPage(relationsData)
-    setEventListeners(anime)
+    setEventListeners()
     getTorrents(anime.title).then(handleTorrents)
 }
 
@@ -262,7 +327,7 @@ function handleError(error) {
  * @param {string} banner Link to anime's banner image
  * @param {string} synopsis Anime's synopsis
  */
-function addAnimeToPage(title, cover, banner, synopsis, progress, episodes) {
+function addAnimeToPage(title, cover, banner, synopsis, animeUserInfo) {
     const animeBannerDiv = document.querySelector('.banner'),
         animeCoverDiv = document.querySelector('.cover'),
         animeAboutDiv = document.querySelector('.about'),
@@ -271,7 +336,11 @@ function addAnimeToPage(title, cover, banner, synopsis, progress, episodes) {
         animeCoverImg = document.createElement('img'),
         animeTitleP = document.createElement('p'),
         animeSynopsisP = document.createElement('p'),
-        animeWatchBtn = document.querySelector('.watch-btn')
+        animeWatchBtn = document.querySelector('.watch-btn'),
+        editAnimeBtn = document.querySelector('.edit-btn'),
+        dropdownStatusBtn = document.querySelector('.dropdown-status-btn'),
+        progressInput = document.querySelector('.progress-input'),
+        scoreInput = document.querySelector('.score-input')
 
     animeTitleP.classList.add('title')
     animeSynopsisP.classList.add('synopsis')
@@ -281,6 +350,11 @@ function addAnimeToPage(title, cover, banner, synopsis, progress, episodes) {
     animeTitleP.innerText = title
     animeSynopsisP.innerText = synopsis
     animeSynopsisP.style.lineHeight = '25px'
+    animeWatchBtn.innerHTML = `Watch Ep. ${animeUserInfo.progress == anime.episodes ? animeUserInfo.progress : animeUserInfo.progress + 1}/${anime.episodes}`
+    editAnimeBtn.innerHTML = MEDIA_ENTRY_STATUS[animeUserInfo.status] + '<i class="fas fa-pen"></i>'
+    dropdownStatusBtn.innerHTML = MEDIA_ENTRY_STATUS[animeUserInfo.status]
+    progressInput.value = animeUserInfo.progress
+    scoreInput.value = animeUserInfo.score
 
     animeAboutDiv.insertBefore(animeTitleP, animeAboutDiv.children[0])
     animeAboutDiv.insertBefore(animeSynopsisP, animeAboutDiv.children[1])
@@ -298,8 +372,6 @@ function addAnimeToPage(title, cover, banner, synopsis, progress, episodes) {
     } else {
         readMoreBtnP.style.display = 'none'
     }
-
-    animeWatchBtn.innerHTML = `Watch Ep. ${progress == episodes ? progress : progress + 1}/${episodes}`
 }
 
 /**
@@ -417,9 +489,8 @@ function addRelationsToPage(relationsData) {
 
 /**
  * Set general event listeners
- * @param {object} animeInfo Anime information
  */
-function setEventListeners(animeInfo) {
+function setEventListeners() {
     const animeAboutDiv = document.querySelector('.about'),
         readMoreBtnP = document.querySelector('.read-more'),
         readMoreBtnA = document.querySelector('.button'),
@@ -428,7 +499,17 @@ function setEventListeners(animeInfo) {
         relations = document.getElementsByClassName('relation-div'),
         tableThs = document.getElementsByTagName('TH'),
         editBtn = document.querySelector('.edit-btn'),
-        editBox = document.querySelector('.edit-box')
+        editBox = document.querySelector('.edit-box'),
+        closeEditBox = document.querySelector('.close-edit-box'),
+        dropdownStatusBtn = document.querySelector('.dropdown-status-btn'),
+        dropdownStatusMenu = document.querySelector('.dropdown-status-menu'),
+        dropdownBtnA = dropdownStatusMenu.getElementsByTagName('a'),
+        progressInput = document.querySelector('.progress-input'),
+        scoreInput = document.querySelector('.score-input'),
+        saveEditBtn = document.querySelector('.save-btn'),
+        selFolderBtn = document.querySelector('.sel-folder-btn'),
+        selFolderInput = document.querySelector('.sel-folder-input'),
+        playBtn = document.querySelector('.watch-btn')
 
     readMoreBtnA.addEventListener('click', function () {
         animeAboutDiv.style.height = 'unset'
@@ -489,14 +570,77 @@ function setEventListeners(animeInfo) {
     }
 
     editBtn.addEventListener('click', () => {
-        editBox.style.width = '500px'
-        editBox.style.height = '300px'
+        editBox.style.height = '430px'
+    })
+
+    closeEditBox.addEventListener('click', () => {
+        editBox.style.height = '0'
+    })
+
+    dropdownStatusBtn.addEventListener('click', () => {
+        dropdownStatusMenu.style.height = '150px'
+    })
+
+    for (let i = 0; i < dropdownBtnA.length; i++) {
+        dropdownBtnA[i].addEventListener('click', () => {
+            dropdownStatusBtn.innerHTML = dropdownBtnA[i].innerText
+        })
+    }
+
+    progressInput.addEventListener('input', () => {
+        if (progressInput.value > anime.episodes) {
+            progressInput.value = anime.episodes
+        } else if (progressInput.value < 0) {
+            progressInput.value = 0
+        } else {
+            progressInput.value = Math.floor(progressInput.value)
+        }
+    })
+
+    scoreInput.addEventListener('input', () => {
+        if (scoreInput.value > 100) {
+            scoreInput.value = 100
+        } else if (scoreInput.value < 0) {
+            scoreInput.value = 0
+        } else {
+            scoreInput.value = Math.floor(scoreInput.value)
+        }
+    })
+
+    saveEditBtn.addEventListener('click', () => {
+        let newStatus = dropdownStatusBtn.innerHTML
+        let newProgress = progressInput.value
+        let newScore = scoreInput.value
+
+        pushEditToAnilist(newStatus, newProgress, newScore)
+
+        localStorage.removeItem('dataAnilist')
+    })
+
+    selFolderBtn.addEventListener('click', () => {
+        const path = remote.dialog.showOpenDialogSync({
+            properties: ['openDirectory']
+        })[0].replace(/\\/g, '/')
+
+        if (path) {
+            selFolderInput.value = path ? path : ''
+            saveAnimeFolder(path)
+        }
+    })
+
+    playBtn.addEventListener('click', () => {
+        playAnime()
     })
 
     document.addEventListener('keydown', (evt) => {
         if (evt.key == 'Escape') {
-            editBox.style.width = '0px'
-            editBox.style.height = '0px'
+            editBox.style.height = '0'
+        }
+    })
+
+    document.addEventListener('click', (event) => {
+        if (!dropdownStatusBtn.contains(event.target)) {
+            dropdownStatusMenu.style.height = '0'
         }
     })
 }
@@ -534,6 +678,24 @@ function addAnimeListCounters(animeLists) {
         
             default:
                 break;
+        }
+    }
+}
+
+/**
+ * Funtion to handle watch button
+ */
+function playAnime() {
+    const episodeToWatch = anime.mediaListEntry.progress + 1
+    const proc = childProcess.spawnSync(localEpisodes[episodeToWatch], {shell: true})
+
+    if (confirm(`Mark episode ${episodeToWatch} as watched?`)) {
+        anime.mediaListEntry.progress += 1
+
+        if (episodeToWatch + 1 <= anime.episodes) {
+            pushEpisodeToAnilist(episodeToWatch)
+        } else {
+            pushAnimeFinishedToAnilist()
         }
     }
 }
@@ -590,4 +752,179 @@ function handleTorrents(data) {
 
         table.appendChild(tr)
     }
+}
+
+/**
+ * Update data on Anilist
+ * @param {String} status New anime status
+ * @param {Number} progress New anime episode progress
+ * @param {Number} score New anime score
+ */
+function pushEditToAnilist(status, progress, score) {
+    const query = `
+        mutation ($mediaId: Int, $status: MediaListStatus, $scoreRaw: Int, $progress: Int) {
+            SaveMediaListEntry (mediaId: $mediaId, status: $status, scoreRaw: $scoreRaw, progress: $progress) {
+                id
+                status
+            }
+        }
+        `;
+    
+    const variables = {
+        mediaId: animeId,
+        status: MEDIA_ENTRY_STATUS[status],
+        scoreRaw: score,
+        progress: progress
+    };
+    
+    const url = 'https://graphql.anilist.co',
+        options = {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + accesCode,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        };
+
+    fetch(url, options).then(handleResponse)
+        .then(handlePushEditToAnilist)
+        .catch(handleError);
+}
+
+function pushEpisodeToAnilist(episode) {
+    const query = `
+        mutation ($mediaId: Int, $progress: Int) {
+            SaveMediaListEntry (mediaId: $mediaId, progress: $progress) {
+                id
+                status
+            }
+        }
+        `;
+    
+    const variables = {
+        mediaId: animeId,
+        progress: episode
+    };
+    
+    const url = 'https://graphql.anilist.co',
+        options = {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + accesCode,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        };
+
+    fetch(url, options).then(handleResponse)
+        .then(handlePushEpisodeToAnilist)
+        .catch(handleError);
+}
+
+function pushAnimeFinishedToAnilist() {
+    const query = `
+        mutation ($mediaId: Int, $progress: Int,  $status: MediaListStatus) {
+            SaveMediaListEntry (mediaId: $mediaId, progress: $progress,  status: $status) {
+                id
+                status
+            }
+        }
+        `;
+    
+    const variables = {
+        mediaId: animeId,
+        progress: anime.episodes,
+        status: MEDIA_ENTRY_STATUS['Completed']
+    };
+    
+    const url = 'https://graphql.anilist.co',
+        options = {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + accesCode,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        };
+
+    fetch(url, options).then(handleResponse)
+        .then(handlePushAnimeFinishedToAnilist)
+        .catch(handleError);
+}
+
+/**
+ * Callback function after pushing edit to Anilist
+ * @param {object} data Anilist data
+ */
+function handlePushEditToAnilist(data) {
+    const saveEditBtn = document.querySelector('.save-btn')
+
+    saveEditBtn.innerHTML = 'Saved'
+}
+
+/**
+ * Callback function after pushing episode progress to Anilist
+ * @param {object} data Anilist data
+ */
+function handlePushEpisodeToAnilist(data) {
+    const watchBtn = document.querySelector('.watch-btn')
+    const progressInput = document.querySelector('.progress-input')
+
+    watchBtn.innerHTML = `Watch Ep. ${anime.mediaListEntry.progress + 1}/${anime.episodes}`
+    progressInput.value = anime.mediaListEntry.progress + 1
+}
+
+/**
+ * Callback function after pushing anime finished to Anilist
+ * @param {object} data Anilist data
+ */
+function handlePushAnimeFinishedToAnilist(data) {
+    const watchBtn = document.querySelector('.watch-btn')
+    const progressInput = document.querySelector('.progress-input')
+    const dropdownStatusBtn = document.querySelector('.dropdown-status-btn')
+    const editAnimeBtn = document.querySelector('.edit-btn')
+
+    watchBtn.innerHTML = `Watch Ep. ${anime.mediaListEntry.progress}/${anime.episodes}`
+    progressInput.value = anime.mediaListEntry.progress
+    dropdownStatusBtn.innerHTML = MEDIA_ENTRY_STATUS['COMPLETED']
+    editAnimeBtn.innerHTML = MEDIA_ENTRY_STATUS['COMPLETED'] + '<i class="fas fa-pen"></i>'
+}
+
+/**
+ * Save anime folder
+ * @param {String} path Path to anime folder
+ */
+function saveAnimeFolder(path) {
+    if (animeFolders) {
+        animeFolders[animeId] = path
+    } else {
+        animeFolders = {}
+        animeFolders[animeId] = path
+    }
+
+    localStorage.setItem('animeFolders', JSON.stringify(animeFolders))
+
+    fs.readdir(animeFolders[animeId], getLocalEpisodes)
+}
+
+function getLocalEpisodes(_, files) {
+    files.forEach((file) => {
+        let parsedFile = anitomy.parseSync(file)
+        let episodePath = pathModule.join(animeFolders[animeId], file).replace(/\\/g, '/')
+
+        localEpisodes[parseInt(parsedFile.episode_number, 10)] = `"${episodePath}"`
+    })
 }
