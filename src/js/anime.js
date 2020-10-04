@@ -613,8 +613,6 @@ function setEventListeners() {
         let newScore = scoreInput.value
 
         pushEditToAnilist(newStatus, newProgress, newScore)
-
-        localStorage.removeItem('dataAnilist')
     })
 
     selFolderBtn.addEventListener('click', () => {
@@ -706,7 +704,6 @@ function playAnime() {
  */
 function handleTorrents(data) {
     const table = document.querySelector('.table-content')
-    const loadMoreBtn = document.querySelector('.load-more-btn')
 
     // Avoid updating gloval variable torrents when sorting
     if (torrents.length != data.length || torrents.length == 75) {
@@ -873,6 +870,8 @@ function handlePushEditToAnilist(data) {
     const saveEditBtn = document.querySelector('.save-btn')
 
     saveEditBtn.innerHTML = 'Saved'
+
+    localStorage.removeItem('dataAnilist')
 }
 
 /**
@@ -885,6 +884,8 @@ function handlePushEpisodeToAnilist(data) {
 
     watchBtn.innerHTML = `Watch Ep. ${anime.mediaListEntry.progress + 1}/${anime.episodes}`
     progressInput.value = anime.mediaListEntry.progress + 1
+
+    localStorage.removeItem('dataAnilist')
 }
 
 /**
@@ -901,6 +902,8 @@ function handlePushAnimeFinishedToAnilist(data) {
     progressInput.value = anime.mediaListEntry.progress
     dropdownStatusBtn.innerHTML = MEDIA_ENTRY_STATUS['COMPLETED']
     editAnimeBtn.innerHTML = MEDIA_ENTRY_STATUS['COMPLETED'] + '<i class="fas fa-pen"></i>'
+
+    localStorage.removeItem('dataAnilist')
 }
 
 /**
