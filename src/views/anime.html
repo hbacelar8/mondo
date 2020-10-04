@@ -16,6 +16,12 @@
 
 <body>
 
+    <div class="window-btns">
+        <div class="min"><i class="fas fa-minus"></i></div>
+        <div class="max"><i class="far fa-square"></i></div>
+        <div class="close"><i class="fas fa-times"></i></div>
+    </div>
+
     <nav class="side-bar">
         <li class="anime-lists">
             <a class="anime-lists-btn">ANIME LISTS</a>
@@ -41,7 +47,7 @@
                 <div class="cover">
                     <!-- <img src="https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx112301-P1K5zjiQfacn.jpg" alt=""> -->
                     <a class="watch-btn">Watch</a>
-                    <a class="edit-btn">Edit</a>
+                    <a class="edit-btn"></a>
                 </div>
 
                 <div class="info">
@@ -54,6 +60,7 @@
                         <a class="tab" data-tab-target="#overview">Overview</a>
                         <a class="tab" data-tab-target="#anime-relations">Anime Relations</a>
                         <a class="tab" data-tab-target="#download">Download</a>
+                        <a class="tab" data-tab-target="#anime-config">Configure</a>
                     </div>
                 </div>
             </div>
@@ -85,10 +92,39 @@
                     </table>
                 </div>
             </div>
+            <div class="tab-content" id="anime-config">
+                <div class="anime-config">
+                    <div class="sel-folder-div">
+                        <div class="title">Anime Folder</div>
+                        <div class="btn"><button class="sel-folder-btn">Select Folder</button></div>
+                        <div class="inpt"><input class="sel-folder-input" type="text"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="edit-box">
-            
+            <p class="close-edit-box"><i class="fas fa-times"></i></p>
+
+            <div class="dropdown-status">
+                <button class="dropdown-status-btn"></button>
+                <div class="dropdown-status-menu">
+                    <a>Watching</a>
+                    <a>Planning</a>
+                    <a>Completed</a>
+                    <a>Paused</a>
+                    <a>Dropped</a>
+                </div>
+            </div>
+            <div class="progress-input-div">
+                <input class="progress-input" type="number">
+            </div>
+            <div class="score-input-div">
+                <input class="score-input" type="number">
+            </div>
+            <div class="save-btn-div">
+                <a class="save-btn">Save</a>
+            </div>
         </div>
     </div>
 
