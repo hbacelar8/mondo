@@ -24,7 +24,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "mondo"
+            "name": "Mondo"
           }
         },
         {
@@ -47,7 +47,7 @@
     }
   },
   "dependencies": {
-    "anitomy-js": "github:skiptirengu/anitomy-js#develop",
+    "anitomy-js": "^5.0.0",
     "axios": "^0.20.0",
     "cheerio": "^1.0.0-rc.3",
     "electron-squirrel-startup": "^1.0.0"
