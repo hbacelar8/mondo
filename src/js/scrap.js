@@ -5,7 +5,7 @@ const axios = require('axios')
 const anitomy = require('anitomy-js')
 
 export const getTorrents = async (anime) => {
-	const torrents = []
+	var torrents = {}
 
 	anime = [anime.romaji, anime.english]
 
@@ -27,10 +27,15 @@ export const getTorrents = async (anime) => {
 						switch (tdIndex) {
 							case 1:
 								let a = $(tdElement).children().last()
-								torrentInfo.name = $(a).attr('title')
-								let parsedTorrent = anitomy.parseSync(torrentInfo.name)
+								torrentInfo.fullName = $(a).attr('title')
+								let parsedTorrent = anitomy.parseSync(torrentInfo.fullName)
 								torrentInfo.source = parsedTorrent.release_group
-								torrentInfo.name = parsedTorrent.anime_title
+
+								if (parsedTorrent.video_resolution) {
+									torrentInfo.name = `${parsedTorrent.anime_title} - ${parsedTorrent.video_resolution}`
+								} else {
+									torrentInfo.name = parsedTorrent.anime_title
+								}
 								
 								if (!parsedTorrent.episode_number && parsedTorrent.release_information) {
 									torrentInfo.episode = 'Batch'
@@ -68,8 +73,8 @@ export const getTorrents = async (anime) => {
 								break;
 						}
 					})
-			
-					torrents.push(torrentInfo)
+
+					torrents[torrentInfo.fullName] = torrentInfo
 				})
 
 				if (page < totalPages) {
@@ -81,6 +86,9 @@ export const getTorrents = async (anime) => {
 			}
 		}
 	}
+
+	console.log(torrents)
+	torrents = Object.values(torrents)
 
 	return torrents.sort(compareParams('seeds', 'desc'))
 }
