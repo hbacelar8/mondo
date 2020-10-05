@@ -545,7 +545,7 @@ function setEventListeners() {
     }
 
     for (let i = 0; i < tableThs.length; i++) {
-        if (i != 3) {
+        if (i != 4) {
             tableThs[i].setAttribute('data-after', '▲')
 
             tableThs[i].addEventListener('click', () => {
@@ -715,6 +715,7 @@ function handleTorrents(data) {
         let sourceTd = document.createElement('td')
         let nameTd = document.createElement('td')
         let episodeTd = document.createElement('td')
+        let videoTd = document.createElement('td')
         let linkTd = document.createElement('td')
         let sizeTd = document.createElement('td')
         let seedTd = document.createElement('td')
@@ -726,6 +727,7 @@ function handleTorrents(data) {
         sourceTd.innerHTML = data[i].source
         nameTd.innerHTML = data[i].name
         episodeTd.innerHTML = data[i].episode
+        videoTd.innerHTML = data[i].video
         sizeTd.innerHTML = data[i].size
         seedTd.innerHTML = data[i].seeds
         leechTd.innerHTML = data[i].leechs
@@ -741,6 +743,7 @@ function handleTorrents(data) {
         tr.appendChild(sourceTd)
         tr.appendChild(nameTd)
         tr.appendChild(episodeTd)
+        tr.appendChild(videoTd)
         tr.appendChild(linkTd)
         tr.appendChild(sizeTd)
         tr.appendChild(seedTd)

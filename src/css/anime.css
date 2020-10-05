@@ -414,7 +414,7 @@ hr {
     cursor: pointer;
 }
 
-.download th:nth-of-type(4) {
+.download th:nth-of-type(5) {
     cursor: unset;
 }
 

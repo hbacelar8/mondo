@@ -28,19 +28,18 @@ export const getTorrents = async (anime) => {
 							case 1:
 								let a = $(tdElement).children().last()
 								torrentInfo.fullName = $(a).attr('title')
-								let parsedTorrent = anitomy.parseSync(torrentInfo.fullName)
-								torrentInfo.source = parsedTorrent.release_group
 
-								if (parsedTorrent.video_resolution) {
-									torrentInfo.name = `${parsedTorrent.anime_title} - ${parsedTorrent.video_resolution}`
-								} else {
-									torrentInfo.name = parsedTorrent.anime_title
-								}
+								let parsedTorrent = anitomy.parseSync(torrentInfo.fullName)
+
+								torrentInfo.source = parsedTorrent.release_group
+								torrentInfo.name = parsedTorrent.anime_title
+								torrentInfo.video = `${parsedTorrent.video_resolution ? parsedTorrent.video_resolution : ''} \
+													${parsedTorrent.video_term ? parsedTorrent.video_term : ''}`
 								
 								if (!parsedTorrent.episode_number && parsedTorrent.release_information) {
 									torrentInfo.episode = 'Batch'
 								} else {
-									torrentInfo.episode = parsedTorrent.episode_number ? parsedTorrent.episode_number : '?'
+									torrentInfo.episode = parsedTorrent.episode_number ? parsedTorrent.episode_number : ''
 								}
 
 								break;
@@ -87,7 +86,6 @@ export const getTorrents = async (anime) => {
 		}
 	}
 
-	console.log(torrents)
 	torrents = Object.values(torrents)
 
 	return torrents.sort(compareParams('seeds', 'desc'))
