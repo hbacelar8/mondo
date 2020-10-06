@@ -175,6 +175,7 @@ body {
 .header h1 {
     margin-left: 50px;
     font-size: 2rem;
+    font-weight: 600;
 }
 
 .anime-search {
