@@ -646,6 +646,34 @@ hr {
     box-shadow: 0px 0px 10px 1px rgba(var(--line-color-rgb), 0.8);
 }
 
+.lds-dual-ring {
+    display: block;
+    width: 80px;
+    height: 80px;
+    margin: auto;
+    transform: translateY(20px);
+}
+
+.lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    border-color: #fff transparent #fff transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@keyframes lds-dual-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 @media (max-width: 1250px) {
     .about {
         margin-right: 20px;

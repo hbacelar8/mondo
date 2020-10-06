@@ -649,7 +649,7 @@ function setEventListeners() {
         playBtn.addEventListener('click', () => {
             if (animeFolders) {
                 if (animeFolders[animeId]) {
-            playAnime()
+                    playAnime()
                 }
             } else {
                 alert('In order to play the episode, you must first set the anime folder containing its episodes in the Configure tab.')
@@ -731,6 +731,7 @@ function playAnime() {
  */
 function handleTorrents(data) {
     const table = document.querySelector('.table-content')
+    const loadingIcon = document.querySelector('.lds-dual-ring')
 
     // Avoid updating gloval variable torrents when sorting
     if (torrents.length != data.length || torrents.length == 75) {
@@ -779,6 +780,8 @@ function handleTorrents(data) {
 
         table.appendChild(tr)
     }
+
+    loadingIcon.style.display = 'none'
 }
 
 /**
