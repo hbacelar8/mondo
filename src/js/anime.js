@@ -647,7 +647,13 @@ function setEventListeners() {
 
     if (playBtn) {
         playBtn.addEventListener('click', () => {
+            if (animeFolders) {
+                if (animeFolders[animeId]) {
             playAnime()
+                }
+            } else {
+                alert('In order to play the episode, you must first set the anime folder containing its episodes in the Configure tab.')
+            }
         })
     }
 
