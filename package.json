@@ -1,6 +1,6 @@
 {
   "name": "mondo",
-  "productName": "mondo",
+  "productName": "Mondo",
   "version": "1.0.0",
   "description": "The one anime client",
   "main": "src/index.js",
@@ -9,7 +9,23 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "lint": "echo \"No linting configured\"",
+    "build-installer": "electron-builder"
+  },
+  "build": {
+    "appId": "mondo",
+    "win": {
+      "target": ["nsis"],
+      "icon": "Icon/Mondo.ico"
+    },
+    "nsis": {
+      "installerIcon": "Icon/Mondo.ico",
+      "uninstallerIcon": "Icon/Mondo.ico",
+      "uninstallDisplayName": "Mondo",
+      "license": "LICENSE",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "keywords": [],
   "author": {
@@ -22,7 +38,7 @@
       "packagerConfig": {
         "appVersion": "0.8.0",
         "buildVersion": "0.8.0",
-        "icon": "Mondo.ico",
+        "icon": "Icon/Mondo.ico",
         "name": "Mondo"
       },
       "makers": [
