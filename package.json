@@ -19,7 +19,12 @@
   "license": "MIT",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "appVersion": "0.8.0",
+        "buildVersion": "0.8.0",
+        "icon": "Mondo.ico",
+        "name": "Mondo"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
