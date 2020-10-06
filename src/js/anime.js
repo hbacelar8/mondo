@@ -229,10 +229,20 @@ function fetchAnime(id) {
     };
 
     const url = 'https://graphql.anilist.co',
-        options = {
+        options = accesCode ? {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + accesCode,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        } : {
+            method: 'POST',
+            headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
@@ -301,7 +311,7 @@ function handleData(data) {
         synopsis = anime.description
 
     if (synopsis) {
-        synopsis = synopsis.replace(/<br>|<\/br>|<i>|<\/i>/g, '')
+        synopsis = synopsis.replace(/<br>|<\/br>|<i>|<\/i>|<strong>|<\/strong>|<em>|<\/em>/g, '')
     }
 
     addAnimeToPage(title, cover, banner, synopsis, animeUserInfo)
@@ -336,14 +346,16 @@ function addAnimeToPage(title, cover, banner, synopsis, animeUserInfo) {
         animeCoverImg = document.createElement('img'),
         animeTitleP = document.createElement('p'),
         animeSynopsisP = document.createElement('p'),
-        animeWatchBtn = document.querySelector('.watch-btn'),
-        editAnimeBtn = document.querySelector('.edit-btn'),
         dropdownStatusBtn = document.querySelector('.dropdown-status-btn'),
         progressInput = document.querySelector('.progress-input'),
-        scoreInput = document.querySelector('.score-input')
+        scoreInput = document.querySelector('.score-input'),
+        animeWatchBtn = document.createElement('a'),
+        editAnimeBtn = document.createElement('a')
 
     animeTitleP.classList.add('title')
     animeSynopsisP.classList.add('synopsis')
+    animeWatchBtn.classList.add('watch-btn')
+    editAnimeBtn.classList.add('edit-btn')
 
     animeBannerImg.src = banner
     animeCoverImg.src = cover
@@ -358,7 +370,12 @@ function addAnimeToPage(title, cover, banner, synopsis, animeUserInfo) {
 
     animeAboutDiv.insertBefore(animeTitleP, animeAboutDiv.children[0])
     animeAboutDiv.insertBefore(animeSynopsisP, animeAboutDiv.children[1])
-    animeCoverDiv.insertBefore(animeCoverImg, animeCoverDiv.children[0])
+    animeCoverDiv.appendChild(animeCoverImg)
+
+    if (accesCode) {
+        animeCoverDiv.appendChild(animeWatchBtn)
+        animeCoverDiv.appendChild(editAnimeBtn)
+    }
 
     if (banner) {
         animeBannerDiv.appendChild(animeBannerImg)
@@ -569,9 +586,11 @@ function setEventListeners() {
         }
     }
 
-    editBtn.addEventListener('click', () => {
-        editBox.style.height = '430px'
-    })
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            editBox.style.height = '430px'
+        })
+    }
 
     closeEditBox.addEventListener('click', () => {
         editBox.style.height = '0'
@@ -626,9 +645,11 @@ function setEventListeners() {
         }
     })
 
-    playBtn.addEventListener('click', () => {
-        playAnime()
-    })
+    if (playBtn) {
+        playBtn.addEventListener('click', () => {
+            playAnime()
+        })
+    }
 
     document.addEventListener('keydown', (evt) => {
         if (evt.key == 'Escape') {
