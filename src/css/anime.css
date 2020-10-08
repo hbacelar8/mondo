@@ -517,11 +517,10 @@ hr {
 .edit-box {
     width: 350px;
     height: 0px;
-    left: 50%;
-    top: 50%;
+    left: calc(50% - 175px);
+    top: calc(50% - 175px);
     outline: 1px solid var(--line-color);
     outline-offset: -3px;
-    transform: translate(-160px, -160px);
     position: fixed;
     background-color: var(--lighter-bg-color);
     transition: 0.2s;
@@ -532,7 +531,7 @@ hr {
 }
 
 .edit-box p {
-    position: fixed;
+    position: absolute;
     right: 15px;
     top: 5px;
     cursor: pointer;
@@ -571,11 +570,10 @@ hr {
 .dropdown-status-menu {
     width: 200px;
     height: 0;
-    margin-top: 10px;
     display: flex;
     flex-direction: column;
     background-color: var(--darker-bg-color);
-    overflow: hidden;
+    overflow: auto;
     transition: 0.2s;
 }
 

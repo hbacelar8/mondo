@@ -805,6 +805,11 @@ function handleTorrents(data) {
  * @param {Number} score New anime score
  */
 function pushEditToAnilist(status, progress, score) {
+    if (status == 'Delete') {
+        pushAnimeDeletedToAnilist()
+        return
+    }
+
     const query = `
         mutation ($mediaId: Int, $status: MediaListStatus, $scoreRaw: Int, $progress: Int) {
             SaveMediaListEntry (mediaId: $mediaId, status: $status, scoreRaw: $scoreRaw, progress: $progress) {
@@ -813,7 +818,7 @@ function pushEditToAnilist(status, progress, score) {
             }
         }
         `;
-    
+
     const variables = {
         mediaId: animeId,
         status: MEDIA_ENTRY_STATUS[status],
@@ -909,6 +914,38 @@ function pushAnimeFinishedToAnilist() {
         .catch(handleError);
 }
 
+function pushAnimeDeletedToAnilist() {
+    var query = `
+        mutation ($mediaId: Int) {
+            SaveMediaListEntry  (mediaId: $mediaId) {
+                id
+            }
+        }
+        `;
+
+    var variables = {
+        mediaId: animeId
+    };
+
+    const url = 'https://graphql.anilist.co',
+        options = {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + accesCode,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        };
+
+    fetch(url, options).then(handleResponse)
+        .then(handlePushAnimeDeletedToAnilist)
+        .catch(handleError);
+}
+
 /**
  * Callback function after pushing edit to Anilist
  * @param {object} data Anilist data
@@ -951,6 +988,38 @@ function handlePushAnimeFinishedToAnilist(data) {
     editAnimeBtn.innerHTML = MEDIA_ENTRY_STATUS['COMPLETED'] + '<i class="fas fa-pen"></i>'
 
     localStorage.removeItem('dataAnilist')
+}
+
+function handlePushAnimeDeletedToAnilist(data) {
+    var query = `
+        mutation ($id: Int) {
+            DeleteMediaListEntry (id: $id) {
+                deleted
+            }
+        }
+        `;
+
+    var variables = {
+        id: data.data.SaveMediaListEntry.id
+    };
+
+    const url = 'https://graphql.anilist.co',
+        options = {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + accesCode,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                variables: variables
+            })
+        };
+
+    fetch(url, options).then(handleResponse)
+        .then(handlePushEditToAnilist)
+        .catch(handleError);
 }
 
 /**
