@@ -17,8 +17,9 @@
 
 const dataAnilist = localStorage.getItem('dataAnilist')
 const usernameAnilist = localStorage.getItem('anilistUsername')
-const searchBar = document.querySelector('.anime-search')
 const remote = require('electron').remote
+
+var currentPageList
 
 document.querySelector('.min').addEventListener('click', () => {
     let window = remote.getCurrentWindow()
@@ -65,6 +66,8 @@ function fetchMediaCollection(username) {
                     entries {
                         score,
                         progress,
+                        updatedAt,
+                        createdAt,
                         media {
                             id,
                             title {
@@ -151,30 +154,34 @@ function handleData(data) {
     }
 
     if (animeLists.completed.length) {
+        let completedLists = animeLists.completed.length
+
         animeLists.completed = animeLists.completed.concat(...animeLists.completed)
-        animeLists.completed.splice(0, 1)
-        animeLists.completed.splice(0, 1)
+
+        for (let i = 0; i < completedLists; i++) {
+            animeLists.completed.splice(0, 1)
+        }
     }
 
     switch (currentPage) {
         case 'watching.html':
-            var currentPageList = animeLists.watching
+            currentPageList = animeLists.watching
             break;
 
         case 'completed.html':
-            var currentPageList = animeLists.completed
+            currentPageList = animeLists.completed
             break;
 
         case 'planning.html':
-            var currentPageList = animeLists.planning
+            currentPageList = animeLists.planning
             break;
 
         case 'paused.html':
-            var currentPageList = animeLists.paused
+            currentPageList = animeLists.paused
             break;
 
         case 'dropped.html':
-            var currentPageList = animeLists.dropped
+            currentPageList = animeLists.dropped
             break;
 
         default:
@@ -232,12 +239,12 @@ function handleError(error) {
  * @param {number} score The score of the anime given by the user
  */
 function addAnimeToView(id, title, cover, episodes, progress, score) {
-    animeWrap = document.getElementsByClassName('anime-wrap')[0]
-    newAnimeDiv = document.createElement('div')
-    newAnimeImg = document.createElement('img')
-    newAnimeP = document.createElement('p')
-    newAnimeSpan1 = document.createElement('span')
-    newAnimeSpan2 = document.createElement('span')
+    const animeWrap = document.getElementsByClassName('anime-wrap')[0]
+    const newAnimeDiv = document.createElement('div')
+    const newAnimeImg = document.createElement('img')
+    const newAnimeP = document.createElement('p')
+    const newAnimeSpan1 = document.createElement('span')
+    const newAnimeSpan2 = document.createElement('span')
 
     newAnimeDiv.classList.add('anime')
     newAnimeImg.src = cover
@@ -262,6 +269,11 @@ function addAnimeToView(id, title, cover, episodes, progress, score) {
  * Set general event listeners
  */
 function setEventListeners() {
+    const searchBar = document.querySelector('.anime-search')
+    const sortBtn = document.querySelector('.sort-btn')
+    const options = document.querySelector('.options')
+    const optionsA = options.getElementsByTagName('a')
+
     searchBar.addEventListener('input', function () {
         const animeDivs = document.getElementsByClassName('anime')
 
@@ -282,6 +294,60 @@ function setEventListeners() {
             window.location.href = `search.html?str=${searchBar.value}`
         }
     })
+
+    sortBtn.addEventListener('click', () => {
+        const arrowUp = sortBtn.getElementsByTagName('i')[0]
+
+        if (options.style.maxHeight != '200px') {
+            arrowUp.style.transform = 'translateY(3px) rotate(180deg)'
+            options.style.maxHeight = '200px'
+        } else {
+            arrowUp.style.transform = 'translateY(3px) rotate(0deg)'
+            options.style.maxHeight = '0'
+        }
+    })
+
+    for (let i = 0; i < optionsA.length; i++) {
+        optionsA[i].addEventListener('click', () => {
+            const animeDivs = document.querySelectorAll('.anime')
+
+            sortBtn.innerHTML = optionsA[i].innerHTML + '<i class="fas fa-angle-up"></i>'
+            options.style.maxHeight = '0'
+
+            if (currentPageList) {
+                for (let i = 0; i < animeDivs.length; i++) {
+                    animeDivs[i].remove()
+                }
+
+                currentPageList.sort(compareParams(optionsA[i].id, optionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
+
+                currentPageList.forEach(function (list) {
+                    if (list.media.title.english) {
+                        var animeTitle = list.media.title.english
+                    } else if (list.media.title.romaji) {
+                        var animeTitle = list.media.title.romaji
+                    } else {
+                        var animeTitle = list.media.title.native
+                    }
+        
+                    const animeId = list.media.id
+                    const animeCover = list.media.coverImage.large
+                    const animeEpisodes = list.media.episodes
+                    const userProgress = list.progress
+                    const userScore = list.score
+        
+                    addAnimeToView(
+                        animeId,
+                        animeTitle,
+                        animeCover,
+                        animeEpisodes,
+                        userProgress,
+                        userScore
+                    )
+                })
+            }
+        })
+    }
 }
 
 /**
@@ -328,4 +394,40 @@ function addAnimeListCounters(animeLists) {
                 break;
         }
     }
+}
+
+function compareParams(key, order = 'asc') {
+    key = key.split('.')
+
+	return function innerSort(a, b) {
+        var varA, varB
+
+        if (!a.hasOwnProperty(key[0]) || !b.hasOwnProperty(key[0])) {
+			return 0;
+        }
+
+        varA = a[key[0]]
+        varB = b[key[0]]
+
+        if (key.length > 1) {
+            for (let i = 1; i < key.length; i++) {
+                varA = varA[key[i]]
+                varB = varB[key[i]]
+            }
+        }
+
+		varA = (typeof varA === 'string') ? varA.toUpperCase() : varA;
+		varB = (typeof varB === 'string') ? varB.toUpperCase() : varB;
+		let comparison = 0;
+
+		if (varA > varB) {
+			comparison = 1;
+		} else if (varA < varB) {
+			comparison = -1;
+		}
+
+		return (
+			(order === 'desc') ? (comparison * -1) : comparison
+		);
+	};
 }
