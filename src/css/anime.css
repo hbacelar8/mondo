@@ -8,7 +8,7 @@
     text-decoration: none;
     list-style: none;
 
-    --darker-bg-color: #2f3640;
+    --darker-bg-color: #292e37;
     --lighter-bg-color: #353b48;
     --line-color: #487eb0;
     --line-color-rgb: 72, 126, 176
@@ -36,13 +36,13 @@ hr {
 /* ----------- Scrollbar -----------*/
 /* width */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-    background: var(--darker-bg-color);
+    background: var(--lighter-bg-color);
 }
 
 /* Handle */
@@ -52,15 +52,28 @@ hr {
 }
 /* ----------- Scrollbar -----------*/
 
+.taskbar {
+    width: calc(100% - 230px);
+    height: 35px;
+    position: fixed;
+    right: 0;
+    -webkit-app-region: drag;
+    z-index: 1;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    background-blend-mode: exclusion;
+    background: rgba(53, 59, 72, 0.2);
+}
+
 .window-btns {
     width: 120px;
-    right: 1%;
-    top: 1%;
+    height: 35px;
+    right: 0;
     z-index: 1;
-    background-color: rgba(47, 54, 64, 0.6);
     display: flex;
     position: fixed;
     justify-content: space-evenly;
+    -webkit-app-region: no-drag;
 }
 
 .window-btns div {
