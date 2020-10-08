@@ -18,7 +18,7 @@
 import {getUrlParam, convertSecondsToDHM, compareParams} from './utils.js'
 import {getTorrents} from './scrap.js'
 
-const remote = require('electron').remote
+const {remote, ipcRenderer} = require('electron')
 const childProcess = require('child_process')
 const anitomy = require('anitomy-js')
 const pathModule = require('path')
@@ -650,6 +650,8 @@ function setEventListeners() {
             if (animeFolders) {
                 if (animeFolders[animeId]) {
                     playAnime()
+                } else {
+                    alert('In order to play the episode, you must first set the anime folder containing its episodes in the Configure tab.')
                 }
             } else {
                 alert('In order to play the episode, you must first set the anime folder containing its episodes in the Configure tab.')
@@ -712,7 +714,19 @@ function addAnimeListCounters(animeLists) {
  */
 function playAnime() {
     const episodeToWatch = anime.mediaListEntry.progress + 1
-    const proc = childProcess.spawnSync(localEpisodes[episodeToWatch], {shell: true})
+    const updateDiscordData = {
+        details: anime.title.english ? anime.title.english : anime.title.romaji,
+        state: `Episode ${episodeToWatch} of ${anime.episodes}`
+    }
+
+    ipcRenderer.send('updateDiscord', updateDiscordData);
+
+    childProcess.spawnSync(localEpisodes[episodeToWatch], {shell: true})
+
+    ipcRenderer.send('updateDiscord', {
+        details: '',
+        state: 'Idling'
+    })
 
     if (confirm(`Mark episode ${episodeToWatch} as watched?`)) {
         anime.mediaListEntry.progress += 1

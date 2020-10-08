@@ -15,7 +15,9 @@
   "build": {
     "appId": "mondo",
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "Icon/Mondo.ico"
     },
     "nsis": {
@@ -71,6 +73,7 @@
     "anitomy-js": "^5.0.0",
     "axios": "^0.20.0",
     "cheerio": "^1.0.0-rc.3",
+    "discord-rich-presence": "0.0.8",
     "electron-squirrel-startup": "^1.0.0"
   },
   "devDependencies": {

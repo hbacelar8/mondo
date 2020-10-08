@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const client = require('discord-rich-presence')('763579990209855559');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -43,6 +44,36 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+client.updatePresence({
+	state: 'Idling',
+	startTimestamp: Date.now(),
+	largeImageKey: 'mondo',
+	smallImageKey: 'ani',
+	instance: true
+});
+
+// Attach listener in the main process with the given ID
+ipcMain.on('updateDiscord', (event, arg) => {
+	if (arg.state == 'Idling') {
+		client.updatePresence({
+			state: arg.state,
+			startTimestamp: Date.now(),
+			largeImageKey: 'mondo',
+			smallImageKey: 'ani',
+			instance: true
+		});
+	} else {
+		client.updatePresence({
+			details: arg.details,
+			state: arg.state,
+			startTimestamp: Date.now(),
+			largeImageKey: 'mondo',
+			smallImageKey: 'ani',
+			instance: true
+		});
+	}
 });
 
 // In this file you can include the rest of your app's specific main process
