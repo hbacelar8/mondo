@@ -90,3 +90,5 @@ out/
 
 # Electron-build
 dist/
+
+electron-builder.yml
