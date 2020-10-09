@@ -86,6 +86,47 @@ body {
     background-color: #870202;
 }
 
+.update-frame {
+    width: 260px;
+    height: 160px;
+    right: 30px;
+    bottom: 25px;
+    border-radius: 10px;
+    padding: 20px 10px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    position: fixed;
+    background-color: var(--lighter-bg-color);
+}
+
+.update-frame p {
+    font-size: 0.8rem;
+}
+
+.update-frame a {
+    width: 100px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 3px;
+    margin: auto;
+    cursor: pointer;
+    text-align: center;
+    background-color: var(--line-color);
+    transition: .2s;
+}
+
+.update-frame a:hover {
+    box-shadow: 0px 0px 10px 1px rgba(var(--line-color-rgb), 0.8);
+}
+
+.hidden {
+    display: none;
+}
+
 .side-bar {
     width: 230px;
     height: 100%;

@@ -17,7 +17,11 @@
 
 const dataAnilist = localStorage.getItem('dataAnilist')
 const usernameAnilist = localStorage.getItem('anilistUsername')
-const remote = require('electron').remote
+const updateNotification = document.querySelector('.update-frame')
+const updateMessage = document.querySelector('.update-msg')
+const updateCloseBtn = document.querySelector('.close-update-btn')
+const updateRestartBtn = document.querySelector('.restart-update-btn')
+const {remote, ipcRenderer} = require('electron')
 
 var currentPageList
 
@@ -39,6 +43,20 @@ document.querySelector('.max').addEventListener('click', () => {
 document.querySelector('.close').addEventListener('click', () => {
     let window = remote.getCurrentWindow()
     window.close()
+})
+
+ipcRenderer.on('update_available', () => {
+    //ipcRenderer.removeAllListeners('update-available')
+    console.log(updateNotification)
+    updateNotification.classList.remove('hidden')
+})
+
+ipcRenderer.on('update_downloaded', () => {
+    ipcRenderer.removeAllListeners('update_downloaded')
+    updateMessage.innerText = 'Update downloaded. It will be installed on restart. Restart now?'
+    updateCloseBtn.classList.add('hidden')
+    updateRestartBtn.classList.remove('hidden')
+    updateNotification.classList.remove('hidden')
 })
 
 if (dataAnilist) {
@@ -273,6 +291,14 @@ function setEventListeners() {
     const sortBtn = document.querySelector('.sort-btn')
     const options = document.querySelector('.options')
     const optionsA = options.getElementsByTagName('a')
+
+    updateCloseBtn.addEventListener('click', () => {
+        updateNotification.classList.add('hidden')
+    })
+
+    updateRestartBtn.addEventListener('click', () => {
+        ipcRenderer.send('restart-app')
+    })
 
     searchBar.addEventListener('input', function () {
         const animeDivs = document.getElementsByClassName('anime')

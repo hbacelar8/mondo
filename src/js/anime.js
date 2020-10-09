@@ -28,6 +28,11 @@ const dataAnilist = localStorage.getItem('dataAnilist')
 const accesCode = localStorage.getItem('accessCode')
 const animeId = getUrlParam('id', null)
 
+const updateNotification = document.querySelector('.update-frame')
+const updateMessage = document.querySelector('.update-msg')
+const updateCloseBtn = document.querySelector('.close-update-btn')
+const updateRestartBtn = document.querySelector('.restart-update-btn')
+
 var anime
 var torrents = []
 var localEpisodes = {}
@@ -106,6 +111,18 @@ document.querySelector('.max').addEventListener('click', () => {
 document.querySelector('.close').addEventListener('click', () => {
     let window = remote.getCurrentWindow()
     window.close()
+})
+
+ipcRenderer.on('update_available', () => {
+    ipcRenderer.removeAllListeners('update-available')
+    updateNotification.classList.remove('hidden')
+})
+
+ipcRenderer.on('update_downloaded', () => {
+    ipcRenderer.removeAllListeners('update_downloaded')
+    updateMessage.innerText = 'Update downloaded. It will be installed on restart. Restart now?'
+    updateCloseBtn.classList.add('hidden')
+    updateRestartBtn.classList.remove('hidden')
 })
 
 if (dataAnilist) {
@@ -527,6 +544,14 @@ function setEventListeners() {
         selFolderBtn = document.querySelector('.sel-folder-btn'),
         selFolderInput = document.querySelector('.sel-folder-input'),
         playBtn = document.querySelector('.watch-btn')
+
+    updateCloseBtn.addEventListener('click', () => {
+        updateNotification.classList.add('hidden')
+    })
+
+    updateRestartBtn.addEventListener('click', () => {
+        ipcRenderer.send('restart-app')
+    })
 
     readMoreBtnA.addEventListener('click', function () {
         animeAboutDiv.style.height = 'unset'

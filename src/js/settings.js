@@ -15,11 +15,16 @@
  * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const remote = require('electron').remote
+const {remote, ipcRenderer} = require('electron')
 const dataAnilist = localStorage.getItem('dataAnilist')
 const usernameAnilist = localStorage.getItem('anilistUsername')
 const connectView = document.querySelector('.connect-view')
 const disconnectView = document.querySelector('.disconnect-view')
+
+const updateNotification = document.querySelector('.update-frame')
+const updateMessage = document.querySelector('.update-msg')
+const updateCloseBtn = document.querySelector('.close-update-btn')
+const updateRestartBtn = document.querySelector('.restart-update-btn')
 
 document.querySelector('.min').addEventListener('click', () => {
     let window = remote.getCurrentWindow()
@@ -39,6 +44,18 @@ document.querySelector('.max').addEventListener('click', () => {
 document.querySelector('.close').addEventListener('click', () => {
     let window = remote.getCurrentWindow()
     window.close()
+})
+
+ipcRenderer.on('update_available', () => {
+    ipcRenderer.removeAllListeners('update-available')
+    updateNotification.classList.remove('hidden')
+})
+
+ipcRenderer.on('update_downloaded', () => {
+    ipcRenderer.removeAllListeners('update_downloaded')
+    updateMessage.innerText = 'Update downloaded. It will be installed on restart. Restart now?'
+    updateCloseBtn.classList.add('hidden')
+    updateRestartBtn.classList.remove('hidden')
 })
 
 if (usernameAnilist) {
@@ -92,6 +109,14 @@ function setEventListeners() {
     const loginInputs = document.getElementsByClassName('login-input')
     const loginBtn = document.querySelector('.login-btn')
     const disconnectBtn = document.querySelector('.disconnect-btn')
+
+    updateCloseBtn.addEventListener('click', () => {
+        updateNotification.classList.add('hidden')
+    })
+
+    updateRestartBtn.addEventListener('click', () => {
+        ipcRenderer.send('restart-app')
+    })
 
     searchBar.addEventListener('keydown', (event) => {
         if (event.key == 'Enter') {
