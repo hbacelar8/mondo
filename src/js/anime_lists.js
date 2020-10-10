@@ -251,8 +251,12 @@ function handleData(data) {
  * @param {object} error Array with error information
  */
 function handleError(error) {
-    alert('Error, check console');
-    console.error(error);
+    if (error.errors[0].status == 404) {
+        alert(`Looks like the Anilist username "${usernameAnilist}" doesn't exist. Try logging in again.`)
+        localStorage.removeItem('anilistUsername')
+        localStorage.removeItem('dataAnilist')
+        localStorage.removeItem('accessCode')
+    }
 }
 
 /**
