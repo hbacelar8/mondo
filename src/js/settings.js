@@ -134,6 +134,17 @@ if (dataAnilist) {
     addAnimeListCounters(animeLists)
 }
 
+ipcRenderer.send('app_version')
+
+ipcRenderer.on('app_version', (_, arg) => {
+    const versionTag = document.querySelector('.version-tag')
+    const lastUpdateP = document.querySelector('.last-update-time')
+    const lastUpdate = arg.lastUpdate ? new Date(arg.lastUpdate) : '-'
+
+    versionTag.innerText = 'v' + arg.version
+    lastUpdateP.innerText = `${lastUpdate.getHours()}:${lastUpdate.getMinutes()}h`
+})
+
 setEventListeners()
 
 /**
@@ -146,6 +157,7 @@ function setEventListeners() {
     const disconnectBtn = document.querySelector('.disconnect-btn')
     const resyncBtn = document.querySelector('.resync-btn')
     const colorsBtn = document.querySelectorAll('.colors')
+    const checkUpdateBtn = document.querySelector('.update-btn')
 
     updateCloseBtn.addEventListener('click', () => {
         updateNotification.classList.add('hidden')
@@ -153,6 +165,11 @@ function setEventListeners() {
 
     updateRestartBtn.addEventListener('click', () => {
         ipcRenderer.send('restart-app')
+    })
+
+    checkUpdateBtn.addEventListener('click', () => {
+        ipcRenderer.send('check_for_updates')
+        document.location.reload()
     })
 
     searchBar.addEventListener('keydown', (event) => {

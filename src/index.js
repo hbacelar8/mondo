@@ -3,6 +3,7 @@ const path = require('path');
 const client = require('discord-rich-presence')('763579990209855559');
 const { autoUpdater } = require('electron-updater');
 let mainWindow
+var lastUpdate = null
 
 function delayMs(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -42,10 +43,12 @@ app.on('ready', function() {
 
   delayMs(5000).then(() => {
     autoUpdater.checkForUpdates()
+    lastUpdate = Date.now()
   })
 
   setInterval(() => {
     autoUpdater.checkForUpdates();
+    lastUpdate = Date.now()
   }, 1000 * 60 * 60)
 
   autoUpdater.on('update-available', () => {
@@ -111,5 +114,14 @@ ipcMain.on('updateDiscord', (event, arg) => {
 });
 
 ipcMain.on('restart-app', () => {
-  autoUpdater.quitAndInstall()
+  autoUpdater.quitAndInstall();
+});
+
+ipcMain.on('check_for_updates', () => {
+  autoUpdater.checkForUpdates();
+  lastUpdate = Date.now()
 })
+
+ipcMain.on('app_version', (event) => {
+  event.sender.send('app_version', {version: app.getVersion(), lastUpdate: lastUpdate});
+});

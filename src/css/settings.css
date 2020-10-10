@@ -254,28 +254,41 @@ body {
 }
 
 .anilist-connection,
-.color-menu {
+.color-menu,
+.update-menu {
     width: 800px;
     height: 150px;
-    margin: auto;
+    margin-bottom: 20px;
     display: grid;
+    align-items: center;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
 }
 
+.color-menu {
+    grid-template-rows: 1fr 1fr;
+}
+
+.update-menu {
+    height: 200px;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+}
+
 .anilist-connection .title,
-.color-menu .title {
+.color-menu .title,
+.update-menu .title {
     grid-column-start: 1;
     grid-column-end: 3;
     position: relative;
 }
 
 .anilist-connection .title::after,
-.color-menu .title::after {
+.color-menu .title::after,
+.update-menu .title::after {
     content: "";
     width: 800px;
     height: 1px;
-    bottom: 10px;
+    bottom: -5px;
     left: 0;
     position: absolute;
     background-color: var(--line-color);
@@ -284,7 +297,8 @@ body {
 .anilist-token-btn,
 .anilist-login-btn,
 .disconnect-btn,
-.resync-btn {
+.resync-btn,
+.update-btn {
     width: 200px;
     height: 36px;
     padding-left: 5px;
@@ -300,7 +314,8 @@ body {
 .anilist-token-btn:hover,
 .anilist-login-btn:hover,
 .disconnect-btn:hover,
-.resync-btn:hover {
+.resync-btn:hover,
+.update-btn:hover {
     background-color: var(--line-color);
 }
 
@@ -383,10 +398,6 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
-.color-menu {
-    margin-top: 20px;
-}
-
 .colors-div {
     grid-column-start: 1;
     grid-column-end: 3;
@@ -404,4 +415,23 @@ input:checked + .slider:before {
 
 .colors-div div:hover {
     width: 60px;
+}
+
+.update-menu p {
+    font-size: 0.8rem;
+}
+
+.update-menu p:nth-of-type(even) {
+    margin-left: auto;
+}
+
+.update-btn {
+    width: 220px;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    margin: auto;
+}
+
+.update-btn a {
+    font-size: 0.85rem;
 }
