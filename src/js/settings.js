@@ -21,6 +21,7 @@ const usernameAnilist = localStorage.getItem('anilistUsername')
 const connectView = document.querySelectorAll('.connect-view')
 const disconnectView = document.querySelectorAll('.disconnect-view')
 const connectedUser = document.querySelector('.connected-user')
+const syncOnStartBtn = document.querySelector('.sync-checkbox')
 const root = document.documentElement
 
 const updateNotification = document.querySelector('.update-frame')
@@ -62,6 +63,10 @@ ipcRenderer.on('update_downloaded', () => {
     updateRestartBtn.classList.remove('hidden')
 })
 
+if (localStorage.getItem('syncOnStart')) {
+    syncOnStartBtn.checked = true
+}
+
 if (usernameAnilist) {
     for (let i = 0; i < connectView.length; i++) {
         connectView[i].classList.add('hidden')
@@ -69,6 +74,10 @@ if (usernameAnilist) {
 
     for (let i = 0; i < disconnectView.length; i++) {
         disconnectView[i].classList.remove('hidden')
+
+        if (i == disconnectView.length - 1) {
+            disconnectView[i].style.display = 'flex'
+        }
     }
 
     connectedUser.innerHTML = `Connected as ${usernameAnilist}`
@@ -79,6 +88,10 @@ if (usernameAnilist) {
 
     for (let i = 0; i < disconnectView.length; i++) {
         disconnectView[i].classList.add('hidden')
+
+        if (i == disconnectView.length - 1) {
+            disconnectView[i].style.display = 'none'
+        }
     }
 }
 
@@ -165,6 +178,10 @@ function setEventListeners() {
 
             for (let i = 0; i < disconnectView.length; i++) {
                 disconnectView[i].classList.remove('hidden')
+
+                if (i == disconnectView.length - 1) {
+                    disconnectView[i].style.display = 'flex'
+                }
             }
 
             connectedUser.innerHTML = `Connected as ${username}`
@@ -182,6 +199,10 @@ function setEventListeners() {
 
         for (let i = 0; i < disconnectView.length; i++) {
             disconnectView[i].classList.add('hidden')
+
+            if (i == disconnectView.length - 1) {
+                disconnectView[i].style.display = 'none'
+            }
         }
     })
 
@@ -219,6 +240,14 @@ function setEventListeners() {
     
                 connectedUser.innerHTML = `Connected as ${username}`
             }
+        }
+    })
+
+    syncOnStartBtn.addEventListener('input', () => {
+        if (syncOnStartBtn.checked) {
+            localStorage.setItem('syncOnStart', syncOnStartBtn.checked)
+        } else {
+            localStorage.removeItem('syncOnStart')
         }
     })
 }

@@ -32,6 +32,14 @@ app.on('ready', function() {
   mainWindow.loadFile(path.join(__dirname, 'views/watching.html'));
   mainWindow.setMenuBarVisibility(false);
 
+  mainWindow.webContents.once('did-finish-load', () => {
+    mainWindow.webContents.executeJavaScript('localStorage.getItem("syncOnStart");', true).then((result) => {
+      if (result) {
+        mainWindow.webContents.send('resync_list')
+      }
+    })
+  })
+
   delayMs(5000).then(() => {
     autoUpdater.checkForUpdates()
   })

@@ -63,6 +63,11 @@ ipcRenderer.on('update_downloaded', () => {
     updateNotification.classList.remove('hidden')
 })
 
+ipcRenderer.on('resync_list', () => {
+    localStorage.removeItem('dataAnilist')
+    document.location.reload()
+})
+
 if (localStorage.getItem('lineColor')) {
     lineColor = localStorage.getItem('lineColor')
 
