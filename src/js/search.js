@@ -17,10 +17,12 @@
 
 import { getUrlParam } from './utils.js'
 
+const {remote, ipcRenderer} = require('electron')
+
 const dataAnilist = localStorage.getItem('dataAnilist')
 const searchStr = getUrlParam('str', null).replace(/%20/g, ' ')
 const searchBar = document.querySelector('.anime-search')
-const {remote, ipcRenderer} = require('electron')
+const slider = document.querySelector('.slider')
 
 const updateNotification = document.querySelector('.update-frame')
 const updateMessage = document.querySelector('.update-msg')
@@ -188,6 +190,11 @@ function handleData(data) {
 
         addAnimeToView(id, title, cover)
     })
+
+    if (localStorage.getItem('gridSize')) {
+        slider.value = localStorage.getItem('gridSize')
+        setGridSize()
+    }
 }
 
 /**
@@ -258,6 +265,11 @@ function setEventListeners() {
             window.location.href = `search.html?str=${searchBar.value}`
         }
     })
+
+    slider.addEventListener('input', () => {
+        setGridSize()
+        localStorage.setItem('gridSize', slider.value)
+    })
 }
 
 function addAnimeListCounters(animeLists) {
@@ -292,3 +304,17 @@ function addAnimeListCounters(animeLists) {
         }
     }
 }
+
+function setGridSize() {
+    const animeWrap = document.querySelector('.anime-wrap')
+    const animeDivs = document.querySelectorAll('.anime')
+
+    animeWrap.style.gridTemplateColumns = `repeat(auto-fill, minmax(${150 + slider.value * 12}px, 1fr))`
+
+    for (let i = 0; i < animeDivs.length; i++) {
+        animeDivs[i].style.width = `${160 + slider.value * 10}px`
+        animeDivs[i].style.height = `${220 + slider.value * 12}px`
+        animeDivs[i].getElementsByTagName('p')[0].style.minHeight = `${50 + slider.value * 1}px`
+    }
+}
+

@@ -220,9 +220,41 @@ body {
     margin-left: -40%;
 }
 
+.grid-slider {
+    position: relative;
+}
+
+.grid-slider input {
+    height: 5px;
+    left: 10%;
+    bottom: -70px;
+    border-radius: 5px;
+    position: absolute;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--lighter-bg-color);
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 10px;
+    width: 10px;
+    border-radius: 5px;
+    background: var(--line-color);
+    cursor: pointer;
+}
+
+.grid-slider input::before {
+    content: "Grid Size";
+    position: absolute;
+    font-size: 0.55rem;
+    top: -25px;
+    left: 0;
+}
+
 .options-container {
     position: relative;
-    background-color: aliceblue;
 }
 
 .sort-btn {

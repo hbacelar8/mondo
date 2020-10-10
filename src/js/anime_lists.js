@@ -15,13 +15,15 @@
  * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+const {remote, ipcRenderer} = require('electron')
+
 const dataAnilist = localStorage.getItem('dataAnilist')
 const usernameAnilist = localStorage.getItem('anilistUsername')
 const updateNotification = document.querySelector('.update-frame')
 const updateMessage = document.querySelector('.update-msg')
 const updateCloseBtn = document.querySelector('.close-update-btn')
 const updateRestartBtn = document.querySelector('.restart-update-btn')
-const {remote, ipcRenderer} = require('electron')
+const slider = document.querySelector('.slider')
 const root = document.documentElement
 
 var currentPageList
@@ -244,6 +246,11 @@ function handleData(data) {
     }
 
     addAnimeListCounters(animeLists)
+
+    if (localStorage.getItem('gridSize')) {
+        slider.value = localStorage.getItem('gridSize')
+        setGridSize()
+    }
 }
 
 /**
@@ -383,9 +390,16 @@ function setEventListeners() {
                         userScore
                     )
                 })
+
+                setGridSize()
             }
         })
     }
+
+    slider.addEventListener('input', () => {
+        setGridSize()
+        localStorage.setItem('gridSize', slider.value)
+    })
 }
 
 /**
@@ -468,4 +482,17 @@ function compareParams(key, order = 'asc') {
 			(order === 'desc') ? (comparison * -1) : comparison
 		);
 	};
+}
+
+function setGridSize() {
+    const animeWrap = document.querySelector('.anime-wrap')
+    const animeDivs = document.querySelectorAll('.anime')
+
+    animeWrap.style.gridTemplateColumns = `repeat(auto-fill, minmax(${150 + slider.value * 12}px, 1fr))`
+
+    for (let i = 0; i < animeDivs.length; i++) {
+        animeDivs[i].style.width = `${160 + slider.value * 10}px`
+        animeDivs[i].style.height = `${220 + slider.value * 12}px`
+        animeDivs[i].getElementsByTagName('p')[0].style.minHeight = `${50 + slider.value * 1}px`
+    }
 }
