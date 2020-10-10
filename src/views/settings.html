@@ -45,25 +45,21 @@
         </div>
 
         <div class="content">
-            <div class="login">
-                <div class="login-box">
-                    <div class="connect-view active">
-                        <div class="login-anilist-btn">
-                            <a href="https://anilist.co/api/v2/oauth/authorize?client_id=3934&response_type=token" target="_blank">Login to Anilist</a>
+            <div class="anilist-connection">
+                <div class="title">Anilist Connection</div>
+
+                <div class="disconnect-btn disconnect-view"><a>Disconnect</a></div>
+                <p class="connected-user disconnect-view"></p>
+                <div class="resync-btn disconnect-view"><a>Update Lists</a></div>
+
+                <div class="anilist-token-btn connect-view">
+                    <a href="https://anilist.co/api/v2/oauth/authorize?client_id=3934&response_type=token" target="_blank">Get Access Token</a>
                         </div>
-                        <form>
-                            <div class="user-box">
-                                <input class="login-input" type="text" name="" required="">
-                                <label>Anilist Username</label>
-                            </div>
-                            <div class="user-box">
-                                <input class="login-input" type="text" name="" required="">
-                                <label>Access Code</label>
-                            </div>
-                        </form>
-                        <div class="login-btn">
+                <div class="token-inpt connect-view"><input class="login-input" placeholder="Access Token" type="text"></div>
+                <div class="anilist-login-btn connect-view">
                             <a>Login</a>
                         </div>
+                <div class="user-inpt connect-view"><input class="login-input" placeholder="Anilist Username" type="text"></div>
                     </div>
 
                     <div class="disconnect-view">

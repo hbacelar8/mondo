@@ -18,8 +18,9 @@
 const {remote, ipcRenderer} = require('electron')
 const dataAnilist = localStorage.getItem('dataAnilist')
 const usernameAnilist = localStorage.getItem('anilistUsername')
-const connectView = document.querySelector('.connect-view')
-const disconnectView = document.querySelector('.disconnect-view')
+const connectView = document.querySelectorAll('.connect-view')
+const disconnectView = document.querySelectorAll('.disconnect-view')
+const connectedUser = document.querySelector('.connected-user')
 
 const updateNotification = document.querySelector('.update-frame')
 const updateMessage = document.querySelector('.update-msg')
@@ -59,11 +60,23 @@ ipcRenderer.on('update_downloaded', () => {
 })
 
 if (usernameAnilist) {
-    connectView.classList.remove('active')
-    disconnectView.classList.add('active')
+    for (let i = 0; i < connectView.length; i++) {
+        connectView[i].classList.add('hidden')
+    }
+
+    for (let i = 0; i < disconnectView.length; i++) {
+        disconnectView[i].classList.remove('hidden')
+    }
+
+    connectedUser.innerHTML = `Connected as ${usernameAnilist}`
 } else {
-    connectView.classList.add('active')
-    disconnectView.classList.remove('active')
+    for (let i = 0; i < connectView.length; i++) {
+        connectView[i].classList.remove('hidden')
+}
+
+    for (let i = 0; i < disconnectView.length; i++) {
+        disconnectView[i].classList.add('hidden')
+    }
 }
 
 if (dataAnilist) {
@@ -107,8 +120,9 @@ setEventListeners()
 function setEventListeners() {
     const searchBar = document.querySelector('.anime-search')
     const loginInputs = document.getElementsByClassName('login-input')
-    const loginBtn = document.querySelector('.login-btn')
+    const loginBtn = document.querySelector('.anilist-login-btn')
     const disconnectBtn = document.querySelector('.disconnect-btn')
+    const resyncBtn = document.querySelector('.resync-btn')
 
     updateCloseBtn.addEventListener('click', () => {
         updateNotification.classList.add('hidden')
@@ -125,10 +139,8 @@ function setEventListeners() {
     })
 
     loginBtn.addEventListener('click', () => {
-        const connectView = document.querySelector('.connect-view')
-        const disconnectView = document.querySelector('.disconnect-view')
-        const username = loginInputs[0].value
-        const accessCode = loginInputs[1].value
+        const accessCode = loginInputs[0].value
+        const username = loginInputs[1].value
 
         if (username && accessCode) {
             loginInputs[0].value = ''
@@ -137,8 +149,15 @@ function setEventListeners() {
             localStorage.setItem('anilistUsername', username)
             localStorage.setItem('accessCode', accessCode)
     
-            connectView.classList.remove('active')
-            disconnectView.classList.add('active')
+            for (let i = 0; i < connectView.length; i++) {
+                connectView[i].classList.add('hidden')
+            }
+
+            for (let i = 0; i < disconnectView.length; i++) {
+                disconnectView[i].classList.remove('hidden')
+            }
+
+            connectedUser.innerHTML = `Connected as ${username}`
         }
     })
 
@@ -147,8 +166,18 @@ function setEventListeners() {
         localStorage.removeItem('accessCode')
         localStorage.removeItem('dataAnilist')
 
-        connectView.classList.add('active')
-        disconnectView.classList.remove('active')
+        for (let i = 0; i < connectView.length; i++) {
+            connectView[i].classList.remove('hidden')
+        }
+
+        for (let i = 0; i < disconnectView.length; i++) {
+            disconnectView[i].classList.add('hidden')
+        }
+    })
+
+    resyncBtn.addEventListener('click', () => {
+        localStorage.removeItem('dataAnilist')
+    })
     })
 }
 
