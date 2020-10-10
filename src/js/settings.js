@@ -21,11 +21,14 @@ const usernameAnilist = localStorage.getItem('anilistUsername')
 const connectView = document.querySelectorAll('.connect-view')
 const disconnectView = document.querySelectorAll('.disconnect-view')
 const connectedUser = document.querySelector('.connected-user')
+const root = document.documentElement
 
 const updateNotification = document.querySelector('.update-frame')
 const updateMessage = document.querySelector('.update-msg')
 const updateCloseBtn = document.querySelector('.close-update-btn')
 const updateRestartBtn = document.querySelector('.restart-update-btn')
+
+var lineColor = '#487eb0'
 
 document.querySelector('.min').addEventListener('click', () => {
     let window = remote.getCurrentWindow()
@@ -72,11 +75,17 @@ if (usernameAnilist) {
 } else {
     for (let i = 0; i < connectView.length; i++) {
         connectView[i].classList.remove('hidden')
-}
+    }
 
     for (let i = 0; i < disconnectView.length; i++) {
         disconnectView[i].classList.add('hidden')
     }
+}
+
+if (localStorage.getItem('lineColor')) {
+    lineColor = localStorage.getItem('lineColor')
+
+    root.style.setProperty('--line-color', lineColor)
 }
 
 if (dataAnilist) {
@@ -123,6 +132,7 @@ function setEventListeners() {
     const loginBtn = document.querySelector('.anilist-login-btn')
     const disconnectBtn = document.querySelector('.disconnect-btn')
     const resyncBtn = document.querySelector('.resync-btn')
+    const colorsBtn = document.querySelectorAll('.colors')
 
     updateCloseBtn.addEventListener('click', () => {
         updateNotification.classList.add('hidden')
@@ -148,7 +158,7 @@ function setEventListeners() {
     
             localStorage.setItem('anilistUsername', username)
             localStorage.setItem('accessCode', accessCode)
-    
+
             for (let i = 0; i < connectView.length; i++) {
                 connectView[i].classList.add('hidden')
             }
@@ -178,6 +188,38 @@ function setEventListeners() {
     resyncBtn.addEventListener('click', () => {
         localStorage.removeItem('dataAnilist')
     })
+
+    for (let i = 0; i < colorsBtn.length; i++) {
+        colorsBtn[i].addEventListener('click', () => {
+            localStorage.setItem('lineColor', colorsBtn[i].id)
+
+            document.location.reload()
+        })
+    }
+
+    loginInputs[1].addEventListener('keydown', (event) => {
+        if (event.key == 'Enter') {
+            const accessCode = loginInputs[0].value
+            const username = loginInputs[1].value
+    
+            if (username && accessCode) {
+                loginInputs[0].value = ''
+                loginInputs[1].value = ''
+        
+                localStorage.setItem('anilistUsername', username)
+                localStorage.setItem('accessCode', accessCode)
+    
+                for (let i = 0; i < connectView.length; i++) {
+                    connectView[i].classList.add('hidden')
+                }
+    
+                for (let i = 0; i < disconnectView.length; i++) {
+                    disconnectView[i].classList.remove('hidden')
+                }
+    
+                connectedUser.innerHTML = `Connected as ${username}`
+            }
+        }
     })
 }
 

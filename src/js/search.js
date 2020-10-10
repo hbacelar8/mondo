@@ -26,6 +26,9 @@ const updateNotification = document.querySelector('.update-frame')
 const updateMessage = document.querySelector('.update-msg')
 const updateCloseBtn = document.querySelector('.close-update-btn')
 const updateRestartBtn = document.querySelector('.restart-update-btn')
+const root = document.documentElement
+
+var lineColor = '#487eb0'
 
 document.querySelector('.min').addEventListener('click', () => {
     let window = remote.getCurrentWindow()
@@ -58,6 +61,12 @@ ipcRenderer.on('update_downloaded', () => {
     updateCloseBtn.classList.add('hidden')
     updateRestartBtn.classList.remove('hidden')
 })
+
+if (localStorage.getItem('lineColor')) {
+    lineColor = localStorage.getItem('lineColor')
+
+    root.style.setProperty('--line-color', lineColor)
+}
 
 if (dataAnilist) {
     const lists = JSON.parse(dataAnilist).data.MediaListCollection.lists

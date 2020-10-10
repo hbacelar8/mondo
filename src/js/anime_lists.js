@@ -22,8 +22,10 @@ const updateMessage = document.querySelector('.update-msg')
 const updateCloseBtn = document.querySelector('.close-update-btn')
 const updateRestartBtn = document.querySelector('.restart-update-btn')
 const {remote, ipcRenderer} = require('electron')
+const root = document.documentElement
 
 var currentPageList
+var lineColor = '#487eb0'
 
 document.querySelector('.min').addEventListener('click', () => {
     let window = remote.getCurrentWindow()
@@ -58,6 +60,12 @@ ipcRenderer.on('update_downloaded', () => {
     updateRestartBtn.classList.remove('hidden')
     updateNotification.classList.remove('hidden')
 })
+
+if (localStorage.getItem('lineColor')) {
+    lineColor = localStorage.getItem('lineColor')
+
+    root.style.setProperty('--line-color', lineColor)
+}
 
 if (dataAnilist) {
     handleData(JSON.parse(dataAnilist))
