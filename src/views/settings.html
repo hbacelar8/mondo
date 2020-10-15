@@ -48,25 +48,37 @@
             <div class="anilist-connection">
                 <div class="title">Anilist Connection</div>
 
-                <div class="disconnect-btn disconnect-view"><a>Disconnect</a></div>
-                <p class="connected-user disconnect-view"></p>
-                <div class="resync-btn disconnect-view"><a>Synchronize Lists</a></div>
-                <div class="sync-on-start-div disconnect-view">
-                    <p>Synchronize on startup</p>
-                    <label class="switch">
-                        <input class="sync-checkbox" type="checkbox">
-                        <span class="slider round"></span>
-                    </label>
+                <div class="connect-view hidden">
+                    <div class="anilist-token-btn btn">
+                        <a href="https://anilist.co/api/v2/oauth/authorize?client_id=3934&response_type=token" target="_blank">Get Access Token</a>
+                    </div>
+                    <div class="token-inpt"><input class="login-input" placeholder="Access Token" type="text"></div>
+                    <div class="anilist-login-btn btn">
+                        <a>Login</a>
+                    </div>
+                    <div class="user-inpt"><input class="login-input" placeholder="Anilist Username" type="text"></div>
                 </div>
 
-                <div class="anilist-token-btn connect-view">
-                    <a href="https://anilist.co/api/v2/oauth/authorize?client_id=3934&response_type=token" target="_blank">Get Access Token</a>
+                <div class="disconnect-view hidden">
+                    <div class="disconnect-btn btn"><a>Disconnect</a></div>
+                    <p class="connected-user">hbacelar</p>
+                    <div class="resync-btn btn"><a>Synchronize Lists</a></div>
+                    <div class="sync-on-start-div">
+                        <p>Synchronize on startup</p>
+                        <label class="switch">
+                            <input class="sync-checkbox" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
                 </div>
-                <div class="token-inpt connect-view"><input class="login-input" placeholder="Access Token" type="text"></div>
-                <div class="anilist-login-btn connect-view">
-                    <a>Login</a>
+            </div>
+
+            <div class="anime-folder-menu">
+                <div class="title">Anime Folder</div>
+                <div class="anime-folder-div">
+                    <div class="set-folder-btn btn"><a>Set Anime Folder</a></div>
+                    <div class="anime-folder-input-div"><input class="anime-folder-input" placeholder="Anime Folder" type="text"></div>
                 </div>
-                <div class="user-inpt connect-view"><input class="login-input" placeholder="Anilist Username" type="text"></div>
             </div>
 
             <div class="color-menu">
@@ -83,12 +95,15 @@
 
             <div class="update-menu">
                 <div class="title">Updates</div>
-                <p>Current Version</p>
-                <p class="version-tag"></p>
-                <p>Last Update Check</p>
-                <p class="last-update-time"></p>
-                <div class="update-btn">
-                    <a>Check for Updates</a>
+
+                <div class="update-menu-div">
+                    <p>Current Version</p>
+                    <p class="version-tag"></p>
+                    <p>Last Update Check</p>
+                    <p class="last-update-time"></p>
+                    <div class="update-btn btn">
+                        <a>Check for Updates</a>
+                    </div>
                 </div>
             </div>
         </div>
