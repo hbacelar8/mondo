@@ -317,6 +317,7 @@ hr {
 .synopsis {
     margin-top: 20px;
     font-size: 0.65rem;
+    line-height: 25px;
     text-align: justify;
 }
 
