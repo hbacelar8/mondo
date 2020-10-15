@@ -15,40 +15,41 @@
  * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Extract variables from page's URL
- * @returns {Array} Array of variables
- */
-function getUrlVars() {
+const cheerio = require('cheerio')
+const axios = require('axios')
+const anitomy = require('anitomy-js')
+
+class Utils {
+  constructor() {
+    this.MEDIA_STATUS = {
+      FINISHED: 'Finished',
+      RELEASING: 'Releasing',
+      NOT_YET_RELEASED: 'Not Yet Released',
+      CANCELLED: 'Cancelled'
+    }
+  }
+
+  getUrlVars() {
     let vars = []
 
     window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (_, key, value) {
-        vars[key] = value
+      vars[key] = value
     })
 
     return vars
-}
+  }
 
-/**
- * Extract a specific variable from page's URL
- * @param {string} parameter Parameter's name
- * @param {*} defaultvalue Value to set if parameter not found
- */
-export function getUrlParam(parameter, defaultvalue) {
+  getUrlParam(parameter, defaultvalue) {
     let urlParameter = defaultvalue
 
     if (window.location.href.indexOf(parameter) > -1) {
-        urlParameter = getUrlVars()[parameter]
+      urlParameter = this.getUrlVars()[parameter]
     }
 
     return urlParameter
-}
+  }
 
-/**
- * Convert a duration in seconds to days, hours and minutes
- * @param {number} seconds Duration in seconds
- */
-export function convertSecondsToDHM(seconds) {
+  convertSecondsToDHM(seconds) {
     seconds = Number(seconds);
 
     var d = Math.floor(seconds / (3600 * 24));
@@ -60,26 +61,134 @@ export function convertSecondsToDHM(seconds) {
     var mDisplay = m > 0 ? m + 'm' : "";
 
     return dDisplay + hDisplay + mDisplay;
+  }
+
+  compareParams(key, order = 'asc') {
+    key = key.split('.')
+
+    return function innerSort(a, b) {
+      var varA, varB
+
+      if (!a.hasOwnProperty(key[0]) || !b.hasOwnProperty(key[0])) {
+        return 0;
+      }
+
+      varA = a[key[0]]
+      varB = b[key[0]]
+
+      if (key.length > 1) {
+        for (let i = 1; i < key.length; i++) {
+          varA = varA[key[i]]
+          varB = varB[key[i]]
+        }
+      }
+
+      varA = (typeof varA === 'string') ? varA.toUpperCase() : varA;
+      varB = (typeof varB === 'string') ? varB.toUpperCase() : varB;
+      let comparison = 0;
+
+      if (varA > varB) {
+        comparison = 1;
+      } else if (varA < varB) {
+        comparison = -1;
+      }
+
+      return (
+        (order === 'desc') ? (comparison * -1) : comparison
+      );
+    };
+  }
+
+  delayMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  getTorrents = async (anime) => {
+    var torrents = {}
+
+    anime = [anime.romaji, anime.english]
+
+    for (let t = 0; t < 2; t++) {
+      if (anime[t]) {
+        anime[t] = anime[t].replace(/:/g, ' ').replace(/\dnd|Season/g, '')
+
+        var { data } = await axios.get(
+          `https://nyaa.si/?q=${anime[t]}&filter=2&c=1_0&p=${1}`
+        )
+        var $ = cheerio.load(data)
+        const totalPages = Math.floor($('.pagination-page-info').text().match(/\d+/g)[2] / 75 + 1)
+
+        for (let page = 1; page <= totalPages; page++) {
+          $('.success').each((_, trElement) => {
+            let torrentInfo = {}
+
+            $(trElement).children().each((tdIndex, tdElement) => {
+              switch (tdIndex) {
+                case 1:
+                  let a = $(tdElement).children().last()
+                  torrentInfo.fullName = $(a).attr('title')
+
+                  let parsedTorrent = anitomy.parseSync(torrentInfo.fullName)
+
+                  torrentInfo.source = parsedTorrent.release_group
+                  torrentInfo.name = parsedTorrent.anime_title
+                  torrentInfo.video = `${parsedTorrent.video_resolution ? parsedTorrent.video_resolution : ''} \
+                            ${parsedTorrent.video_term ? parsedTorrent.video_term : ''}`
+
+                  if (!parsedTorrent.episode_number && parsedTorrent.release_information) {
+                    torrentInfo.episode = 'Batch'
+                  } else {
+                    torrentInfo.episode = parsedTorrent.episode_number ? parsedTorrent.episode_number : ''
+                  }
+
+                  break;
+
+                case 2:
+                  let a1 = $(tdElement).children().first()
+                  let a2 = $(tdElement).children().last()
+
+                  torrentInfo.downloadLink = 'https://nyaa.si/' + $(a1).attr('href')
+                  torrentInfo.magneticLink = $(a2).attr('href')
+                  break;
+
+                case 3:
+                  torrentInfo.size = $(tdElement).text()
+                  break;
+
+                case 5:
+                  torrentInfo.seeds = parseInt($(tdElement).text(), 10)
+                  break;
+
+                case 6:
+                  torrentInfo.leechs = parseInt($(tdElement).text(), 10)
+                  break;
+
+                case 7:
+                  torrentInfo.downloadNumber = parseInt($(tdElement).text(), 10)
+                  break;
+
+                default:
+                  break;
+              }
+            })
+
+            torrents[torrentInfo.fullName] = torrentInfo
+          })
+
+          if (page < totalPages) {
+            var { data } = await axios.get(
+              `https://nyaa.si/?q=${anime[t]}&filter=2&c=1_0&p=${page + 1}`
+            )
+            $ = cheerio.load(data)
+          }
+        }
+      }
+    }
+
+    torrents = Object.values(torrents)
+
+    return torrents.sort(this.compareParams('seeds', 'desc'))
+  }
 }
 
-export function compareParams(key, order = 'asc') {
-	return function innerSort(a, b) {
-		if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
-			return 0;
-		}
-
-		const varA = (typeof a[key] === 'string') ? a[key].toUpperCase() : a[key];
-		const varB = (typeof b[key] === 'string') ? b[key].toUpperCase() : b[key];
-		let comparison = 0;
-
-		if (varA > varB) {
-			comparison = 1;
-		} else if (varA < varB) {
-			comparison = -1;
-		}
-
-		return (
-			(order === 'desc') ? (comparison * -1) : comparison
-		);
-	};
-}
+module.exports = new Utils

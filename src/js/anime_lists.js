@@ -15,272 +15,56 @@
  * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const {remote, ipcRenderer} = require('electron')
+/********************************************************************
+ *                                                                  *
+ *                              Main                                *
+ *                                                                  *
+ * ******************************************************************
+ */
 
-const dataAnilist = localStorage.getItem('dataAnilist')
-const usernameAnilist = localStorage.getItem('anilistUsername')
-const updateNotification = document.querySelector('.update-frame')
-const updateMessage = document.querySelector('.update-msg')
-const updateCloseBtn = document.querySelector('.close-update-btn')
-const updateRestartBtn = document.querySelector('.restart-update-btn')
-const slider = document.querySelector('.slider')
-const root = document.documentElement
+const path = require('path')
+const { remote, ipcRenderer } = require('electron')
+const Store = require(path.resolve('./src/js/store'))
+const Utils = require(path.resolve('./src/js/utils'))
+const currentPage = window.location.pathname.split('/').pop().replace('.html', '')
 
-var currentPageList
-var lineColor = '#487eb0'
-
-document.querySelector('.min').addEventListener('click', () => {
-    let window = remote.getCurrentWindow()
-    window.minimize()
+// Load user information JSON
+const storeUserConfig = new Store({
+  configName: 'user-config',
+  defaults: {
+    userInfo: {
+      username: null,
+      accessCode: null
+    },
+    gridSize: 0
+  }
 })
 
-document.querySelector('.max').addEventListener('click', () => {
-    let window = remote.getCurrentWindow()
-
-    if (!window.isMaximized()) {
-        window.maximize()    
-    } else {
-        window.unmaximize()
-    }
+// Load Anilist media data JSON
+const storeAnilistMediaData = new Store({
+  configName: 'anilist-data',
+  defaults: {}
 })
 
-document.querySelector('.close').addEventListener('click', () => {
-    let window = remote.getCurrentWindow()
-    window.close()
-})
-
-ipcRenderer.on('update_available', () => {
-    //ipcRenderer.removeAllListeners('update-available')
-    console.log(updateNotification)
-    updateNotification.classList.remove('hidden')
-})
-
-ipcRenderer.on('update_downloaded', () => {
-    ipcRenderer.removeAllListeners('update_downloaded')
-    updateMessage.innerText = 'Update downloaded. It will be installed on restart. Restart now?'
-    updateCloseBtn.classList.add('hidden')
-    updateRestartBtn.classList.remove('hidden')
-    updateNotification.classList.remove('hidden')
-})
-
-ipcRenderer.on('resync_list', () => {
-    localStorage.removeItem('dataAnilist')
-    document.location.reload()
-})
-
-if (localStorage.getItem('lineColor')) {
-    lineColor = localStorage.getItem('lineColor')
-
-    root.style.setProperty('--line-color', lineColor)
-}
-
-if (dataAnilist) {
-    handleData(JSON.parse(dataAnilist))
+if (Object.keys(storeAnilistMediaData.data) != 0) {
+  addAnimesToView()
 } else {
-    if (usernameAnilist) {
-        fetchMediaCollection(usernameAnilist)
-    } else {
-        addNoListToView()
-    }
+  addNoListToView()
 }
 
+setIpcCallbacks()
 setEventListeners()
+setWindowButtonsEvents()
 
-/**
- * Fetch information from Anilist API
- * @param {String} username Username
+/********************************************************************
+ *                                                                  *
+ *                            Functions                             *
+ *                                                                  *
+ * ******************************************************************
  */
-function fetchMediaCollection(username) {
-    const query = `
-        query ($username: String) {
-            MediaListCollection (userName: $username, type: ANIME) {
-                lists {
-                    name,
-                    entries {
-                        score,
-                        progress,
-                        updatedAt,
-                        createdAt,
-                        media {
-                            id,
-                            title {
-                                english(stylised: false),
-                                romaji,
-                                native
-                            },
-                            episodes,
-                            coverImage {
-                                large
-                            }
-                        }
-                    }
-                    isSplitCompletedList,
-                    status
-                }
-            }
-        }
-    `;
 
-    const variables = {
-        username: username
-    };
-
-    const url = 'https://graphql.anilist.co',
-        options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-                query: query,
-                variables: variables
-            })
-        };
-
-    fetch(url, options).then(handleResponse)
-        .then(handleData)
-        .catch(handleError);
-}
-
-/**
- * Handle response from server
- * @param {object} response server's response
- */
-function handleResponse(response) {
-    return response.json().then(function (json) {
-        return response.ok ? json : Promise.reject(json);
-    });
-}
-
-/**
- * Handle data received from server
- * @param {object} data Data received from server
- */
-function handleData(data) {
-    const currentPage = window.location.pathname.split('/').pop()
-    const lists = data.data.MediaListCollection.lists
-    const animeLists = {
-        watching: null,
-        completed: new Array(),
-        planning: null,
-        paused: null,
-        dropped: null
-    }
-
-    if (!dataAnilist) {
-        localStorage.setItem('dataAnilist', JSON.stringify(data))
-    }
-
-    for (let i = 0; i < lists.length; i++) {
-        if (lists[i].name == 'Watching') {
-            animeLists.watching = lists[i].entries
-        } else if (lists[i].name == 'Planning') {
-            animeLists.planning = lists[i].entries
-        } else if (lists[i].name == 'Paused') {
-            animeLists.paused = lists[i].entries
-        } else if (lists[i].name == 'Dropped') {
-            animeLists.dropped = lists[i].entries
-        } else {
-            animeLists.completed.push(lists[i].entries)
-        }
-    }
-
-    if (animeLists.completed.length) {
-        let completedLists = animeLists.completed.length
-
-        animeLists.completed = animeLists.completed.concat(...animeLists.completed)
-
-        for (let i = 0; i < completedLists; i++) {
-            animeLists.completed.splice(0, 1)
-        }
-    }
-
-    switch (currentPage) {
-        case 'watching.html':
-            currentPageList = animeLists.watching
-            break;
-
-        case 'completed.html':
-            currentPageList = animeLists.completed
-            break;
-
-        case 'planning.html':
-            currentPageList = animeLists.planning
-            break;
-
-        case 'paused.html':
-            currentPageList = animeLists.paused
-            break;
-
-        case 'dropped.html':
-            currentPageList = animeLists.dropped
-            break;
-
-        default:
-            break;
-    }
-
-    if (currentPageList) {
-        currentPageList.forEach(function (list) {
-            if (list.media.title.english) {
-                var animeTitle = list.media.title.english
-            } else if (list.media.title.romaji) {
-                var animeTitle = list.media.title.romaji
-            } else {
-                var animeTitle = list.media.title.native
-            }
-
-            const animeId = list.media.id
-            const animeCover = list.media.coverImage.large
-            const animeEpisodes = list.media.episodes
-            const userProgress = list.progress
-            const userScore = list.score
-
-            addAnimeToView(
-                animeId,
-                animeTitle,
-                animeCover,
-                animeEpisodes,
-                userProgress,
-                userScore
-            )
-        })
-    } else {
-        addNoListToView()
-    }
-
-    addAnimeListCounters(animeLists)
-
-    if (localStorage.getItem('gridSize')) {
-        slider.value = localStorage.getItem('gridSize')
-        setGridSize()
-    }
-}
-
-/**
- * Handle error from server request
- * @param {object} error Array with error information
- */
-function handleError(error) {
-    if (error.errors[0].status == 404) {
-        alert(`Looks like the Anilist username "${usernameAnilist}" doesn't exist. Try logging in again.`)
-        localStorage.removeItem('anilistUsername')
-        localStorage.removeItem('dataAnilist')
-        localStorage.removeItem('accessCode')
-    }
-}
-
-/**
- * Add anime to HTML
- * @param {number} id Anime ID
- * @param {string} title Anime title
- * @param {string} cover Link to anime cover image
- * @param {number} episodes The amount of episodes the anime has when completed
- * @param {number} progress The amount of episodes seen by the user
- * @param {number} score The score of the anime given by the user
- */
-function addAnimeToView(id, title, cover, episodes, progress, score) {
+function addAnimesToView() {
+  storeAnilistMediaData.data[currentPage].entries.forEach((entry) => {
     const animeWrap = document.getElementsByClassName('anime-wrap')[0]
     const newAnimeDiv = document.createElement('div')
     const newAnimeImg = document.createElement('img')
@@ -289,11 +73,11 @@ function addAnimeToView(id, title, cover, episodes, progress, score) {
     const newAnimeSpan2 = document.createElement('span')
 
     newAnimeDiv.classList.add('anime')
-    newAnimeImg.src = cover
+    newAnimeImg.src = entry.media.coverImage.large
     newAnimeImg.loading = 'lazy'
-    newAnimeP.innerText = title
-    newAnimeSpan1.innerText = `${progress}/${episodes ? episodes : '?'}`
-    newAnimeSpan2.innerText = score == 0 ? '-' : score
+    newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
+    newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
+    newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
 
     newAnimeDiv.appendChild(newAnimeImg)
     newAnimeDiv.appendChild(newAnimeP)
@@ -301,203 +85,190 @@ function addAnimeToView(id, title, cover, episodes, progress, score) {
     newAnimeDiv.appendChild(newAnimeSpan2)
 
     newAnimeDiv.addEventListener('click', function () {
-        window.location.href = `anime.html?id=${id}`
+      window.location.href = `anime.html?id=${entry.media.id}`
     })
 
     animeWrap.appendChild(newAnimeDiv)
+  })
+
+  setGridSize()
+  addAnimeListCounters()
 }
 
-/**
- * Set general event listeners
- */
-function setEventListeners() {
-    const searchBar = document.querySelector('.anime-search')
-    const sortBtn = document.querySelector('.sort-btn')
-    const options = document.querySelector('.options')
-    const optionsA = options.getElementsByTagName('a')
-
-    updateCloseBtn.addEventListener('click', () => {
-        updateNotification.classList.add('hidden')
-    })
-
-    updateRestartBtn.addEventListener('click', () => {
-        ipcRenderer.send('restart-app')
-    })
-
-    searchBar.addEventListener('input', function () {
-        const animeDivs = document.getElementsByClassName('anime')
-
-        for (let i = 0; i < animeDivs.length; i++) {
-            const animeTitle = animeDivs[i].getElementsByTagName('p')[0]
-            const titleText = animeTitle.textContent || animeTitle.innerHTML
-
-            if (titleText.toUpperCase().indexOf(searchBar.value.toUpperCase()) > -1) {
-                animeDivs[i].style.display = '';
-            } else {
-                animeDivs[i].style.display = 'none'
-            }
-        }
-    })
-
-    searchBar.addEventListener('keydown', function (event) {
-        if (event.key == 'Enter') {
-            window.location.href = `search.html?str=${searchBar.value}`
-        }
-    })
-
-    sortBtn.addEventListener('click', () => {
-        const arrowUp = sortBtn.getElementsByTagName('i')[0]
-
-        if (options.style.maxHeight != '200px') {
-            arrowUp.style.transform = 'translateY(3px) rotate(180deg)'
-            options.style.maxHeight = '200px'
-        } else {
-            arrowUp.style.transform = 'translateY(3px) rotate(0deg)'
-            options.style.maxHeight = '0'
-        }
-    })
-
-    for (let i = 0; i < optionsA.length; i++) {
-        optionsA[i].addEventListener('click', () => {
-            const animeDivs = document.querySelectorAll('.anime')
-
-            sortBtn.innerHTML = optionsA[i].innerHTML + '<i class="fas fa-angle-up"></i>'
-            options.style.maxHeight = '0'
-
-            if (currentPageList) {
-                for (let i = 0; i < animeDivs.length; i++) {
-                    animeDivs[i].remove()
-                }
-
-                currentPageList.sort(compareParams(optionsA[i].id, optionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
-
-                currentPageList.forEach(function (list) {
-                    if (list.media.title.english) {
-                        var animeTitle = list.media.title.english
-                    } else if (list.media.title.romaji) {
-                        var animeTitle = list.media.title.romaji
-                    } else {
-                        var animeTitle = list.media.title.native
-                    }
-        
-                    const animeId = list.media.id
-                    const animeCover = list.media.coverImage.large
-                    const animeEpisodes = list.media.episodes
-                    const userProgress = list.progress
-                    const userScore = list.score
-        
-                    addAnimeToView(
-                        animeId,
-                        animeTitle,
-                        animeCover,
-                        animeEpisodes,
-                        userProgress,
-                        userScore
-                    )
-                })
-
-                setGridSize()
-            }
-        })
-    }
-
-    slider.addEventListener('input', () => {
-        setGridSize()
-        localStorage.setItem('gridSize', slider.value)
-    })
-}
-
-/**
- * Displays a message when no anime content to show
- */
 function addNoListToView() {
-    const animeWrap = document.querySelector('.anime-wrap')
-    const noListDiv = document.createElement('div')
+  const animeWrap = document.querySelector('.anime-wrap')
+  const noListDiv = document.createElement('div')
 
-    noListDiv.classList.add('no-list')
-    noListDiv.innerHTML = 'Nothing to show around here'
+  noListDiv.classList.add('no-list')
+  noListDiv.innerHTML = 'Nothing to show around here'
 
-    animeWrap.appendChild(noListDiv)
+  animeWrap.appendChild(noListDiv)
 }
 
-function addAnimeListCounters(animeLists) {
-    const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('P')
+function addAnimeListCounters() {
+  const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('P')
 
-    for (let i = 0; i < counters.length; i++) {
-        let listLinkName = counters[i].previousSibling.nodeValue
+  for (let i = 0; i < counters.length; i++) {
+    let listLinkName = counters[i].previousSibling.nodeValue
 
-        switch (listLinkName) {
-            case 'Watching':
-                counters[i].innerHTML = animeLists.watching ? animeLists.watching.length : 0
-                break;
+    switch (listLinkName) {
+      case 'Watching':
+        counters[i].innerHTML = storeAnilistMediaData.data.watching ? storeAnilistMediaData.data.watching.entries.length : 0
+        break;
 
-            case 'Completed':
-                counters[i].innerHTML = animeLists.completed ? animeLists.completed.length : 0
-                break;
+      case 'Completed':
+        counters[i].innerHTML = storeAnilistMediaData.data.completed ? storeAnilistMediaData.data.completed.entries.length : 0
+        break;
 
-            case 'Planning':
-                counters[i].innerHTML = animeLists.planning ? animeLists.planning.length : 0
-                break;
+      case 'Planning':
+        counters[i].innerHTML = storeAnilistMediaData.data.planning ? storeAnilistMediaData.data.planning.entries.length : 0
+        break;
 
-            case 'Paused':
-                counters[i].innerHTML = animeLists.paused ? animeLists.paused.length : 0
-                break;
+      case 'Paused':
+        counters[i].innerHTML = storeAnilistMediaData.data.paused ? storeAnilistMediaData.data.paused.entries.length : 0
+        break;
 
-            case 'Dropped':
-                counters[i].innerHTML = animeLists.dropped ? animeLists.dropped.length : 0
-                break;
-        
-            default:
-                break;
-        }
+      case 'Dropped':
+        counters[i].innerHTML = storeAnilistMediaData.data.dropped ? storeAnilistMediaData.data.dropped.entries.length : 0
+        break;
+
+      default:
+        break;
     }
+  }
 }
 
-function compareParams(key, order = 'asc') {
-    key = key.split('.')
+function setEventListeners() {
+  const updateCloseBtn = document.querySelector('.close-update-btn')
+  const updateRestartBtn = document.querySelector('.restart-update-btn')
+  const searchBar = document.querySelector('.anime-search')
+  const slider = document.querySelector('.slider')
+  const sortBtn = document.querySelector('.sort-btn')
+  const sortBtnOptions = document.querySelector('.options')
+  const sortBtnOptionsA = sortBtnOptions.getElementsByTagName('a')
 
-	return function innerSort(a, b) {
-        var varA, varB
 
-        if (!a.hasOwnProperty(key[0]) || !b.hasOwnProperty(key[0])) {
-			return 0;
+  updateCloseBtn.addEventListener('click', () => {
+    const updateNotification = document.querySelector('.update-frame')
+    updateNotification.classList.add('hidden')
+  })
+
+  updateRestartBtn.addEventListener('click', () => {
+    ipcRenderer.send('restart-app')
+  })
+
+  searchBar.addEventListener('input', () => {
+    const animeDivs = document.getElementsByClassName('anime')
+
+    for (let i = 0; i < animeDivs.length; i++) {
+      const animeTitle = animeDivs[i].getElementsByTagName('p')[0]
+      const titleText = animeTitle.textContent || animeTitle.innerHTML
+
+      if (titleText.toUpperCase().indexOf(searchBar.value.toUpperCase()) > -1) {
+        animeDivs[i].classList.remove('hidden')
+      } else {
+        animeDivs[i].classList.add('hidden')
+      }
+    }
+  })
+
+  searchBar.addEventListener('keydown', (event) => {
+    if (event.key == 'Enter') {
+      window.location.href = `search.html?str=${searchBar.value}`
+    }
+  })
+
+  slider.addEventListener('input', () => {
+    storeUserConfig.set('gridSize', slider.value)
+    setGridSize()
+  })
+
+  sortBtn.addEventListener('click', () => {
+    const arrowUp = sortBtn.getElementsByTagName('i')[0]
+
+    if (sortBtnOptions.style.maxHeight != '200px') {
+      arrowUp.style.transform = 'translateY(3px) rotate(180deg)'
+      sortBtnOptions.style.maxHeight = '200px'
+    } else {
+      arrowUp.style.transform = 'translateY(3px) rotate(0deg)'
+      sortBtnOptions.style.maxHeight = '0'
+    }
+  })
+
+  for (let i = 0; i < sortBtnOptionsA.length; i++) {
+    sortBtnOptionsA[i].addEventListener('click', () => {
+      const animeDivs = document.querySelectorAll('.anime')
+
+      sortBtn.innerHTML = sortBtnOptionsA[i].innerHTML + '<i class="fas fa-angle-up"></i>'
+      sortBtnOptions.style.maxHeight = '0'
+
+      if (animeDivs) {
+        for (let i = 0; i < animeDivs.length; i++) {
+          animeDivs[i].remove()
         }
 
-        varA = a[key[0]]
-        varB = b[key[0]]
+        storeAnilistMediaData.data[currentPage].entries.sort(Utils.compareParams(sortBtnOptionsA[i].id, sortBtnOptionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
 
-        if (key.length > 1) {
-            for (let i = 1; i < key.length; i++) {
-                varA = varA[key[i]]
-                varB = varB[key[i]]
-            }
-        }
-
-		varA = (typeof varA === 'string') ? varA.toUpperCase() : varA;
-		varB = (typeof varB === 'string') ? varB.toUpperCase() : varB;
-		let comparison = 0;
-
-		if (varA > varB) {
-			comparison = 1;
-		} else if (varA < varB) {
-			comparison = -1;
-		}
-
-		return (
-			(order === 'desc') ? (comparison * -1) : comparison
-		);
-	};
+        addAnimesToView()
+        setGridSize()
+      }
+    })
+  }
 }
 
 function setGridSize() {
-    const animeWrap = document.querySelector('.anime-wrap')
-    const animeDivs = document.querySelectorAll('.anime')
+  const animeWrap = document.querySelector('.anime-wrap')
+  const animeDivs = document.querySelectorAll('.anime')
+  const slider = document.querySelector('.slider')
 
-    animeWrap.style.gridTemplateColumns = `repeat(auto-fill, minmax(${150 + slider.value * 12}px, 1fr))`
+  slider.value = storeUserConfig.data.gridSize
+  animeWrap.style.gridTemplateColumns = `repeat(auto-fill, minmax(${150 + storeUserConfig.data.gridSize * 12}px, 1fr))`
 
-    for (let i = 0; i < animeDivs.length; i++) {
-        animeDivs[i].style.width = `${160 + slider.value * 10}px`
-        animeDivs[i].style.height = `${220 + slider.value * 12}px`
-        animeDivs[i].getElementsByTagName('p')[0].style.minHeight = `${50 + slider.value * 1}px`
+  for (let i = 0; i < animeDivs.length; i++) {
+    animeDivs[i].style.width = `${160 + storeUserConfig.data.gridSize * 10}px`
+    animeDivs[i].style.height = `${220 + storeUserConfig.data.gridSize * 12}px`
+    animeDivs[i].getElementsByTagName('p')[0].style.minHeight = `${50 + storeUserConfig.data.gridSize * 1}px`
+  }
+}
+
+function setWindowButtonsEvents() {
+  document.querySelector('.min').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+    window.minimize()
+  })
+
+  document.querySelector('.max').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+
+    if (!window.isMaximized()) {
+      window.maximize()
+    } else {
+      window.unmaximize()
     }
+  })
+
+  document.querySelector('.close').addEventListener('click', () => {
+    let window = remote.getCurrentWindow()
+    window.close()
+  })
+}
+
+function setIpcCallbacks() {
+  ipcRenderer.on('update_available', () => {
+    const updateNotification = document.querySelector('.update-frame')
+
+    ipcRenderer.removeAllListeners('update-available')
+    updateNotification.classList.remove('hidden')
+  })
+
+  ipcRenderer.on('update_downloaded', () => {
+    const updateMessage = document.querySelector('.update-msg')
+    const updateCloseBtn = document.querySelector('.close-update-btn')
+    const updateRestartBtn = document.querySelector('.restart-update-btn')
+
+    ipcRenderer.removeAllListeners('update_downloaded')
+    updateMessage.innerText = 'Update downloaded. It will be installed on restart. Restart now?'
+    updateCloseBtn.classList.add('hidden')
+    updateRestartBtn.classList.remove('hidden')
+  })
 }
