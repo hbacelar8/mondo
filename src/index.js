@@ -1,15 +1,15 @@
 const client = require('discord-rich-presence')('763579990209855559')
-const { app, BrowserWindow, ipcMain, dialog, ipcRenderer } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const childProcess = require('child_process')
-const FetchData = require('./js/fetchData')
+const FetchData = require('./fetchData')
 const anitomy = require('anitomy-js')
-const Store = require('./js/store')
-const Utils = require('./js/utils')
+const Store = require('./store')
+const Utils = require('./utils')
 const path = require('path')
 const fs = require('fs')
 let mainWindow
-var lastUpdate = null
+let lastUpdate = new Date(Date.now())
 
 // Load window JSON configurations
 const storeWindowConfig = new Store({
@@ -102,16 +102,17 @@ app.on('ready', function () {
     storeWindowConfig.writeToFile()
   })
 
-  mainWindow.loadFile(path.join(__dirname, 'views/watching.html'))
+  mainWindow.loadFile(path.join(__dirname, 'views/main.html'))
 
   Utils.delayMs(5000).then(() => {
     autoUpdater.checkForUpdates()
-    lastUpdate = Date.now()
   })
 
   setInterval(() => {
+    lastUpdate = new Date(Date.now())
+
     autoUpdater.checkForUpdates()
-    lastUpdate = Date.now()
+    mainWindow.webContents.send('updateUpdateTime', lastUpdate)
   }, 1000 * 60 * 60)
 
   autoUpdater.on('update-available', () => {
@@ -142,12 +143,16 @@ ipcMain.on('restart-app', () => {
 })
 
 ipcMain.on('check_for_updates', () => {
+  lastUpdate = new Date(Date.now())
+
   autoUpdater.checkForUpdates()
-  lastUpdate = Date.now()
+  mainWindow.webContents.send('updateUpdateTime', lastUpdate)
 })
 
 ipcMain.on('app_version', (event) => {
-  event.sender.send('app_version', { version: app.getVersion(), lastUpdate: lastUpdate })
+  const appVersion = app.getVersion()
+
+  event.sender.send('app_version', { appVersion, lastUpdate })
 })
 
 ipcMain.on('setAnimeFolder', (_, args) => {
@@ -236,6 +241,14 @@ ipcMain.on('fetchMediaCollection', (_, args) => {
     .then(handleError)
 })
 
+ipcMain.on('searchMedia', (event, args) => {
+  fetchData.fetchSearch(args)
+    .then(handleResponse)
+    .then((data) => {
+      event.reply('searchResult', data)
+    })
+})
+
 ipcMain.on('pushEditAnimeToAnilist', (_, args) => {
   fetchData.pushEditToAnilist(
     args.animeId,
@@ -311,6 +324,8 @@ function handleError(error) {
 function handleMediaCollectionData(data) {
   var completedListEntries = []
 
+  storeUserConfig.set('userAvatar', data.data.MediaListCollection.user.avatar.large)
+
   data.data.MediaListCollection.lists.forEach((list) => {
     storeAnilistMediaData.set(list.name.toLowerCase().replace(' ', ''), list)
 
@@ -326,4 +341,6 @@ function handleMediaCollectionData(data) {
       entries: completedListEntries
     })
   }
+
+  mainWindow.webContents.send('reload')
 }

@@ -155,8 +155,21 @@ hr {
     background: rgba(53, 59, 72, 0.6);
 }
 
+.user-avatar-div {
+    width: 100%;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.user-avatar-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
 .anime-lists {
-    margin: 20px 0 20px 15px;
+    margin: 10px 0 20px 15px;
 }
 
 .anime-lists-btn {

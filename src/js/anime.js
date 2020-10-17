@@ -26,9 +26,9 @@ const pathModule = require('path')
 const anitomy = require('anitomy-js')
 const { remote, ipcRenderer } = require('electron')
 const stringSimilarity = require('string-similarity')
-const Store = require(pathModule.resolve('./src/js/store'))
-const Utils = require(pathModule.resolve('./src/js/utils'))
-const FetchData = require(pathModule.resolve('./src/js/fetchData'))
+const Store = require('../store')
+const Utils = require('../utils')
+const FetchData = require('../fetchData')
 
 const animeId = Utils.getUrlParam('id', null)
 const root = document.documentElement
@@ -122,6 +122,13 @@ const RELATION_TYPE = {
   SUMMARY: 'Summary',
   OTHER: 'Other',
   PARENT: 'Parent'
+}
+
+if (storeUserConfig.data.userAvatar) {
+  const userAvatar = document.querySelector('.user-avatar-img')
+
+  userAvatar.src = storeUserConfig.data.userAvatar
+  userAvatar.classList.remove('hidden')
 }
 
 fetchData.fetchAnimeData(animeId)

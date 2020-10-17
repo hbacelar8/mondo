@@ -73,6 +73,11 @@ class FetchData {
                 }
                 isSplitCompletedList,
                 status
+              },
+              user {
+                avatar {
+                  large
+                }
               }
             }
           }
@@ -190,6 +195,53 @@ class FetchData {
         };
   
     return fetch(url, options)
+  }
+
+  fetchSearch(searchString) {
+    const query = `
+          query ($perPage: Int, $search: String) {
+              Page (perPage: $perPage) {
+                  pageInfo {
+                      total,
+                      currentPage,
+                      lastPage,
+                      hasNextPage,
+                      perPage
+                  }
+                  media (search: $search, type: ANIME) {
+                      id,
+                      title {
+                          english(stylised: false),
+                          romaji,
+                          native
+                      },
+                      coverImage {
+                          large
+                      }
+                  }
+              }
+          }
+      `;
+  
+    const variables = {
+      search: searchString,
+      perPage: 50
+    };
+  
+    const url = 'https://graphql.anilist.co',
+      options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          query: query,
+          variables: variables
+        })
+      };
+  
+    return nodeFetch(url, options)
   }
 
   pushEditToAnilist(id, status, progress, score) {

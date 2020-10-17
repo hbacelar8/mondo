@@ -7,9 +7,9 @@
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/settings.css">
+    <link rel="stylesheet" href="../css/main.css">
 
-    <script src="../js/settings.js" defer></script>
+    <script src="../js/main.js" defer></script>
 </head>
 <body>
 
@@ -22,29 +22,57 @@
     </div>
 
     <nav class="side-bar">
+        <div class="user-avatar-div">
+            <img src="" class="user-avatar-img hidden">
+        </div>
         <li class="anime-lists">
             <a class="anime-lists-btn">ANIME LISTS</a>
             <div class="anime-lists-menu">
-                <a href="watching.html"><i class="far fa-bookmark"></i>Watching<p>0</p></a>
-                <a href="completed.html"><i class="far fa-bookmark"></i>Completed<p>0</p></a>
-                <a href="planning.html"><i class="far fa-bookmark"></i>Planning<p>0</p></a>
-                <a href="paused.html"><i class="far fa-bookmark"></i>Paused<p>0</p></a>
-                <a href="dropped.html"><i class="far fa-bookmark"></i>Dropped<p>0</p></a>
+                <a class="tab" data-tab-target="#watching"><i class="far fa-bookmark"></i>Watching<p>0</p></a>
+                <a class="tab" data-tab-target="#completed"><i class="far fa-bookmark"></i>Completed<p>0</p></a>
+                <a class="tab" data-tab-target="#planning"><i class="far fa-bookmark"></i>Planning<p>0</p></a>
+                <a class="tab" data-tab-target="#paused"><i class="far fa-bookmark"></i>Paused<p>0</p></a>
+                <a class="tab" data-tab-target="#dropped"><i class="far fa-bookmark"></i>Dropped<p>0</p></a>
             </div>
         </li>
 
-        <a href="settings.html" class="settings-btn"><i class="fas fa-cog"></i>Settings</a>
+        <a class="tab settings-btn" data-tab-target="#settings"><i class="fas fa-cog"></i>Settings</a>
     </nav>
 
     <div class="main">
         <div class="header-wrap">
             <div class="header">
-                <h1>Settings</h1>
+                <h1>Watching</h1>
                 <input type="text" placeholder="Search Anime" class="anime-search">
+            </div>
+
+            <div class="grid-slider">
+                <input type="range" min="0" max="8" value="0" class="slider" id="myRange">
+            </div>
+
+            <div class="options-container">
+                <a class="sort-btn">Sort<i class="fas fa-angle-up"></i></a>
+                
+                <div class="options">
+                    <a id="media.title.english">Title</a>
+                    <a id="progress">Progress</a>
+                    <a id="score">Score</a>
+                    <a id="updatedAt">Last Updated</a>
+                    <a id="createdAt">Last Added</a>
+                </div>
             </div>
         </div>
 
         <div class="content">
+            <div class="anime-wrap tab-content" id="#watching"></div>
+            <div class="anime-wrap tab-content hidden" id="#completed"></div>
+            <div class="anime-wrap tab-content hidden" id="#planning"></div>
+            <div class="anime-wrap tab-content hidden" id="#paused"></div>
+            <div class="anime-wrap tab-content hidden" id="#dropped"></div>
+            <div class="anime-wrap tab-content hidden" id="#search"></div>
+        </div>
+
+        <div class="settings-content tab-content hidden" id="#settings">
             <div class="anilist-connection">
                 <div class="title">Anilist Connection</div>
 
