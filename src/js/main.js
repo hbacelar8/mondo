@@ -24,7 +24,6 @@
 
 const { remote, ipcRenderer } = require('electron')
 const Store = require('../store')
-const { convertSecondsToDHM } = require('../utils')
 const Utils = require('../utils')
 
 // Load user information JSON
@@ -80,6 +79,7 @@ if (Object.keys(storeAnilistMediaData.data) != 0) {
   addNoListToView()
 }
 
+ipcRenderer.send('getPage')
 ipcRenderer.send('app_version')
 
 setIpcCallbacks()
@@ -115,6 +115,7 @@ function addAnimesToView() {
     newAnimeDiv.appendChild(newAnimeSpan2)
 
     newAnimeDiv.addEventListener('click', function () {
+      ipcRenderer.send('setPage', '#watching')
       window.location.href = `anime.html?id=${entry.media.id}`
     })
 
@@ -142,6 +143,7 @@ function addAnimesToView() {
     newAnimeDiv.appendChild(newAnimeSpan2)
 
     newAnimeDiv.addEventListener('click', function () {
+      ipcRenderer.send('setPage', '#completed')
       window.location.href = `anime.html?id=${entry.media.id}`
     })
 
@@ -169,6 +171,7 @@ function addAnimesToView() {
     newAnimeDiv.appendChild(newAnimeSpan2)
 
     newAnimeDiv.addEventListener('click', function () {
+      ipcRenderer.send('setPage', '#planning')
       window.location.href = `anime.html?id=${entry.media.id}`
     })
 
@@ -196,6 +199,7 @@ function addAnimesToView() {
     newAnimeDiv.appendChild(newAnimeSpan2)
 
     newAnimeDiv.addEventListener('click', function () {
+      ipcRenderer.send('setPage', '#paused')
       window.location.href = `anime.html?id=${entry.media.id}`
     })
 
@@ -223,6 +227,7 @@ function addAnimesToView() {
     newAnimeDiv.appendChild(newAnimeSpan2)
 
     newAnimeDiv.addEventListener('click', function () {
+      ipcRenderer.send('setPage', '#dropped')
       window.location.href = `anime.html?id=${entry.media.id}`
     })
 
@@ -239,19 +244,19 @@ function addSearchResultsToView(searchResults) {
     const animeDiv = document.createElement('div')
     const animeImg = document.createElement('img')
     const animeP = document.createElement('p')
-  
+
     animeDiv.classList.add('anime')
     animeImg.src = media.coverImage.large
     animeImg.loading = 'lazy'
     animeP.innerText = media.title.english ? media.title.english : media.title.romaji
-  
+
     animeDiv.appendChild(animeImg)
     animeDiv.appendChild(animeP)
-  
+
     animeDiv.addEventListener('click', function () {
       window.location.href = `anime.html?id=${media.id}`
     })
-  
+
     animeWrap.appendChild(animeDiv)
   })
 
@@ -354,6 +359,13 @@ function setEventListeners() {
       const animeDivs = document.getElementsByClassName('anime')
       const sortContainer = document.querySelector('.options-container')
       const pageTitle = document.querySelector('.header').children[0]
+      const searchResults = document.getElementById('#search').querySelectorAll('.anime')
+
+      if (searchResults.length) {
+        for (let i = 0; i < searchResults.length; i++) {
+          searchResults[i].remove()
+        }
+      }
 
       sortContainer.classList.add('hidden')
 
@@ -594,6 +606,18 @@ function setIpcCallbacks() {
     updateMessage.innerText = 'Update downloaded. It will be installed on restart. Restart now?'
     updateCloseBtn.classList.add('hidden')
     updateRestartBtn.classList.remove('hidden')
+  })
+
+  ipcRenderer.on('showPage', (_, page) => {
+    const tabContent = document.querySelectorAll('.tab-content')
+    const pageTitle = document.querySelector('.header').children[0]
+
+    tabContent.forEach((tab) => {
+      if (tab.id == page) {
+        tab.classList.remove('hidden')
+        pageTitle.innerHTML = tab.id.charAt(1).toUpperCase() + tab.id.slice(2)
+      }
+    })
   })
 
   ipcRenderer.on('app_version', (_, args) => {

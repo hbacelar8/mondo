@@ -9,6 +9,7 @@ const Utils = require('./utils')
 const path = require('path')
 const fs = require('fs')
 let mainWindow
+let pageToShow = '#watching'
 let lastUpdate = new Date(Date.now())
 
 // Load window JSON configurations
@@ -262,6 +263,14 @@ ipcMain.on('pushEditAnimeToAnilist', (_, args) => {
         .then(handleMediaCollectionData)
         .then(handleError)
     })
+})
+
+ipcMain.on('setPage', (_, page) => {
+  pageToShow = page
+})
+
+ipcMain.on('getPage', (event) => {
+  event.sender.send('showPage', pageToShow)
 })
 
 function updateDiscord(opts) {

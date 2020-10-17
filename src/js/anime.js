@@ -29,6 +29,7 @@ const stringSimilarity = require('string-similarity')
 const Store = require('../store')
 const Utils = require('../utils')
 const FetchData = require('../fetchData')
+const { convertSecondsToDHM } = require('../utils')
 
 const animeId = Utils.getUrlParam('id', null)
 const root = document.documentElement
@@ -389,6 +390,7 @@ function setEventListeners() {
   const animeAboutDiv = document.querySelector('.about')
   const readMoreBtnP = document.querySelector('.read-more')
   const readMoreBtnA = document.querySelector('.button')
+  const sideBarBtns = document.querySelectorAll('.side-bar-btn')
   const menuTabs = document.getElementsByClassName('tab')
   const tabContent = document.getElementsByClassName('tab-content')
   const relations = document.getElementsByClassName('relation-div')
@@ -419,6 +421,12 @@ function setEventListeners() {
     animeAboutDiv.style.height = 'unset'
     readMoreBtnP.style.display = 'none'
   })
+
+  for (let i = 0; i < sideBarBtns.length; i++) {
+    sideBarBtns[i].addEventListener('click', () => {
+      ipcRenderer.send('setPage', sideBarBtns[i].id)
+    })
+  }
 
   for (let i = 0; i < menuTabs.length; i++) {
     menuTabs[i].addEventListener('click', function () {
