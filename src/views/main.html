@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mondo</title>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+
+    <script src="../js/main.js" defer></script>
+</head>
+<body>
+
+    <div class="taskbar"></div>
+
+    <div class="window-btns">
+        <div class="min"><i class="fas fa-minus"></i></div>
+        <div class="max"><i class="far fa-square"></i></div>
+        <div class="close"><i class="fas fa-times"></i></div>
+    </div>
+
+    <nav class="side-bar">
+        <div class="user-avatar-div">
+            <img src="" class="user-avatar-img hidden">
+        </div>
+        <li class="anime-lists">
+            <a class="anime-lists-btn">ANIME LISTS</a>
+            <div class="anime-lists-menu">
+                <a class="tab" data-tab-target="#watching"><i class="far fa-bookmark"></i>Watching<p>0</p></a>
+                <a class="tab" data-tab-target="#completed"><i class="far fa-bookmark"></i>Completed<p>0</p></a>
+                <a class="tab" data-tab-target="#planning"><i class="far fa-bookmark"></i>Planning<p>0</p></a>
+                <a class="tab" data-tab-target="#paused"><i class="far fa-bookmark"></i>Paused<p>0</p></a>
+                <a class="tab" data-tab-target="#dropped"><i class="far fa-bookmark"></i>Dropped<p>0</p></a>
+            </div>
+        </li>
+
+        <a class="tab settings-btn" data-tab-target="#settings"><i class="fas fa-cog"></i>Settings</a>
+    </nav>
+
+    <div class="main">
+        <div class="header-wrap">
+            <div class="header">
+                <h1>Watching</h1>
+                <input type="text" placeholder="Search Anime" class="anime-search">
+            </div>
+
+            <div class="grid-slider">
+                <input type="range" min="0" max="8" value="0" class="slider" id="myRange">
+            </div>
+
+            <div class="options-container">
+                <a class="sort-btn">Sort<i class="fas fa-angle-up"></i></a>
+                
+                <div class="options">
+                    <a id="media.title.english">Title</a>
+                    <a id="progress">Progress</a>
+                    <a id="score">Score</a>
+                    <a id="updatedAt">Last Updated</a>
+                    <a id="createdAt">Last Added</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="anime-wrap tab-content" id="#watching"></div>
+            <div class="anime-wrap tab-content hidden" id="#completed"></div>
+            <div class="anime-wrap tab-content hidden" id="#planning"></div>
+            <div class="anime-wrap tab-content hidden" id="#paused"></div>
+            <div class="anime-wrap tab-content hidden" id="#dropped"></div>
+            <div class="anime-wrap tab-content hidden" id="#search"></div>
+        </div>
+
+        <div class="settings-content tab-content hidden" id="#settings">
+            <div class="anilist-connection">
+                <div class="title">Anilist Connection</div>
+
+                <div class="connect-view hidden">
+                    <div class="anilist-token-btn btn">
+                        <a href="https://anilist.co/api/v2/oauth/authorize?client_id=3934&response_type=token" target="_blank">Get Access Token</a>
+                    </div>
+                    <div class="token-inpt"><input class="login-input" placeholder="Access Token" type="text"></div>
+                    <div class="anilist-login-btn btn">
+                        <a>Login</a>
+                    </div>
+                    <div class="user-inpt"><input class="login-input" placeholder="Anilist Username" type="text"></div>
+                </div>
+
+                <div class="disconnect-view hidden">
+                    <div class="disconnect-btn btn"><a>Disconnect</a></div>
+                    <p class="connected-user">hbacelar</p>
+                    <div class="resync-btn btn"><a>Synchronize Lists</a></div>
+                    <div class="sync-on-start-div">
+                        <p>Synchronize on startup</p>
+                        <label class="switch">
+                            <input class="sync-checkbox" type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="anime-folder-menu">
+                <div class="title">Anime Folder</div>
+                <div class="anime-folder-div">
+                    <div class="set-folder-btn btn"><a>Set Anime Folder</a></div>
+                    <div class="anime-folder-input-div"><input class="anime-folder-input" placeholder="Anime Folder" type="text"></div>
+                </div>
+            </div>
+
+            <div class="color-menu">
+                <div class="title">Color</div>
+                <div class="colors-div">
+                    <div class="colors" id="#487eb0" style="background-color: #487eb0;"></div>
+                    <div class="colors" id="#4cd137" style="background-color: #4cd137;"></div>
+                    <div class="colors" id="#fbc531" style="background-color: #fbc531;"></div>
+                    <div class="colors" id="#00a8ff" style="background-color: #00a8ff;"></div>
+                    <div class="colors" id="#7f8fa6" style="background-color: #7f8fa6;"></div>
+                    <div class="colors" id="#e84118" style="background-color: #e84118;"></div>
+                </div>
+            </div>
+
+            <div class="update-menu">
+                <div class="title">Updates</div>
+
+                <div class="update-menu-div">
+                    <p>Current Version</p>
+                    <p class="version-tag"></p>
+                    <p>Last Update Check</p>
+                    <p class="last-update-time"></p>
+                    <div class="update-btn btn">
+                        <a>Check for Updates</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="update-frame hidden">
+        <p class="update-msg">A new update is available. Downloading now...</p>
+        <a class="close-update-btn">Close</a>
+        <a class="restart-update-btn hidden">Restart</a>
+    </div>
+    
+</body>
+</html>
