@@ -14,7 +14,6 @@
     --lighter-bg-color: #353b48;
     --lighter-bg-color-rgb: 53, 59, 72;
     --line-color: #487eb0;
-    --line-color-rgb: 72, 126, 176;
 }
 
 *:focus {
@@ -134,7 +133,7 @@ hr {
 }
 
 .update-frame a:hover {
-    box-shadow: 0px 0px 10px 1px rgba(var(--line-color-rgb), 0.8);
+    transform: scale(1.1);
 }
 
 .hidden {
@@ -709,10 +708,6 @@ hr {
     text-align: center;
     background-color: var(--line-color);
     transition: .2s;
-}
-
-.save-btn a:hover {
-    box-shadow: 0px 0px 10px 1px rgba(var(--line-color-rgb), 0.8);
 }
 
 .lds-dual-ring {
