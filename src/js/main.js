@@ -474,6 +474,7 @@ function setEventListeners() {
 
     if (username && accessCode) {
       ipcRenderer.send('fetchMediaCollection', { username, accessCode })
+      ipcRenderer.send('setPage', '#settings')
 
       connectView.classList.add('hidden')
       disconnectView.classList.remove('hidden')
@@ -488,6 +489,8 @@ function setEventListeners() {
   disconnectBtn.addEventListener('click', () => {
     const connectView = document.querySelector('.connect-view')
     const disconnectView = document.querySelector('.disconnect-view')
+
+    ipcRenderer.send('setPage', '#settings')
 
     storeUserConfig.removeFile()
     storeAnilistMediaData.removeFile()
@@ -508,6 +511,7 @@ function setEventListeners() {
 
       if (username && accessCode) {
         ipcRenderer.send('fetchMediaCollection', { username, accessCode })
+        ipcRenderer.send('setPage', '#settings')
 
         connectView.classList.add('hidden')
         disconnectView.classList.remove('hidden')
