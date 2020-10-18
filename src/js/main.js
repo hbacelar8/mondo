@@ -400,11 +400,16 @@ function setEventListeners() {
       const gridSlider = document.querySelector('.grid-slider')
       const sortContainer = document.querySelector('.options-container')
       const searchResults = document.getElementById('#search').querySelectorAll('.anime')
+      const noListDiv = document.querySelectorAll('.no-list')
 
       if (searchResults.length) {
         for (let i = 0; i < searchResults.length; i++) {
           searchResults[i].remove()
         }
+      }
+
+      for (let i = 0; i < noListDiv.length; i++) {
+        noListDiv[i].classList.remove('hidden')
       }
 
       pageTitle.innerHTML = menuTabs[i].dataset.tabTarget.charAt(1).toUpperCase() + menuTabs[i].dataset.tabTarget.slice(2)
@@ -639,6 +644,12 @@ function setIpcCallbacks() {
   })
 
   ipcRenderer.on('searchResult', (_, args) => {
+    const noListDiv = document.querySelectorAll('.no-list')
+
+    for (let i = 0; i < noListDiv.length; i++) {
+      noListDiv[i].classList.add('hidden')
+    }
+
     data = args.data.Page.media
 
     addSearchResultsToView(data)
