@@ -25,6 +25,7 @@
 const { remote, ipcRenderer } = require('electron')
 const Store = require('../store')
 const Utils = require('../utils')
+const root = document.documentElement
 
 // Load user information JSON
 const storeUserConfig = new Store({
@@ -61,6 +62,10 @@ if (storeUserConfig.data.animeFolder) {
   const setAnimeFolderInpt = document.querySelector('.anime-folder-input')
 
   setAnimeFolderInpt.value = storeUserConfig.data.animeFolder
+}
+
+if (storeUserConfig.data.lineColor) {
+  root.style.setProperty('--line-color', storeUserConfig.data.lineColor)
 }
 
 if (Object.keys(storeAnilistMediaData.data) != 0) {
@@ -544,7 +549,8 @@ function setEventListeners() {
 
   for (let i = 0; i < colorsBtn.length; i++) {
     colorsBtn[i].addEventListener('click', () => {
-      document.location.reload()
+      storeUserConfig.set('lineColor', colorsBtn[i].id)
+      root.style.setProperty('--line-color', colorsBtn[i].id)
     })
   }
 

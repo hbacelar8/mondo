@@ -132,6 +132,11 @@ if (storeUserConfig.data.userAvatar) {
   userAvatar.classList.remove('hidden')
 }
 
+
+if (storeUserConfig.data.lineColor) {
+  root.style.setProperty('--line-color', storeUserConfig.data.lineColor)
+}
+
 fetchData.fetchAnimeData(animeId)
   .then(handleResponse)
   .then(handleData)
