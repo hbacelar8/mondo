@@ -16,7 +16,7 @@
   <img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/bacelarhenrique/mondo/total?style=for-the-badge">
   
   <a href="https://discord.gg/J6cA7Hq" target="_blank">
-    <img alt="Discord" src="https://img.shields.io/discord/767222327645437952?label=support%20chat&style=for-the-badge">
+    <img alt="Discord" src="https://img.shields.io/discord/767222327645437952?style=for-the-badge">
   </a>
 </p>
 
