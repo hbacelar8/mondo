@@ -29,7 +29,6 @@ const stringSimilarity = require('string-similarity')
 const Store = require('../store')
 const Utils = require('../utils')
 const FetchData = require('../fetchData')
-const { convertSecondsToDHM } = require('../utils')
 
 const animeId = Utils.getUrlParam('id', null)
 const root = document.documentElement
@@ -132,7 +131,6 @@ if (storeUserConfig.data.userAvatar) {
   userAvatar.classList.remove('hidden')
 }
 
-
 if (storeUserConfig.data.lineColor) {
   root.style.setProperty('--line-color', storeUserConfig.data.lineColor)
 }
@@ -140,7 +138,7 @@ if (storeUserConfig.data.lineColor) {
 fetchData.fetchAnimeData(animeId)
   .then(handleResponse)
   .then(handleData)
-  .then(handleError)
+  .catch(handleError)
 
 addAnimeListCounters()
 setWindowButtonsEvents()
@@ -172,8 +170,9 @@ function handleData(data) {
 
 function handleError(error) {
   if (error) {
-    alert('Error loading anime content.');
-    console.error(error);
+    if (error.errors[0].message == 'Invalid token') {
+      ipcRenderer.send('tokenError')
+    }
   }
 }
 
@@ -610,6 +609,8 @@ function setAnimeFolder() {
 
         episodesPath[parseInt(parsedFile.episode_number, 10)] = pathModule.join(animeFolder.folderPath, ep)
       })
+
+      episodesPath['folderPath'] = animeFolder.folderPath
 
       ipcRenderer.send('setIdFolder', { animeId, episodesPath })
     }

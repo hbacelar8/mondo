@@ -25,7 +25,7 @@ const storeWindowConfig = new Store({
 });
 
 // Load user information JSON
-const storeUserConfig = new Store({
+var storeUserConfig = new Store({
   configName: 'user-config',
   defaults: {
     userInfo: {
@@ -37,7 +37,7 @@ const storeUserConfig = new Store({
 })
 
 // Load anime folders JSON
-const storeAnimeFiles = new Store({
+var storeAnimeFiles = new Store({
   configName: 'anime-folders',
   defaults: {
     allFolders: {},
@@ -161,8 +161,14 @@ ipcMain.on('setAnimeFolder', (_, args) => {
     storeUserConfig.set('animeFolder', args)
     setAnimeFolder()
   } else {
-    storeUserConfig.delete('animeFolder')
     storeAnimeFiles.removeFile()
+    storeAnimeFiles = new Store({
+      configName: 'anime-folders',
+      defaults: {
+        allFolders: {},
+        idFolders: {}
+      }
+    })
   }
 })
 
@@ -239,7 +245,7 @@ ipcMain.on('fetchMediaCollection', (_, args) => {
   fetchData.fetchMediaCollection()
     .then(handleResponse)
     .then(handleMediaCollectionData)
-    .then(handleError)
+    .catch(handleError)
 })
 
 ipcMain.on('searchMedia', (event, args) => {
@@ -271,6 +277,28 @@ ipcMain.on('setPage', (_, page) => {
 
 ipcMain.on('getPage', (event) => {
   event.sender.send('showPage', pageToShow)
+})
+
+ipcMain.on('tokenError', () => {
+  const opts = {
+    type: 'info',
+    message: `Looks like your Anilist token is not correct. Make sure to copy it right after logging in on the settings page.`
+  }
+
+  dialog.showMessageBox(opts)
+  storeUserConfig.removeFile()
+  storeAnilistMediaData.removeFile()
+
+  storeUserConfig = new Store({
+    configName: 'user-config',
+    defaults: {
+      userInfo: {
+        username: null,
+        accessCode: null
+      },
+      gridSize: 0
+    }
+  })
 })
 
 function updateDiscord(opts) {
@@ -322,10 +350,25 @@ function handleResponse(response) {
 
 function handleError(error) {
   if (error) {
-    if (error.errors[0].status == 404) {
-      alert(`Looks like the Anilist username "${storeUserConfig.data.userInfo.username}" doesn't exist. Try logging in again.`)
+    if (error.errors[0].message == 'User not found') {
+      const opts = {
+        type: 'info',
+        message: `Looks like the Anilist username "${storeUserConfig.data.userInfo.username}" doesn't exist. Try logging in again.`
+      }
+
+      dialog.showMessageBox(opts)
       storeUserConfig.removeFile()
-      storeAnilistMediaData.removeFile()
+
+      storeUserConfig = new Store({
+        configName: 'user-config',
+        defaults: {
+          userInfo: {
+            username: null,
+            accessCode: null
+          },
+          gridSize: 0
+        }
+      })
     }
   }
 }
