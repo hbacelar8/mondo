@@ -14,7 +14,16 @@
   </a>
   
   <img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/bacelarhenrique/mondo/total?style=for-the-badge">
+  
+  <a href="https://discord.gg/J6cA7Hq" target="_blank">
+    <img alt="Discord" src="https://img.shields.io/discord/767222327645437952?label=support%20chat&style=for-the-badge">
+  </a>
 </p>
+
+<img alt="mondo1" src="https://i.ibb.co/4NKzXb6/mondo1.png">
+<img alt="mondo2" src="https://i.ibb.co/qdTX0tr/mondo2.png">
+<img alt="mondo3" src="https://i.ibb.co/jkb90Yy/mondo3.png">
+<img alt="mondo4" src="https://i.ibb.co/nzXTdZY/mondo4.png">
 
 ---
 
@@ -24,7 +33,7 @@ Mondo is an open source desktop application for Windows allowing the synchroniza
 - Displays anime information including time to next episode for releasing anime and anime relations;
 - Allows you to modify an anime entry: status, episode progress and score;
 - Downloads torrent files or with magnetic links from different sources directly from the application for every anime;
-- Plays next episode directly from the app after configuring the folder with the anime episodes and automatically sync to Anilist after finished watching;
+- Plays next episode directly from the app after configuring anime folder and automatically syncs to Anilist after finished watching;
 - Discord Rich Presence integration.
 
 *Mondo is currently in pre-release build, errors might and will happen. Also, new features are still to be implemented.*
