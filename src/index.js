@@ -81,6 +81,13 @@ if (storeUserConfig.data.animeFolder) {
   setAnimeFolder()
 }
 
+if (storeUserConfig.data.syncOnStart) {
+  fetchData.fetchMediaCollection()
+    .then(handleResponse)
+    .then(handleMediaCollectionData)
+    .catch(handleError)
+}
+
 // This method will be called once Electron has finished initialization
 app.on('ready', function () {
   mainWindow = new BrowserWindow({
