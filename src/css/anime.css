@@ -473,7 +473,7 @@ hr {
 .download th, td {
     font-size: 0.6rem;
     padding: 6px;
-    max-width: 500px;
+    max-width: 300px;
     border-bottom: 1px solid var(--line-color);
     white-space: nowrap;
     overflow: hidden;
