@@ -17,13 +17,14 @@
 
 const client = require('discord-rich-presence')('763579990209855559')
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+const stringSimilarity = require('string-similarity')
 const { autoUpdater } = require('electron-updater')
 const childProcess = require('child_process')
 const FetchData = require('./fetchData')
 const anitomy = require('anitomy-js')
 const Store = require('./store')
 const Utils = require('./utils')
-const path = require('path')
+const pathModule = require('path')
 const fs = require('fs')
 let mainWindow
 let pageToShow = '#watching'
@@ -55,11 +56,8 @@ var storeUserConfig = new Store({
 
 // Load anime folders JSON
 var storeAnimeFiles = new Store({
-  configName: 'anime-folders',
-  defaults: {
-    allFolders: {},
-    idFolders: {}
-  }
+  configName: 'anime-files',
+  defaults: {}
 })
 
 // Load Anilist media data JSON
@@ -79,7 +77,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
-if (storeUserConfig.animeFolder && Object.keys(storeAnimeFiles.data) == 0) {
+if (storeUserConfig.data.animeFolder) {
   setAnimeFolder()
 }
 
@@ -120,7 +118,7 @@ app.on('ready', function () {
     storeWindowConfig.writeToFile()
   })
 
-  mainWindow.loadFile(path.join(__dirname, 'views/main.html'))
+  mainWindow.loadFile(pathModule.join(__dirname, 'views/main.html'))
 
   Utils.delayMs(5000).then(() => {
     autoUpdater.checkForUpdates()
@@ -178,69 +176,100 @@ ipcMain.on('setAnimeFolder', (_, args) => {
     storeUserConfig.set('animeFolder', args)
     setAnimeFolder()
   } else {
+    storeUserConfig.delete('animeFolder')
     storeAnimeFiles.removeFile()
     storeAnimeFiles = new Store({
-      configName: 'anime-folders',
-      defaults: {
-        allFolders: {},
-        idFolders: {}
-      }
+      configName: 'anime-files',
+      defaults: {}
     })
   }
 })
 
-ipcMain.on('setIdFolder', (_, args) => {
-  storeAnimeFiles.setSubKey('idFolders', args.animeId, args.episodesPath)
-})
-
 ipcMain.on('playAnime', (_, args) => {
-  if (storeAnimeFiles.data.idFolders[args.animeId]) {
-    updateDiscord(args.updateDiscord)
-
-    const player = childProcess.spawn(`"${storeAnimeFiles.data.idFolders[args.animeId][args.nextEpisode]}"`, { shell: true })
-
-    player.on('close', () => {
-      const opts = {
-        type: 'question',
-        buttons: ['No', 'Yes'],
-        defaultId: 0,
-        title: args.updateDiscord.details,
-        message: `Mark episode ${args.nextEpisode} as watched?`
+  if (Object.keys(storeAnimeFiles.data) != 0) {
+    if (args.animeTitle.english == args.animeTitle.romaji) {
+      var bestMatch = stringSimilarity.findBestMatch(args.animeTitle.english, storeAnimeFiles.data.animeNames)
+    } else {
+      var matchEnglishTitle = stringSimilarity.findBestMatch(args.animeTitle.english, storeAnimeFiles.data.animeNames)
+      var matchRomajiTitle = stringSimilarity.findBestMatch(args.animeTitle.romaji, storeAnimeFiles.data.animeNames)
+  
+      if (matchEnglishTitle.bestMatch.rating > matchRomajiTitle.bestMatch.rating) {
+        var bestMatch = matchEnglishTitle
+      } else {
+        var bestMatch = matchRomajiTitle
       }
+    }
 
-      updateDiscord({ details: '', state: 'Idling' })
+    if (bestMatch.bestMatch.rating > 0.5) {
+      const targetFile = storeAnimeFiles.data.allFiles.filter(
+        entry => entry.animeTitle == bestMatch.bestMatch.target && entry.episodeNumber == args.nextEpisode
+      )
 
-      if (dialog.showMessageBoxSync(null, opts)) {
-        if (args.nextEpisode < args.totalEpisodes) {
-          fetchData.pushEpisodeToAnilist(args.animeId, args.nextEpisode)
-            .then(handleResponse)
-            .then((_) => {
-              console.log(1)
-              mainWindow.webContents.send('episodeWatched', {
-                animeId: args.animeId,
-                episodeWatched: args.nextEpisode
-              })
-
-              updateAnimeData()
-            })
-        } else {
-          fetchData.pushAnimeFinishedToAnilist(args.animeId, args.totalEpisodes)
-            .then(handleResponse)
-            .then((_) => {
-              mainWindow.webContents.send('animeFinished', {
-                animeId: args.animeId
-              })
-
-              updateAnimeData()
-            })
+      if (targetFile.length) {
+        updateDiscord(args.updateDiscord)
+    
+        const player = childProcess.spawn(`"${targetFile[0].path}"`, { shell: true })
+    
+        player.on('close', () => {
+          const opts = {
+            type: 'question',
+            buttons: ['No', 'Yes'],
+            defaultId: 0,
+            title: args.updateDiscord.details,
+            message: `Mark episode ${args.nextEpisode} as watched?`
+          }
+    
+          updateDiscord({ details: '', state: 'Idling' })
+    
+          if (dialog.showMessageBoxSync(null, opts)) {
+            if (args.nextEpisode < args.totalEpisodes) {
+              fetchData.pushEpisodeToAnilist(args.animeId, args.nextEpisode)
+                .then(handleResponse)
+                .then((_) => {
+                  console.log(1)
+                  mainWindow.webContents.send('episodeWatched', {
+                    animeId: args.animeId,
+                    episodeWatched: args.nextEpisode
+                  })
+    
+                  updateAnimeData()
+                })
+            } else {
+              fetchData.pushAnimeFinishedToAnilist(args.animeId, args.totalEpisodes)
+                .then(handleResponse)
+                .then((_) => {
+                  mainWindow.webContents.send('animeFinished', {
+                    animeId: args.animeId
+                  })
+    
+                  updateAnimeData()
+                })
+            }
+          }
+        })
+      } else {
+        const opts = {
+          type: 'info',
+          title: 'Play Anime',
+          message: `No episodes found for ${args.updateDiscord.details}`
         }
+    
+        dialog.showMessageBoxSync(null, opts)
       }
-    })
+    } else {
+      const opts = {
+        type: 'info',
+        title: 'Play Anime',
+        message: `No episodes found for ${args.updateDiscord.details}`
+      }
+  
+      dialog.showMessageBoxSync(null, opts)
+    }
   } else {
     const opts = {
       type: 'info',
       title: 'Play Anime',
-      message: `No episodes found for ${args.updateDiscord.details}`
+      message: 'No anime folder configured. You must point to a folder containing your anime files on Settings.'
     }
 
     dialog.showMessageBoxSync(null, opts)
@@ -348,15 +377,52 @@ function updateAnimeData() {
 }
 
 function setAnimeFolder() {
-  const animeFolders = fs.readdirSync(storeUserConfig.data.animeFolder)
+  if (fs.existsSync(storeUserConfig.data.animeFolder)) {
+    const allFiles = getFiles(storeUserConfig.data.animeFolder)
+    const animeNames = [...new Set(allFiles.map(file => (file.animeTitle)))]
+  
+    storeAnimeFiles.set('allFiles', allFiles)
+    storeAnimeFiles.set('animeNames', animeNames)
 
-  animeFolders.forEach((animeFolder) => {
-    const folderPath = storeUserConfig.data.animeFolder + '/' + animeFolder
-    const animes = fs.readdirSync(folderPath)
-    const parsedFile = anitomy.parseSync(animes[0])
+    fs.watch(storeUserConfig.data.animeFolder, () => {
+      setAnimeFolder()
+    })
+  } else {
+    const opts = {
+      type: 'error',
+      message: `The folder ${storeUserConfig.data.animeFolder} doesn't exist.`
+    }
 
-    storeAnimeFiles.setSubKey('allFolders', parsedFile.anime_title, { folderPath, animes })
-  })
+    mainWindow.webContents.send('clearSelFolderInpt')
+    dialog.showMessageBox(opts)
+    storeUserConfig.delete('animeFolder')
+  }
+}
+
+function getFiles(path) {
+  const entries = fs.readdirSync(path, { withFileTypes: true });
+
+  // Get files within the current directory and add a path key to the file objects
+  const files = entries
+    .filter(file => !file.isDirectory() && (file.name.split('.').pop() == 'mkv' ||
+      file.name.split('.').pop() == 'mp4' ||
+      file.name.split('.').pop() == 'avi'))
+    .map(file => ({
+      ...file, path: pathModule.join(path, file.name), animeTitle: anitomy.parseSync(file.name).anime_title,
+      episodeNumber: parseInt(anitomy.parseSync(file.name).episode_number, 10)
+    }));
+
+  // Get folders within the current directory
+  const folders = entries.filter(folder => folder.isDirectory());
+
+  for (const folder of folders)
+    /*
+      Add the found files within the subdirectory to the files array by calling the
+      current function itself
+    */
+    files.push(...getFiles(`${path}/${folder.name}/`));
+
+  return files;
 }
 
 function handleResponse(response) {

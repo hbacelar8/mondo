@@ -54,15 +54,6 @@ const storeAnilistMediaData = new Store({
   defaults: {}
 })
 
-// Load anime folders JSON
-const storeAnimeFiles = new Store({
-  configName: 'anime-folders',
-  defaults: {
-    allFolders: {},
-    idFolders: {}
-  }
-})
-
 // Instantiate class to fetch data
 const fetchData = new FetchData({
   username: storeUserConfig.data.userInfo.username,
@@ -164,7 +155,6 @@ function handleData(data) {
   addOverviewToPage()
   addRelationsToPage()
   setEventListeners()
-  setAnimeFolder()
   Utils.getTorrents(animeData.title).then(handleTorrents)
 }
 
@@ -557,9 +547,13 @@ function setEventListeners() {
         nextEpisode: animeData.mediaListEntry.progress + 1 > animeData.episodes ? animeData.episodes : animeData.mediaListEntry.progress + 1,
         totalEpisodes: animeData.episodes,
         animeId: animeId,
+        animeTitle: {
+          english: animeData.title.english,
+          romaji: animeData.title.romaji
+        },
         updateDiscord: {
           details: animeData.title.english ? animeData.title.english : animeData.title.romaji,
-          state: `Episode ${animeData.mediaListEntry.progress + 1} of ${animeData.episodes}`
+          state: `Episode ${animeData.mediaListEntry.progress + 1 > animeData.episodes ? animeData.episodes : animeData.mediaListEntry.progress + 1} of ${animeData.episodes}`
         }
       }
     
@@ -578,43 +572,6 @@ function setEventListeners() {
       dropdownStatusMenu.style.height = '0'
     }
   })
-}
-
-function setAnimeFolder() {
-  if (Object.keys(storeAnimeFiles.data.allFolders) != 0 && !storeAnimeFiles.data.idFolders[animeId]) {
-    const selFolderInput = document.querySelector('.sel-folder-input')
-    const foldersNames = Object.keys(storeAnimeFiles.data.allFolders)
-
-    if (animeData.title.english == animeData.title.romaji) {
-      var bestMatch = stringSimilarity.findBestMatch(animeData.title.english, foldersNames)
-    } else {
-      var matchEnglishTitle = stringSimilarity.findBestMatch(animeData.title.english, foldersNames)
-      var matchRomajiTitle = stringSimilarity.findBestMatch(animeData.title.romaji, foldersNames)
-
-      if (matchEnglishTitle.bestMatch.rating > matchRomajiTitle.bestMatch.rating) {
-        var bestMatch = matchEnglishTitle
-      } else {
-        var bestMatch = matchRomajiTitle
-      }
-    }
-
-    if (bestMatch.bestMatch.rating > 0.5) {
-      const animeFolder = storeAnimeFiles.data.allFolders[bestMatch.bestMatch.target]
-      var episodesPath = {}
-
-      selFolderInput.value = animeFolder.folderPath
-
-      animeFolder.animes.forEach((ep) => {
-        const parsedFile = anitomy.parseSync(ep)
-
-        episodesPath[parseInt(parsedFile.episode_number, 10)] = pathModule.join(animeFolder.folderPath, ep)
-      })
-
-      episodesPath['folderPath'] = animeFolder.folderPath
-
-      ipcRenderer.send('setIdFolder', { animeId, episodesPath })
-    }
-  }
 }
 
 function handleTorrents(data) {

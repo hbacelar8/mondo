@@ -711,6 +711,12 @@ function setIpcCallbacks() {
     lastUpdateP.innerText = `${Utils.zeroPad(lastUpdate.getHours(), 2)}:${Utils.zeroPad(lastUpdate.getMinutes(), 2)}h`
   })
 
+  ipcRenderer.on('clearSelFolderInpt', () => {
+    const setAnimeFolderInpt = document.querySelector('.anime-folder-input')
+
+    setAnimeFolderInpt.value = ''
+  })
+
   ipcRenderer.on('reload', () => {
     location.reload()
   })
