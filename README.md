@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/license-GPL--3-blue?style=for-the-badge&logo=appveyor"/>
   </a>
   
-   <a href="https://github.com/bacelarhenrique/mondo/releases/download/v0.9.7/Mondo-Setup-0.9.7.exe">
+   <a href="https://github.com/bacelarhenrique/mondo/releases/download/v0.9.72/Mondo-Setup-0.9.72.exe">
     <img alt="GitHub release (latest by date including pre-releases)" src="https://img.shields.io/github/v/release/bacelarhenrique/mondo?include_prereleases&style=for-the-badge">
   </a>
   
