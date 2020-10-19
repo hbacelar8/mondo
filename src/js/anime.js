@@ -22,10 +22,7 @@
  * ******************************************************************
  */
 
-const pathModule = require('path')
-const anitomy = require('anitomy-js')
 const { remote, ipcRenderer } = require('electron')
-const stringSimilarity = require('string-similarity')
 const Store = require('../store')
 const Utils = require('../utils')
 const FetchData = require('../fetchData')
@@ -50,7 +47,7 @@ const storeUserConfig = new Store({
 
 // Load Anilist media data JSON
 const storeAnilistMediaData = new Store({
-  configName: 'anilist-data',
+  configName: 'anime-list',
   defaults: {}
 })
 
@@ -346,36 +343,13 @@ function addRelationsToPage() {
 }
 
 function addAnimeListCounters() {
-  const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('P')
+  const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('p')
 
-  for (let i = 0; i < counters.length; i++) {
-    let listLinkName = counters[i].previousSibling.nodeValue
-
-    switch (listLinkName) {
-      case 'Watching':
-        counters[i].innerHTML = storeAnilistMediaData.data.watching ? storeAnilistMediaData.data.watching.entries.length : 0
-        break;
-
-      case 'Completed':
-        counters[i].innerHTML = storeAnilistMediaData.data.completed ? storeAnilistMediaData.data.completed.entries.length : 0
-        break;
-
-      case 'Planning':
-        counters[i].innerHTML = storeAnilistMediaData.data.planning ? storeAnilistMediaData.data.planning.entries.length : 0
-        break;
-
-      case 'Paused':
-        counters[i].innerHTML = storeAnilistMediaData.data.paused ? storeAnilistMediaData.data.paused.entries.length : 0
-        break;
-
-      case 'Dropped':
-        counters[i].innerHTML = storeAnilistMediaData.data.dropped ? storeAnilistMediaData.data.dropped.entries.length : 0
-        break;
-
-      default:
-        break;
-    }
-  }
+  counters[0].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'CURRENT').length
+  counters[1].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'COMPLETED').length
+  counters[2].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PLANNING').length
+  counters[3].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PAUSED').length
+  counters[4].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'DROPPED').length
 }
 
 function setEventListeners() {
@@ -556,7 +530,7 @@ function setEventListeners() {
           state: `Episode ${animeData.mediaListEntry.progress + 1 > animeData.episodes ? animeData.episodes : animeData.mediaListEntry.progress + 1} of ${animeData.episodes}`
         }
       }
-    
+
       ipcRenderer.send('playAnime', args)
     })
   }

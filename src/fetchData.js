@@ -54,6 +54,7 @@ class FetchData {
               lists {
                 name,
                 entries {
+                  status,
                   score,
                   progress,
                   updatedAt,
@@ -165,7 +166,7 @@ class FetchData {
               }
           }
       `;
-  
+
     const variables = {
       id: id
     };
@@ -193,7 +194,7 @@ class FetchData {
             variables: variables
           })
         };
-  
+
     return fetch(url, options)
   }
 
@@ -222,12 +223,12 @@ class FetchData {
               }
           }
       `;
-  
+
     const variables = {
       search: searchString,
       perPage: 50
     };
-  
+
     const url = 'https://graphql.anilist.co',
       options = {
         method: 'POST',
@@ -240,7 +241,7 @@ class FetchData {
           variables: variables
         })
       };
-  
+
     return nodeFetch(url, options)
   }
 
@@ -257,14 +258,14 @@ class FetchData {
               }
           }
           `;
-  
+
     const variables = {
       mediaId: id,
       status: MEDIA_ENTRY_STATUS[status],
       scoreRaw: score,
       progress: progress
     };
-  
+
     const url = 'https://graphql.anilist.co',
       options = {
         method: 'POST',
@@ -278,7 +279,7 @@ class FetchData {
           variables: variables
         })
       };
-  
+
     return nodeFetch(url, options)
   }
 
@@ -291,12 +292,12 @@ class FetchData {
               }
           }
           `;
-  
+
     const variables = {
       mediaId: id,
       progress: episode
     };
-  
+
     const url = 'https://graphql.anilist.co',
       options = {
         method: 'POST',
@@ -310,7 +311,7 @@ class FetchData {
           variables: variables
         })
       };
-  
+
     return nodeFetch(url, options)
   }
 
@@ -323,13 +324,13 @@ class FetchData {
               }
           }
           `;
-  
+
     const variables = {
       mediaId: id,
       progress: episodes,
       status: MEDIA_ENTRY_STATUS['Completed']
     };
-  
+
     const url = 'https://graphql.anilist.co',
       options = {
         method: 'POST',
@@ -343,7 +344,7 @@ class FetchData {
           variables: variables
         })
       };
-  
+
     return nodeFetch(url, options)
   }
 
@@ -355,11 +356,11 @@ class FetchData {
               }
           }
           `;
-  
+
     var variables = {
       mediaId: id
     };
-  
+
     const url = 'https://graphql.anilist.co',
       options = {
         method: 'POST',
@@ -373,7 +374,7 @@ class FetchData {
           variables: variables
         })
       };
-  
+
     return nodeFetch(url, options)
   }
 }

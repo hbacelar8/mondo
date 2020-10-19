@@ -31,8 +31,10 @@ let pageToShow = '#watching'
 let lastUpdate = new Date(Date.now())
 
 const userDataPath = (app || remote.app).getPath('userData')
-if (fs.existsSync(pathModule.join(userDataPath, 'anime-folders.json'))) {
-  fs.unlinkSync(pathModule.join(userDataPath, 'anime-folders.json'))
+if (fs.existsSync(pathModule.join(userDataPath, 'anime-folders.json')) || fs.existsSync(pathModule.join(userDataPath, 'anilist-data.json'))) {
+  if (fs.existsSync(pathModule.join(userDataPath, 'anime-folders.json'))) {
+    fs.unlinkSync(pathModule.join(userDataPath, 'anime-folders.json'))
+  }
 
   if (fs.existsSync(pathModule.join(userDataPath, 'anilist-data.json'))) {
     fs.unlinkSync(pathModule.join(userDataPath, 'anilist-data.json'))
@@ -75,7 +77,7 @@ var storeAnimeFiles = new Store({
 
 // Load Anilist media data JSON
 const storeAnilistMediaData = new Store({
-  configName: 'anilist-data',
+  configName: 'anime-list',
   defaults: {}
 })
 
@@ -212,7 +214,7 @@ ipcMain.on('playAnime', (_, args) => {
     } else {
       var matchEnglishTitle = stringSimilarity.findBestMatch(args.animeTitle.english, storeAnimeFiles.data.animeNames)
       var matchRomajiTitle = stringSimilarity.findBestMatch(args.animeTitle.romaji, storeAnimeFiles.data.animeNames)
-  
+
       if (matchEnglishTitle.bestMatch.rating > matchRomajiTitle.bestMatch.rating) {
         var bestMatch = matchEnglishTitle
       } else {
@@ -227,9 +229,9 @@ ipcMain.on('playAnime', (_, args) => {
 
       if (targetFile.length) {
         updateDiscord(args.updateDiscord)
-    
+
         const player = childProcess.spawn(`"${targetFile[0].path}"`, { shell: true })
-    
+
         player.on('close', () => {
           const opts = {
             type: 'question',
@@ -238,9 +240,9 @@ ipcMain.on('playAnime', (_, args) => {
             title: args.updateDiscord.details,
             message: `Mark episode ${args.nextEpisode} as watched?`
           }
-    
+
           updateDiscord({ details: '', state: 'Idling' })
-    
+
           if (dialog.showMessageBoxSync(null, opts)) {
             if (args.nextEpisode < args.totalEpisodes) {
               fetchData.pushEpisodeToAnilist(args.animeId, args.nextEpisode)
@@ -251,7 +253,7 @@ ipcMain.on('playAnime', (_, args) => {
                     animeId: args.animeId,
                     episodeWatched: args.nextEpisode
                   })
-    
+
                   updateAnimeData()
                 })
             } else {
@@ -261,7 +263,7 @@ ipcMain.on('playAnime', (_, args) => {
                   mainWindow.webContents.send('animeFinished', {
                     animeId: args.animeId
                   })
-    
+
                   updateAnimeData()
                 })
             }
@@ -273,7 +275,7 @@ ipcMain.on('playAnime', (_, args) => {
           title: 'Play Anime',
           message: `No episodes found for ${args.updateDiscord.details}`
         }
-    
+
         dialog.showMessageBoxSync(null, opts)
       }
     } else {
@@ -282,7 +284,7 @@ ipcMain.on('playAnime', (_, args) => {
         title: 'Play Anime',
         message: `No episodes found for ${args.updateDiscord.details}`
       }
-  
+
       dialog.showMessageBoxSync(null, opts)
     }
   } else {
@@ -400,7 +402,7 @@ function setAnimeFolder() {
   if (fs.existsSync(storeUserConfig.data.animeFolder)) {
     const allFiles = getFiles(storeUserConfig.data.animeFolder)
     const animeNames = [...new Set(allFiles.map(file => (file.animeTitle)))]
-  
+
     storeAnimeFiles.set('allFiles', allFiles)
     storeAnimeFiles.set('animeNames', animeNames)
 
@@ -477,25 +479,15 @@ function handleError(error) {
 }
 
 function handleMediaCollectionData(data) {
-  var completedListEntries = []
+  var animeList = []
 
   storeUserConfig.set('userAvatar', data.data.MediaListCollection.user.avatar.large)
 
   data.data.MediaListCollection.lists.forEach((list) => {
-    storeAnilistMediaData.set(list.name.toLowerCase().replace(' ', ''), list)
-
-    if (list.name.includes('Completed')) {
-      completedListEntries = completedListEntries.concat(list.entries)
-    }
+    animeList = animeList.concat(list.entries)
   })
 
-  if (completedListEntries.length) {
-    storeAnilistMediaData.set('completed', {
-      name: 'Completed',
-      status: 'COMPLETED',
-      entries: completedListEntries
-    })
-  }
+  storeAnilistMediaData.set('animeList', animeList)
 
   mainWindow.webContents.send('reload')
 }
