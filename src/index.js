@@ -16,7 +16,7 @@
  */
 
 const client = require('discord-rich-presence')('763579990209855559')
-const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, remote } = require('electron')
 const stringSimilarity = require('string-similarity')
 const { autoUpdater } = require('electron-updater')
 const childProcess = require('child_process')
@@ -29,6 +29,19 @@ const fs = require('fs')
 let mainWindow
 let pageToShow = '#watching'
 let lastUpdate = new Date(Date.now())
+
+const userDataPath = (app || remote.app).getPath('userData')
+if (fs.existsSync(pathModule.join(userDataPath, 'anime-folders.json'))) {
+  fs.unlinkSync(pathModule.join(userDataPath, 'anime-folders.json'))
+
+  if (fs.existsSync(pathModule.join(userDataPath, 'anilist-data.json'))) {
+    fs.unlinkSync(pathModule.join(userDataPath, 'anilist-data.json'))
+  }
+
+  if (fs.existsSync(pathModule.join(userDataPath, 'user-config.json'))) {
+    fs.unlinkSync(pathModule.join(userDataPath, 'user-config.json'))
+  }
+}
 
 // Load window JSON configurations
 const storeWindowConfig = new Store({
