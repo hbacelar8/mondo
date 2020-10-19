@@ -1,7 +1,7 @@
 {
   "name": "mondo",
   "productName": "Mondo",
-  "version": "0.9.71",
+  "version": "0.9.72",
   "description": "The one anime client",
   "main": "src/index.js",
   "scripts": {
