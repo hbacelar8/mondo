@@ -41,7 +41,7 @@ const storeUserConfig = new Store({
 
 // Load Anilist media data JSON
 const storeAnilistMediaData = new Store({
-  configName: 'anilist-data',
+  configName: 'anime-list',
   defaults: {}
 })
 
@@ -68,7 +68,7 @@ if (storeUserConfig.data.lineColor) {
   root.style.setProperty('--line-color', storeUserConfig.data.lineColor)
 }
 
-if (Object.keys(storeAnilistMediaData.data) != 0) {
+if (storeAnilistMediaData.data.animeList) {
   const disconnectView = document.querySelector('.disconnect-view')
   const connectedUser = document.querySelector('.connected-user')
 
@@ -99,195 +99,245 @@ setWindowButtonsEvents()
  */
 
 function addAnimesToView() {
-  if (storeAnilistMediaData.data['watching']) {
-    storeAnilistMediaData.data['watching'].entries.forEach((entry) => {
-      const animeWrap = document.getElementsByClassName('anime-wrap')[0]
-      const newAnimeDiv = document.createElement('div')
-      const newAnimeImg = document.createElement('img')
-      const newAnimeP = document.createElement('p')
-      const newAnimeSpan1 = document.createElement('span')
-      const newAnimeSpan2 = document.createElement('span')
-  
-      newAnimeDiv.classList.add('anime')
-      newAnimeImg.src = entry.media.coverImage.large
-      newAnimeImg.loading = 'lazy'
-      newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
-      newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
-      newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
-  
-      newAnimeDiv.appendChild(newAnimeImg)
-      newAnimeDiv.appendChild(newAnimeP)
-      newAnimeDiv.appendChild(newAnimeSpan1)
-      newAnimeDiv.appendChild(newAnimeSpan2)
-  
-      newAnimeDiv.addEventListener('click', function () {
-        ipcRenderer.send('setPage', '#watching')
-        window.location.href = `anime.html?id=${entry.media.id}`
-      })
-  
-      animeWrap.appendChild(newAnimeDiv)
-    })
-  } else {
-    const animeWrap = document.querySelectorAll('.anime-wrap')
-    const noListDiv = document.createElement('div')
-
-    noListDiv.classList.add('no-list')
-    noListDiv.innerHTML = 'Nothing to show around here'
-
-    animeWrap[0].appendChild(noListDiv)
+  const animeStatus = {
+    'CURRENT': '#watching',
+    'COMPLETED': '#completed',
+    'PLANNING': '#planning',
+    'PAUSED': '#paused',
+    'DROPPED': '#dropped'
   }
 
-  if (storeAnilistMediaData.data['completed']) {
-    storeAnilistMediaData.data['completed'].entries.forEach((entry) => {
-      const animeWrap = document.getElementsByClassName('anime-wrap')[1]
-      const newAnimeDiv = document.createElement('div')
-      const newAnimeImg = document.createElement('img')
-      const newAnimeP = document.createElement('p')
-      const newAnimeSpan1 = document.createElement('span')
-      const newAnimeSpan2 = document.createElement('span')
-  
-      newAnimeDiv.classList.add('anime')
-      newAnimeImg.src = entry.media.coverImage.large
-      newAnimeImg.loading = 'lazy'
-      newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
-      newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
-      newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
-  
-      newAnimeDiv.appendChild(newAnimeImg)
-      newAnimeDiv.appendChild(newAnimeP)
-      newAnimeDiv.appendChild(newAnimeSpan1)
-      newAnimeDiv.appendChild(newAnimeSpan2)
-  
-      newAnimeDiv.addEventListener('click', function () {
-        ipcRenderer.send('setPage', '#completed')
-        window.location.href = `anime.html?id=${entry.media.id}`
+  for (let [index, status] of Object.keys(animeStatus).entries()) {
+    const subList = storeAnilistMediaData.data.animeList.filter(anime => anime.status == status)
+
+    if (subList.length) {
+      subList.forEach((entry) => {
+        const animeWrap = document.getElementsByClassName('anime-wrap')[index]
+        const newAnimeDiv = document.createElement('div')
+        const newAnimeImg = document.createElement('img')
+        const newAnimeP = document.createElement('p')
+        const newAnimeSpan1 = document.createElement('span')
+        const newAnimeSpan2 = document.createElement('span')
+
+        newAnimeDiv.classList.add('anime')
+        newAnimeImg.src = entry.media.coverImage.large
+        newAnimeImg.loading = 'lazy'
+        newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
+        newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
+        newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
+
+        newAnimeDiv.appendChild(newAnimeImg)
+        newAnimeDiv.appendChild(newAnimeP)
+        newAnimeDiv.appendChild(newAnimeSpan1)
+        newAnimeDiv.appendChild(newAnimeSpan2)
+
+        newAnimeDiv.addEventListener('click', function () {
+          ipcRenderer.send('setPage', animeStatus[status])
+          window.location.href = `anime.html?id=${entry.media.id}`
+        })
+
+        animeWrap.appendChild(newAnimeDiv)
       })
-  
-      animeWrap.appendChild(newAnimeDiv)
-    })
-  } else {
-    const animeWrap = document.querySelectorAll('.anime-wrap')
-    const noListDiv = document.createElement('div')
+    } else {
+      const animeWrap = document.querySelectorAll('.anime-wrap')
+      const noListDiv = document.createElement('div')
 
-    noListDiv.classList.add('no-list')
-    noListDiv.innerHTML = 'Nothing to show around here'
+      noListDiv.classList.add('no-list')
+      noListDiv.innerHTML = 'Nothing to show around here'
 
-    animeWrap[1].appendChild(noListDiv)
+      animeWrap[index].appendChild(noListDiv)
+    }
   }
 
-  if (storeAnilistMediaData.data['planning']) {
-    storeAnilistMediaData.data['planning'].entries.forEach((entry) => {
-      const animeWrap = document.getElementsByClassName('anime-wrap')[2]
-      const newAnimeDiv = document.createElement('div')
-      const newAnimeImg = document.createElement('img')
-      const newAnimeP = document.createElement('p')
-      const newAnimeSpan1 = document.createElement('span')
-      const newAnimeSpan2 = document.createElement('span')
-  
-      newAnimeDiv.classList.add('anime')
-      newAnimeImg.src = entry.media.coverImage.large
-      newAnimeImg.loading = 'lazy'
-      newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
-      newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
-      newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
-  
-      newAnimeDiv.appendChild(newAnimeImg)
-      newAnimeDiv.appendChild(newAnimeP)
-      newAnimeDiv.appendChild(newAnimeSpan1)
-      newAnimeDiv.appendChild(newAnimeSpan2)
-  
-      newAnimeDiv.addEventListener('click', function () {
-        ipcRenderer.send('setPage', '#planning')
-        window.location.href = `anime.html?id=${entry.media.id}`
-      })
-  
-      animeWrap.appendChild(newAnimeDiv)
-    })
-  } else {
-    const animeWrap = document.querySelectorAll('.anime-wrap')
-    const noListDiv = document.createElement('div')
+  // if (storeAnilistMediaData.data['watching']) {
+  //   storeAnilistMediaData.data['watching'].entries.forEach((entry) => {
+  //     const animeWrap = document.getElementsByClassName('anime-wrap')[0]
+  //     const newAnimeDiv = document.createElement('div')
+  //     const newAnimeImg = document.createElement('img')
+  //     const newAnimeP = document.createElement('p')
+  //     const newAnimeSpan1 = document.createElement('span')
+  //     const newAnimeSpan2 = document.createElement('span')
 
-    noListDiv.classList.add('no-list')
-    noListDiv.innerHTML = 'Nothing to show around here'
+  //     newAnimeDiv.classList.add('anime')
+  //     newAnimeImg.src = entry.media.coverImage.large
+  //     newAnimeImg.loading = 'lazy'
+  //     newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
+  //     newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
+  //     newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
 
-    animeWrap[2].appendChild(noListDiv)
-  }
+  //     newAnimeDiv.appendChild(newAnimeImg)
+  //     newAnimeDiv.appendChild(newAnimeP)
+  //     newAnimeDiv.appendChild(newAnimeSpan1)
+  //     newAnimeDiv.appendChild(newAnimeSpan2)
 
-  if (storeAnilistMediaData.data['paused']) {
-    storeAnilistMediaData.data['paused'].entries.forEach((entry) => {
-      const animeWrap = document.getElementsByClassName('anime-wrap')[3]
-      const newAnimeDiv = document.createElement('div')
-      const newAnimeImg = document.createElement('img')
-      const newAnimeP = document.createElement('p')
-      const newAnimeSpan1 = document.createElement('span')
-      const newAnimeSpan2 = document.createElement('span')
-  
-      newAnimeDiv.classList.add('anime')
-      newAnimeImg.src = entry.media.coverImage.large
-      newAnimeImg.loading = 'lazy'
-      newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
-      newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
-      newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
-  
-      newAnimeDiv.appendChild(newAnimeImg)
-      newAnimeDiv.appendChild(newAnimeP)
-      newAnimeDiv.appendChild(newAnimeSpan1)
-      newAnimeDiv.appendChild(newAnimeSpan2)
-  
-      newAnimeDiv.addEventListener('click', function () {
-        ipcRenderer.send('setPage', '#paused')
-        window.location.href = `anime.html?id=${entry.media.id}`
-      })
-  
-      animeWrap.appendChild(newAnimeDiv)
-    })
-  } else {
-    const animeWrap = document.querySelectorAll('.anime-wrap')
-    const noListDiv = document.createElement('div')
+  //     newAnimeDiv.addEventListener('click', function () {
+  //       ipcRenderer.send('setPage', '#watching')
+  //       window.location.href = `anime.html?id=${entry.media.id}`
+  //     })
 
-    noListDiv.classList.add('no-list')
-    noListDiv.innerHTML = 'Nothing to show around here'
+  //     animeWrap.appendChild(newAnimeDiv)
+  //   })
+  // } else {
+  //   const animeWrap = document.querySelectorAll('.anime-wrap')
+  //   const noListDiv = document.createElement('div')
 
-    animeWrap[3].appendChild(noListDiv)
-  }
+  //   noListDiv.classList.add('no-list')
+  //   noListDiv.innerHTML = 'Nothing to show around here'
 
-  if (storeAnilistMediaData.data['dropped']) {
-    storeAnilistMediaData.data['dropped'].entries.forEach((entry) => {
-      const animeWrap = document.getElementsByClassName('anime-wrap')[4]
-      const newAnimeDiv = document.createElement('div')
-      const newAnimeImg = document.createElement('img')
-      const newAnimeP = document.createElement('p')
-      const newAnimeSpan1 = document.createElement('span')
-      const newAnimeSpan2 = document.createElement('span')
-  
-      newAnimeDiv.classList.add('anime')
-      newAnimeImg.src = entry.media.coverImage.large
-      newAnimeImg.loading = 'lazy'
-      newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
-      newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
-      newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
-  
-      newAnimeDiv.appendChild(newAnimeImg)
-      newAnimeDiv.appendChild(newAnimeP)
-      newAnimeDiv.appendChild(newAnimeSpan1)
-      newAnimeDiv.appendChild(newAnimeSpan2)
-  
-      newAnimeDiv.addEventListener('click', function () {
-        ipcRenderer.send('setPage', '#dropped')
-        window.location.href = `anime.html?id=${entry.media.id}`
-      })
-  
-      animeWrap.appendChild(newAnimeDiv)
-    })
-  } else {
-    const animeWrap = document.querySelectorAll('.anime-wrap')
-    const noListDiv = document.createElement('div')
+  //   animeWrap[0].appendChild(noListDiv)
+  // }
 
-    noListDiv.classList.add('no-list')
-    noListDiv.innerHTML = 'Nothing to show around here'
+  // if (storeAnilistMediaData.data['completed']) {
+  //   storeAnilistMediaData.data['completed'].entries.forEach((entry) => {
+  //     const animeWrap = document.getElementsByClassName('anime-wrap')[1]
+  //     const newAnimeDiv = document.createElement('div')
+  //     const newAnimeImg = document.createElement('img')
+  //     const newAnimeP = document.createElement('p')
+  //     const newAnimeSpan1 = document.createElement('span')
+  //     const newAnimeSpan2 = document.createElement('span')
 
-    animeWrap[4].appendChild(noListDiv)
-  }
+  //     newAnimeDiv.classList.add('anime')
+  //     newAnimeImg.src = entry.media.coverImage.large
+  //     newAnimeImg.loading = 'lazy'
+  //     newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
+  //     newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
+  //     newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
+
+  //     newAnimeDiv.appendChild(newAnimeImg)
+  //     newAnimeDiv.appendChild(newAnimeP)
+  //     newAnimeDiv.appendChild(newAnimeSpan1)
+  //     newAnimeDiv.appendChild(newAnimeSpan2)
+
+  //     newAnimeDiv.addEventListener('click', function () {
+  //       ipcRenderer.send('setPage', '#completed')
+  //       window.location.href = `anime.html?id=${entry.media.id}`
+  //     })
+
+  //     animeWrap.appendChild(newAnimeDiv)
+  //   })
+  // } else {
+  //   const animeWrap = document.querySelectorAll('.anime-wrap')
+  //   const noListDiv = document.createElement('div')
+
+  //   noListDiv.classList.add('no-list')
+  //   noListDiv.innerHTML = 'Nothing to show around here'
+
+  //   animeWrap[1].appendChild(noListDiv)
+  // }
+
+  // if (storeAnilistMediaData.data['planning']) {
+  //   storeAnilistMediaData.data['planning'].entries.forEach((entry) => {
+  //     const animeWrap = document.getElementsByClassName('anime-wrap')[2]
+  //     const newAnimeDiv = document.createElement('div')
+  //     const newAnimeImg = document.createElement('img')
+  //     const newAnimeP = document.createElement('p')
+  //     const newAnimeSpan1 = document.createElement('span')
+  //     const newAnimeSpan2 = document.createElement('span')
+
+  //     newAnimeDiv.classList.add('anime')
+  //     newAnimeImg.src = entry.media.coverImage.large
+  //     newAnimeImg.loading = 'lazy'
+  //     newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
+  //     newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
+  //     newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
+
+  //     newAnimeDiv.appendChild(newAnimeImg)
+  //     newAnimeDiv.appendChild(newAnimeP)
+  //     newAnimeDiv.appendChild(newAnimeSpan1)
+  //     newAnimeDiv.appendChild(newAnimeSpan2)
+
+  //     newAnimeDiv.addEventListener('click', function () {
+  //       ipcRenderer.send('setPage', '#planning')
+  //       window.location.href = `anime.html?id=${entry.media.id}`
+  //     })
+
+  //     animeWrap.appendChild(newAnimeDiv)
+  //   })
+  // } else {
+  //   const animeWrap = document.querySelectorAll('.anime-wrap')
+  //   const noListDiv = document.createElement('div')
+
+  //   noListDiv.classList.add('no-list')
+  //   noListDiv.innerHTML = 'Nothing to show around here'
+
+  //   animeWrap[2].appendChild(noListDiv)
+  // }
+
+  // if (storeAnilistMediaData.data['paused']) {
+  //   storeAnilistMediaData.data['paused'].entries.forEach((entry) => {
+  //     const animeWrap = document.getElementsByClassName('anime-wrap')[3]
+  //     const newAnimeDiv = document.createElement('div')
+  //     const newAnimeImg = document.createElement('img')
+  //     const newAnimeP = document.createElement('p')
+  //     const newAnimeSpan1 = document.createElement('span')
+  //     const newAnimeSpan2 = document.createElement('span')
+
+  //     newAnimeDiv.classList.add('anime')
+  //     newAnimeImg.src = entry.media.coverImage.large
+  //     newAnimeImg.loading = 'lazy'
+  //     newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
+  //     newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
+  //     newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
+
+  //     newAnimeDiv.appendChild(newAnimeImg)
+  //     newAnimeDiv.appendChild(newAnimeP)
+  //     newAnimeDiv.appendChild(newAnimeSpan1)
+  //     newAnimeDiv.appendChild(newAnimeSpan2)
+
+  //     newAnimeDiv.addEventListener('click', function () {
+  //       ipcRenderer.send('setPage', '#paused')
+  //       window.location.href = `anime.html?id=${entry.media.id}`
+  //     })
+
+  //     animeWrap.appendChild(newAnimeDiv)
+  //   })
+  // } else {
+  //   const animeWrap = document.querySelectorAll('.anime-wrap')
+  //   const noListDiv = document.createElement('div')
+
+  //   noListDiv.classList.add('no-list')
+  //   noListDiv.innerHTML = 'Nothing to show around here'
+
+  //   animeWrap[3].appendChild(noListDiv)
+  // }
+
+  // if (storeAnilistMediaData.data['dropped']) {
+  //   storeAnilistMediaData.data['dropped'].entries.forEach((entry) => {
+  //     const animeWrap = document.getElementsByClassName('anime-wrap')[4]
+  //     const newAnimeDiv = document.createElement('div')
+  //     const newAnimeImg = document.createElement('img')
+  //     const newAnimeP = document.createElement('p')
+  //     const newAnimeSpan1 = document.createElement('span')
+  //     const newAnimeSpan2 = document.createElement('span')
+
+  //     newAnimeDiv.classList.add('anime')
+  //     newAnimeImg.src = entry.media.coverImage.large
+  //     newAnimeImg.loading = 'lazy'
+  //     newAnimeP.innerText = entry.media.title.english ? entry.media.title.english : entry.media.title.romaji
+  //     newAnimeSpan1.innerText = `${entry.progress}/${entry.media.episodes ? entry.media.episodes : '?'}`
+  //     newAnimeSpan2.innerText = entry.score == 0 ? '-' : entry.score
+
+  //     newAnimeDiv.appendChild(newAnimeImg)
+  //     newAnimeDiv.appendChild(newAnimeP)
+  //     newAnimeDiv.appendChild(newAnimeSpan1)
+  //     newAnimeDiv.appendChild(newAnimeSpan2)
+
+  //     newAnimeDiv.addEventListener('click', function () {
+  //       ipcRenderer.send('setPage', '#dropped')
+  //       window.location.href = `anime.html?id=${entry.media.id}`
+  //     })
+
+  //     animeWrap.appendChild(newAnimeDiv)
+  //   })
+  // } else {
+  //   const animeWrap = document.querySelectorAll('.anime-wrap')
+  //   const noListDiv = document.createElement('div')
+
+  //   noListDiv.classList.add('no-list')
+  //   noListDiv.innerHTML = 'Nothing to show around here'
+
+  //   animeWrap[4].appendChild(noListDiv)
+  // }
 
   setGridSize()
   addAnimeListCounters()
@@ -332,36 +382,13 @@ function addNoListToView() {
 }
 
 function addAnimeListCounters() {
-  const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('P')
+  const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('p')
 
-  for (let i = 0; i < counters.length; i++) {
-    let listLinkName = counters[i].previousSibling.nodeValue
-
-    switch (listLinkName) {
-      case 'Watching':
-        counters[i].innerHTML = storeAnilistMediaData.data.watching ? storeAnilistMediaData.data.watching.entries.length : 0
-        break;
-
-      case 'Completed':
-        counters[i].innerHTML = storeAnilistMediaData.data.completed ? storeAnilistMediaData.data.completed.entries.length : 0
-        break;
-
-      case 'Planning':
-        counters[i].innerHTML = storeAnilistMediaData.data.planning ? storeAnilistMediaData.data.planning.entries.length : 0
-        break;
-
-      case 'Paused':
-        counters[i].innerHTML = storeAnilistMediaData.data.paused ? storeAnilistMediaData.data.paused.entries.length : 0
-        break;
-
-      case 'Dropped':
-        counters[i].innerHTML = storeAnilistMediaData.data.dropped ? storeAnilistMediaData.data.dropped.entries.length : 0
-        break;
-
-      default:
-        break;
-    }
-  }
+  counters[0].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'CURRENT').length
+  counters[1].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'COMPLETED').length
+  counters[2].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PLANNING').length
+  counters[3].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PAUSED').length
+  counters[4].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'DROPPED').length
 }
 
 function setEventListeners() {
@@ -509,11 +536,7 @@ function setEventListeners() {
           animeDivs[i].remove()
         }
 
-        storeAnilistMediaData.data['watching'].entries.sort(Utils.compareParams(sortBtnOptionsA[i].id, sortBtnOptionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
-        storeAnilistMediaData.data['completed'].entries.sort(Utils.compareParams(sortBtnOptionsA[i].id, sortBtnOptionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
-        storeAnilistMediaData.data['planning'].entries.sort(Utils.compareParams(sortBtnOptionsA[i].id, sortBtnOptionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
-        storeAnilistMediaData.data['paused'].entries.sort(Utils.compareParams(sortBtnOptionsA[i].id, sortBtnOptionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
-        storeAnilistMediaData.data['dropped'].entries.sort(Utils.compareParams(sortBtnOptionsA[i].id, sortBtnOptionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
+        storeAnilistMediaData.data.animeList.sort(Utils.compareParams(sortBtnOptionsA[i].id, sortBtnOptionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
 
         addAnimesToView()
         setGridSize()
