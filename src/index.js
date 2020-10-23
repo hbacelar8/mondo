@@ -24,6 +24,7 @@ const anitomy = require('anitomy-js')
 const pathModule = require('path')
 const fs = require('fs')
 
+const WindowConfig = require('../lib/window-config')
 const UserConfig = require('../lib/user-config')
 const AnimeList = require('../lib/anime-list')
 const FetchData = require('../lib/fetch-data')
@@ -50,7 +51,7 @@ if (fs.existsSync(pathModule.join(userDataPath, 'anime-folders.json')) || fs.exi
 }
 
 // Load window JSON configurations
-const storeWindowConfig = new Store({
+const windowConfig = new WindowConfig({
   configName: 'window-config',
   defaults: {
     windowBounds: {
@@ -111,8 +112,8 @@ if (userConfig.getSyncOnStart()) {
 // This method will be called once Electron has finished initialization
 app.on('ready', function () {
   mainWindow = new BrowserWindow({
-    width: storeWindowConfig.data.windowBounds.width,
-    height: storeWindowConfig.data.windowBounds.height,
+    width: windowConfig.getWidth(),
+    height: windowConfig.getHeight(),
     frame: false,
     webPreferences: {
       nodeIntegration: true,
@@ -121,24 +122,22 @@ app.on('ready', function () {
     }
   })
 
-  if (storeWindowConfig.data.maximize) {
+  if (windowConfig.getMaximize()) {
     mainWindow.maximize()
   }
 
   mainWindow.on('resize', () => {
     let { width, height } = mainWindow.getBounds()
 
-    storeWindowConfig.set('windowBounds', { width, height })
+    windowConfig.setWindowBounds(width, height)
   })
 
   mainWindow.on('maximize', () => {
-    storeWindowConfig.data.maximize = true
-    storeWindowConfig.writeToFile()
+    windowConfig.setMaximize(true)
   })
 
   mainWindow.on('unmaximize', () => {
-    storeWindowConfig.data.maximize = false
-    storeWindowConfig.writeToFile()
+    windowConfig.setMaximize(false)
   })
 
   mainWindow.loadFile(pathModule.join(__dirname, 'views/main.html'))
