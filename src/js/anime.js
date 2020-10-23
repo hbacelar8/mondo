@@ -23,18 +23,19 @@
  */
 
 const { remote, ipcRenderer } = require('electron')
-const Store = require('../store')
-const Utils = require('../utils')
-const FetchData = require('../fetchData')
+
+const UserConfig = require('../../lib/user-config')
+const FetchData = require('../../lib/fetch-data')
+const AnimeList = require('../../lib/anime-list')
+const Utils = require('../../lib/utils')
 
 const animeId = Utils.getUrlParam('id', null)
-const root = document.documentElement
 
 var animeData
 var torrents = []
 
 // Load user information JSON
-const storeUserConfig = new Store({
+const userConfig = new UserConfig({
   configName: 'user-config',
   defaults: {
     userInfo: {
@@ -46,15 +47,15 @@ const storeUserConfig = new Store({
 })
 
 // Load Anilist media data JSON
-const storeAnilistMediaData = new Store({
+const animeList = new AnimeList({
   configName: 'anime-list',
   defaults: {}
 })
 
 // Instantiate class to fetch data
 const fetchData = new FetchData({
-  username: storeUserConfig.data.userInfo.username,
-  accessCode: storeUserConfig.data.userInfo.accessCode
+  username: userConfig.getUsername(),
+  accessCode: userConfig.getAccessCode()
 })
 
 const MEDIA_STATUS = {
@@ -112,15 +113,16 @@ const RELATION_TYPE = {
   PARENT: 'Parent'
 }
 
-if (storeUserConfig.data.userAvatar) {
+if (userConfig.getUserAvatar()) {
   const userAvatar = document.querySelector('.user-avatar-img')
 
-  userAvatar.src = storeUserConfig.data.userAvatar
+  userAvatar.src = userConfig.getUserAvatar()
   userAvatar.classList.remove('hidden')
 }
 
-if (storeUserConfig.data.lineColor) {
-  root.style.setProperty('--line-color', storeUserConfig.data.lineColor)
+if (userConfig.getLineColor()) {
+  const root = document.documentElement
+  root.style.setProperty('--line-color', userConfig.getLineColor())
 }
 
 fetchData.fetchAnimeData(animeId)
@@ -201,7 +203,7 @@ function addAnimeToPage() {
   animeAboutDiv.insertBefore(animeSynopsisP, animeAboutDiv.children[1])
   animeCoverDiv.appendChild(animeCoverImg)
 
-  if (storeUserConfig.data.userInfo.username) {
+  if (userConfig.getUsername()) {
     animeCoverDiv.appendChild(animeWatchBtn)
     animeCoverDiv.appendChild(editAnimeBtn)
   }
@@ -345,11 +347,11 @@ function addRelationsToPage() {
 function addAnimeListCounters() {
   const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('p')
 
-  counters[0].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'CURRENT').length
-  counters[1].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'COMPLETED').length
-  counters[2].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PLANNING').length
-  counters[3].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PAUSED').length
-  counters[4].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'DROPPED').length
+  counters[0].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'CURRENT').length
+  counters[1].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'COMPLETED').length
+  counters[2].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'PLANNING').length
+  counters[3].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'PAUSED').length
+  counters[4].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'DROPPED').length
 }
 
 function setEventListeners() {
