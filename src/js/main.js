@@ -25,10 +25,8 @@
 const { remote, ipcRenderer } = require('electron')
 
 const UserConfig = require('../../lib/user-config')
-const Store = require('../../lib/store')
+const AnimeList = require('../../lib/anime-list')
 const Utils = require('../../lib/utils')
-
-const root = document.documentElement
 
 // Load user information JSON
 const userConfig = new UserConfig({
@@ -43,7 +41,7 @@ const userConfig = new UserConfig({
 })
 
 // Load Anilist media data JSON
-const storeAnilistMediaData = new Store({
+const animeList = new AnimeList({
   configName: 'anime-list',
   defaults: {}
 })
@@ -68,10 +66,11 @@ if (userConfig.getSyncOnStart()) {
 // }
 
 if (userConfig.getLineColor()) {
+  const root = document.documentElement
   root.style.setProperty('--line-color', userConfig.getLineColor())
 }
 
-if (storeAnilistMediaData.data.animeList) {
+if (animeList.getAnimeList()) {
   const disconnectView = document.querySelector('.disconnect-view')
   const connectedUser = document.querySelector('.connected-user')
 
@@ -111,7 +110,7 @@ function addAnimesToView() {
   }
 
   for (let [index, status] of Object.keys(animeStatus).entries()) {
-    const subList = storeAnilistMediaData.data.animeList.filter(anime => anime.status == status)
+    const subList = animeList.getAnimeList().filter(anime => anime.status == status)
 
     if (subList.length) {
       subList.forEach((entry) => {
@@ -197,11 +196,11 @@ function addNoListToView() {
 function addAnimeListCounters() {
   const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('p')
 
-  counters[0].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'CURRENT').length
-  counters[1].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'COMPLETED').length
-  counters[2].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PLANNING').length
-  counters[3].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PAUSED').length
-  counters[4].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'DROPPED').length
+  counters[0].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'CURRENT').length
+  counters[1].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'COMPLETED').length
+  counters[2].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'PLANNING').length
+  counters[3].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'PAUSED').length
+  counters[4].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'DROPPED').length
 }
 
 function setEventListeners() {
@@ -349,7 +348,7 @@ function setEventListeners() {
           animeDivs[i].remove()
         }
 
-        storeAnilistMediaData.data.animeList.sort(Utils.compareParams(sortBtnOptionsA[i].id, sortBtnOptionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
+        animeList.getAnimeList().sort(Utils.compareParams(sortBtnOptionsA[i].id, sortBtnOptionsA[i].id == 'media.title.english' ? 'asc' : 'desc'))
 
         addAnimesToView()
         setGridSize()
@@ -389,7 +388,7 @@ function setEventListeners() {
     ipcRenderer.send('setPage', '#settings')
 
     userConfig.resetData()
-    storeAnilistMediaData.removeFile()
+    animeList.resetData()
 
     connectView.classList.remove('hidden')
     disconnectView.classList.add('hidden')
@@ -440,6 +439,7 @@ function setEventListeners() {
 
   for (let i = 0; i < colorsBtn.length; i++) {
     colorsBtn[i].addEventListener('click', () => {
+      const root = document.documentElement
       userConfig.setLineColor(colorsBtn[i].id)
       root.style.setProperty('--line-color', colorsBtn[i].id)
     })

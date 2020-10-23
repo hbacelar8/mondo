@@ -25,6 +25,7 @@ const pathModule = require('path')
 const fs = require('fs')
 
 const UserConfig = require('../lib/user-config')
+const AnimeList = require('../lib/anime-list')
 const FetchData = require('../lib/fetch-data')
 const Store = require('../lib/store')
 const Utils = require('../lib/utils')
@@ -80,7 +81,7 @@ var storeAnimeFiles = new Store({
 })
 
 // Load Anilist media data JSON
-const storeAnilistMediaData = new Store({
+const animeList = new AnimeList({
   configName: 'anime-list',
   defaults: {}
 })
@@ -356,7 +357,7 @@ ipcMain.on('tokenError', () => {
 
   dialog.showMessageBox(opts)
   userConfig.resetData()
-  storeAnilistMediaData.removeFile()
+  animeList.resetData()
 })
 
 function updateDiscord(opts) {
@@ -381,7 +382,6 @@ function updateDiscord(opts) {
 }
 
 function updateAnimeData() {
-  storeAnilistMediaData.removeFile()
   fetchData.fetchMediaCollection()
     .then(handleResponse)
     .then(handleMediaCollectionData)
@@ -458,15 +458,15 @@ function handleError(error) {
 }
 
 function handleMediaCollectionData(data) {
-  var animeList = []
+  var animeLists = []
 
   userConfig.setUserAvatar(data.data.MediaListCollection.user.avatar.large)
 
   data.data.MediaListCollection.lists.forEach((list) => {
-    animeList = animeList.concat(list.entries)
+    animeLists = animeLists.concat(list.entries)
   })
 
-  storeAnilistMediaData.set('animeList', animeList)
+  animeList.setAnimeList(animeLists)
 
   mainWindow.webContents.send('reload')
 }

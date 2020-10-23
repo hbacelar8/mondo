@@ -24,13 +24,12 @@
 
 const { remote, ipcRenderer } = require('electron')
 
-const FetchData = require('../../lib/fetch-data')
 const UserConfig = require('../../lib/user-config')
-const Store = require('../../lib/store')
+const FetchData = require('../../lib/fetch-data')
+const AnimeList = require('../../lib/anime-list')
 const Utils = require('../../lib/utils')
 
 const animeId = Utils.getUrlParam('id', null)
-const root = document.documentElement
 
 var animeData
 var torrents = []
@@ -48,7 +47,7 @@ const userConfig = new UserConfig({
 })
 
 // Load Anilist media data JSON
-const storeAnilistMediaData = new Store({
+const animeList = new AnimeList({
   configName: 'anime-list',
   defaults: {}
 })
@@ -122,6 +121,7 @@ if (userConfig.getUserAvatar()) {
 }
 
 if (userConfig.getLineColor()) {
+  const root = document.documentElement
   root.style.setProperty('--line-color', userConfig.getLineColor())
 }
 
@@ -347,11 +347,11 @@ function addRelationsToPage() {
 function addAnimeListCounters() {
   const counters = document.querySelector('.anime-lists-menu').getElementsByTagName('p')
 
-  counters[0].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'CURRENT').length
-  counters[1].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'COMPLETED').length
-  counters[2].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PLANNING').length
-  counters[3].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'PAUSED').length
-  counters[4].innerHTML = storeAnilistMediaData.data.animeList.filter(anime => anime.status == 'DROPPED').length
+  counters[0].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'CURRENT').length
+  counters[1].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'COMPLETED').length
+  counters[2].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'PLANNING').length
+  counters[3].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'PAUSED').length
+  counters[4].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'DROPPED').length
 }
 
 function setEventListeners() {
