@@ -23,8 +23,8 @@
  */
 
 const { remote, ipcRenderer } = require('electron')
-const Store = require('../store')
-const Utils = require('../utils')
+const Store = require('../../lib/store')
+const Utils = require('../../lib/utils')
 const root = document.documentElement
 
 // Load user information JSON

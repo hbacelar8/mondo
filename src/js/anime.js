@@ -23,9 +23,9 @@
  */
 
 const { remote, ipcRenderer } = require('electron')
-const Store = require('../store')
-const Utils = require('../utils')
-const FetchData = require('../fetchData')
+const Store = require('../../lib/store')
+const Utils = require('../../lib/utils')
+const FetchData = require('../../lib/fetch-data')
 
 const animeId = Utils.getUrlParam('id', null)
 const root = document.documentElement
