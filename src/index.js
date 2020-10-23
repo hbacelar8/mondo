@@ -15,17 +15,20 @@
  * along with Mondo.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const client = require('discord-rich-presence')('763579990209855559')
 const { app, BrowserWindow, ipcMain, dialog, remote } = require('electron')
+const client = require('discord-rich-presence')('763579990209855559')
 const stringSimilarity = require('string-similarity')
 const { autoUpdater } = require('electron-updater')
 const childProcess = require('child_process')
-const FetchData = require('../lib/fetch-data')
 const anitomy = require('anitomy-js')
-const Store = require('../lib/store')
-const Utils = require('../lib/utils')
 const pathModule = require('path')
 const fs = require('fs')
+
+const UserConfig = require('../lib/user-config')
+const FetchData = require('../lib/fetch-data')
+const Store = require('../lib/store')
+const Utils = require('../lib/utils')
+
 let mainWindow
 let pageToShow = '#watching'
 let lastUpdate = new Date(Date.now())
@@ -58,14 +61,15 @@ const storeWindowConfig = new Store({
 });
 
 // Load user information JSON
-var storeUserConfig = new Store({
+const userConfig = new UserConfig({
   configName: 'user-config',
   defaults: {
     userInfo: {
       username: null,
       accessCode: null
     },
-    gridSize: 0
+    gridSize: 0,
+    syncOnStart: false
   }
 })
 
@@ -83,8 +87,8 @@ const storeAnilistMediaData = new Store({
 
 // Instantiate class to fetch data
 const fetchData = new FetchData({
-  username: storeUserConfig.data.userInfo.username,
-  accessCode: storeUserConfig.data.userInfo.accessCode
+  username: userConfig.getUsername(),
+  accessCode: userConfig.getAccessCode()
 })
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -92,11 +96,11 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
-if (storeUserConfig.data.animeFolder) {
+if (userConfig.data.animeFolder) {
   setAnimeFolder()
 }
 
-if (storeUserConfig.data.syncOnStart) {
+if (userConfig.getSyncOnStart()) {
   fetchData.fetchMediaCollection()
     .then(handleResponse)
     .then(handleMediaCollectionData)
@@ -118,10 +122,6 @@ app.on('ready', function () {
 
   if (storeWindowConfig.data.maximize) {
     mainWindow.maximize()
-  }
-
-  if (storeUserConfig.data.syncOnStart) {
-    storeAnilistMediaData.removeFile()
   }
 
   mainWindow.on('resize', () => {
@@ -194,17 +194,17 @@ ipcMain.on('app_version', (event) => {
 })
 
 ipcMain.on('setAnimeFolder', (_, args) => {
-  if (args) {
-    storeUserConfig.set('animeFolder', args)
-    setAnimeFolder()
-  } else {
-    storeUserConfig.delete('animeFolder')
-    storeAnimeFiles.removeFile()
-    storeAnimeFiles = new Store({
-      configName: 'anime-files',
-      defaults: {}
-    })
-  }
+  // if (args) {
+  //   userConfig.set('animeFolder', args)
+  //   setAnimeFolder()
+  // } else {
+  //   userConfig.delete('animeFolder')
+  //   storeAnimeFiles.removeFile()
+  //   storeAnimeFiles = new Store({
+  //     configName: 'anime-files',
+  //     defaults: {}
+  //   })
+  // }
 })
 
 ipcMain.on('playAnime', (_, args) => {
@@ -306,9 +306,10 @@ ipcMain.on('fetchMediaCollection', (_, args) => {
   let username = args.username
   let accessCode = args.accessCode
 
-  storeUserConfig.set('userInfo', { username, accessCode })
-  fetchData.setUsername(storeUserConfig.data.userInfo.username)
-  fetchData.setAccessCode(storeUserConfig.data.userInfo.accessCode)
+  userConfig.setUsername(username)
+  userConfig.setAccessCode(accessCode)
+  fetchData.setUsername(username)
+  fetchData.setAccessCode(accessCode)
 
   fetchData.fetchMediaCollection()
     .then(handleResponse)
@@ -354,19 +355,8 @@ ipcMain.on('tokenError', () => {
   }
 
   dialog.showMessageBox(opts)
-  storeUserConfig.removeFile()
+  userConfig.resetData()
   storeAnilistMediaData.removeFile()
-
-  storeUserConfig = new Store({
-    configName: 'user-config',
-    defaults: {
-      userInfo: {
-        username: null,
-        accessCode: null
-      },
-      gridSize: 0
-    }
-  })
 })
 
 function updateDiscord(opts) {
@@ -399,26 +389,26 @@ function updateAnimeData() {
 }
 
 function setAnimeFolder() {
-  if (fs.existsSync(storeUserConfig.data.animeFolder)) {
-    const allFiles = getFiles(storeUserConfig.data.animeFolder)
-    const animeNames = [...new Set(allFiles.map(file => (file.animeTitle)))]
+  // if (fs.existsSync(userConfig.data.animeFolder)) {
+  //   const allFiles = getFiles(userConfig.data.animeFolder)
+  //   const animeNames = [...new Set(allFiles.map(file => (file.animeTitle)))]
 
-    storeAnimeFiles.set('allFiles', allFiles)
-    storeAnimeFiles.set('animeNames', animeNames)
+  //   storeAnimeFiles.set('allFiles', allFiles)
+  //   storeAnimeFiles.set('animeNames', animeNames)
 
-    fs.watch(storeUserConfig.data.animeFolder, () => {
-      setAnimeFolder()
-    })
-  } else {
-    const opts = {
-      type: 'error',
-      message: `The folder ${storeUserConfig.data.animeFolder} doesn't exist.`
-    }
+  //   fs.watch(userConfig.data.animeFolder, () => {
+  //     setAnimeFolder()
+  //   })
+  // } else {
+  //   const opts = {
+  //     type: 'error',
+  //     message: `The folder ${userConfig.data.animeFolder} doesn't exist.`
+  //   }
 
-    mainWindow.webContents.send('clearSelFolderInpt')
-    dialog.showMessageBox(opts)
-    storeUserConfig.delete('animeFolder')
-  }
+  //   mainWindow.webContents.send('clearSelFolderInpt')
+  //   dialog.showMessageBox(opts)
+  //   userConfig.delete('animeFolder')
+  // }
 }
 
 function getFiles(path) {
@@ -458,22 +448,11 @@ function handleError(error) {
     if (error.errors[0].message == 'User not found') {
       const opts = {
         type: 'info',
-        message: `Looks like the Anilist username "${storeUserConfig.data.userInfo.username}" doesn't exist. Try logging in again.`
+        message: `Looks like the Anilist username "${userConfig.getUsername()}" doesn't exist. Try logging in again.`
       }
 
       dialog.showMessageBox(opts)
-      storeUserConfig.removeFile()
-
-      storeUserConfig = new Store({
-        configName: 'user-config',
-        defaults: {
-          userInfo: {
-            username: null,
-            accessCode: null
-          },
-          gridSize: 0
-        }
-      })
+      userConfig.resetData()
     }
   }
 }
@@ -481,7 +460,7 @@ function handleError(error) {
 function handleMediaCollectionData(data) {
   var animeList = []
 
-  storeUserConfig.set('userAvatar', data.data.MediaListCollection.user.avatar.large)
+  userConfig.setUserAvatar(data.data.MediaListCollection.user.avatar.large)
 
   data.data.MediaListCollection.lists.forEach((list) => {
     animeList = animeList.concat(list.entries)

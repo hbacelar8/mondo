@@ -23,9 +23,11 @@
  */
 
 const { remote, ipcRenderer } = require('electron')
+
+const FetchData = require('../../lib/fetch-data')
+const UserConfig = require('../../lib/user-config')
 const Store = require('../../lib/store')
 const Utils = require('../../lib/utils')
-const FetchData = require('../../lib/fetch-data')
 
 const animeId = Utils.getUrlParam('id', null)
 const root = document.documentElement
@@ -34,7 +36,7 @@ var animeData
 var torrents = []
 
 // Load user information JSON
-const storeUserConfig = new Store({
+const userConfig = new UserConfig({
   configName: 'user-config',
   defaults: {
     userInfo: {
@@ -53,8 +55,8 @@ const storeAnilistMediaData = new Store({
 
 // Instantiate class to fetch data
 const fetchData = new FetchData({
-  username: storeUserConfig.data.userInfo.username,
-  accessCode: storeUserConfig.data.userInfo.accessCode
+  username: userConfig.getUsername(),
+  accessCode: userConfig.getAccessCode()
 })
 
 const MEDIA_STATUS = {
@@ -112,15 +114,15 @@ const RELATION_TYPE = {
   PARENT: 'Parent'
 }
 
-if (storeUserConfig.data.userAvatar) {
+if (userConfig.getUserAvatar()) {
   const userAvatar = document.querySelector('.user-avatar-img')
 
-  userAvatar.src = storeUserConfig.data.userAvatar
+  userAvatar.src = userConfig.getUserAvatar()
   userAvatar.classList.remove('hidden')
 }
 
-if (storeUserConfig.data.lineColor) {
-  root.style.setProperty('--line-color', storeUserConfig.data.lineColor)
+if (userConfig.getLineColor()) {
+  root.style.setProperty('--line-color', userConfig.getLineColor())
 }
 
 fetchData.fetchAnimeData(animeId)
@@ -201,7 +203,7 @@ function addAnimeToPage() {
   animeAboutDiv.insertBefore(animeSynopsisP, animeAboutDiv.children[1])
   animeCoverDiv.appendChild(animeCoverImg)
 
-  if (storeUserConfig.data.userInfo.username) {
+  if (userConfig.getUsername()) {
     animeCoverDiv.appendChild(animeWatchBtn)
     animeCoverDiv.appendChild(editAnimeBtn)
   }
