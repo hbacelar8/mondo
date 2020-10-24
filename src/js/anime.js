@@ -646,6 +646,22 @@ function setIpcCallbacks() {
     updateRestartBtn.classList.remove('hidden')
   })
 
+  ipcRenderer.on('updateAnimeView', () => {
+    const watchBtn = document.querySelector('.watch-btn')
+    const editBtn = document.querySelector('.edit-btn')
+    const statusBtn = document.querySelector('.dropdown-status-btn')
+    const progressInput = document.querySelector('.progress-input')
+    const scoreInput = document.querySelector('.score-input')
+
+    animeList.resyncFile()
+
+    watchBtn.innerHTML = `Watch Ep. ${animeList.getAnimeProgress(animeId) == animeData.episodes ? 1 : animeList.getAnimeProgress(animeId) + 1}/${animeData.episodes}`
+    editBtn.innerHTML = MEDIA_ENTRY_STATUS[animeList.getAnimeStatus(animeId)] + '<i class="fas fa-pen"></i>'
+    statusBtn.innerHTML = MEDIA_ENTRY_STATUS[animeList.getAnimeStatus(animeId)]
+    progressInput.value = animeList.getAnimeProgress(animeId)
+    scoreInput.value = animeList.getAnimeScore(animeId)
+  })
+
   ipcRenderer.on('episodeWatched', (_, args) => {
     if (animeId == args.animeId) {
       const watchBtn = document.querySelector('.watch-btn')
