@@ -459,6 +459,7 @@ function setEventListeners() {
 
   closeEditBox.addEventListener('click', () => {
     editBox.style.height = '0'
+    saveEditBtn.innerHTML = 'Save'
   })
 
   dropdownStatusBtn.addEventListener('click', () => {
@@ -540,6 +541,7 @@ function setEventListeners() {
   document.addEventListener('keydown', (event) => {
     if (event.key == 'Escape') {
       editBox.style.height = '0'
+      saveEditBtn.innerHTML = 'Save'
     }
   })
 
