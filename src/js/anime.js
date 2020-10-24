@@ -492,7 +492,7 @@ function setEventListeners() {
   })
 
   saveEditBtn.addEventListener('click', () => {
-    const newStatus = dropdownStatusBtn.innerHTML
+    const newStatus = MEDIA_ENTRY_STATUS[dropdownStatusBtn.innerHTML]
     const newProgress = progressInput.value
     const newScore = scoreInput.value
 
