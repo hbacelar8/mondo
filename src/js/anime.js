@@ -459,6 +459,7 @@ function setEventListeners() {
 
   closeEditBox.addEventListener('click', () => {
     editBox.style.height = '0'
+    saveEditBtn.innerHTML = 'Save'
   })
 
   dropdownStatusBtn.addEventListener('click', () => {
@@ -492,7 +493,7 @@ function setEventListeners() {
   })
 
   saveEditBtn.addEventListener('click', () => {
-    const newStatus = dropdownStatusBtn.innerHTML
+    const newStatus = MEDIA_ENTRY_STATUS[dropdownStatusBtn.innerHTML]
     const newProgress = progressInput.value
     const newScore = scoreInput.value
 
@@ -540,6 +541,7 @@ function setEventListeners() {
   document.addEventListener('keydown', (event) => {
     if (event.key == 'Escape') {
       editBox.style.height = '0'
+      saveEditBtn.innerHTML = 'Save'
     }
   })
 
@@ -644,6 +646,22 @@ function setIpcCallbacks() {
     updateMessage.innerText = 'Update downloaded. It will be installed on restart. Restart now?'
     updateCloseBtn.classList.add('hidden')
     updateRestartBtn.classList.remove('hidden')
+  })
+
+  ipcRenderer.on('updateAnimeView', () => {
+    const watchBtn = document.querySelector('.watch-btn')
+    const editBtn = document.querySelector('.edit-btn')
+    const statusBtn = document.querySelector('.dropdown-status-btn')
+    const progressInput = document.querySelector('.progress-input')
+    const scoreInput = document.querySelector('.score-input')
+
+    animeList.resyncFile()
+
+    watchBtn.innerHTML = `Watch Ep. ${animeList.getAnimeProgress(animeId) == animeData.episodes ? 1 : animeList.getAnimeProgress(animeId) + 1}/${animeData.episodes}`
+    editBtn.innerHTML = MEDIA_ENTRY_STATUS[animeList.getAnimeStatus(animeId)] + '<i class="fas fa-pen"></i>'
+    statusBtn.innerHTML = MEDIA_ENTRY_STATUS[animeList.getAnimeStatus(animeId)]
+    progressInput.value = animeList.getAnimeProgress(animeId)
+    scoreInput.value = animeList.getAnimeScore(animeId)
   })
 
   ipcRenderer.on('episodeWatched', (_, args) => {

@@ -325,18 +325,22 @@ ipcMain.on('searchMedia', (event, args) => {
     })
 })
 
-ipcMain.on('pushEditAnimeToAnilist', (_, args) => {
+ipcMain.on('pushEditAnimeToAnilist', (event, args) => {
   fetchData.pushEditToAnilist(
     args.animeId,
     args.newStatus,
     args.newProgress,
     args.newScore
   ).then(handleResponse)
-    .then((_) => {
-      fetchData.fetchMediaCollection()
-        .then(handleResponse)
-        .then(handleMediaCollectionData)
-        .then(handleError)
+    .then(() => {
+      animeList.editAnime(
+        args.animeId,
+        args.newStatus,
+        args.newProgress,
+        args.newScore
+      )
+
+      event.reply('updateAnimeView')
     })
 })
 
