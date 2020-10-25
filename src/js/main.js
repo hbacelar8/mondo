@@ -24,6 +24,7 @@
 
 const { remote, ipcRenderer } = require('electron')
 
+const AnimeFiles = require('../../lib/anime-files')
 const UserConfig = require('../../lib/user-config')
 const AnimeList = require('../../lib/anime-list')
 const Utils = require('../../lib/utils')
@@ -44,6 +45,12 @@ const userConfig = new UserConfig({
 const animeList = new AnimeList({
   configName: 'anime-list',
   defaults: {}
+})
+
+// Load anime files data JSON
+const animeFiles = new AnimeFiles({
+  configName: 'anime-files',
+  defaults: { rootFolders: [] }
 })
 
 if (userConfig.getUserAvatar()) {

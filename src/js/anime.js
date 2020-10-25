@@ -24,6 +24,7 @@
 
 const { remote, ipcRenderer } = require('electron')
 
+const AnimeFiles = require('../../lib/anime-files')
 const UserConfig = require('../../lib/user-config')
 const FetchData = require('../../lib/fetch-data')
 const AnimeList = require('../../lib/anime-list')
@@ -50,6 +51,12 @@ const userConfig = new UserConfig({
 const animeList = new AnimeList({
   configName: 'anime-list',
   defaults: {}
+})
+
+// Load anime files data JSON
+const animeFiles = new AnimeFiles({
+  configName: 'anime-files',
+  defaults: { rootFolders: [] }
 })
 
 // Instantiate class to fetch data

@@ -20,15 +20,14 @@ const client = require('discord-rich-presence')('763579990209855559')
 const stringSimilarity = require('string-similarity')
 const { autoUpdater } = require('electron-updater')
 const childProcess = require('child_process')
-const anitomy = require('anitomy-js')
 const pathModule = require('path')
 const fs = require('fs')
 
 const WindowConfig = require('../lib/window-config')
 const UserConfig = require('../lib/user-config')
+const AnimeFiles = require('../lib/anime-files')
 const AnimeList = require('../lib/anime-list')
 const FetchData = require('../lib/fetch-data')
-const Store = require('../lib/store')
 const Utils = require('../lib/utils')
 
 let mainWindow
@@ -75,10 +74,10 @@ const userConfig = new UserConfig({
   }
 })
 
-// Load anime folders JSON
-var storeAnimeFiles = new Store({
+// Load anime files data JSON
+const animeFiles = new AnimeFiles({
   configName: 'anime-files',
-  defaults: {}
+  defaults: { rootFolders: [] }
 })
 
 // Load Anilist media data JSON
