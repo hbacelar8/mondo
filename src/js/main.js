@@ -66,11 +66,15 @@ if (userConfig.getSyncOnStart()) {
   syncOnStartBtn.checked = userConfig.getSyncOnStart()
 }
 
-// if (userConfig.data.animeFolder) {
-//   const setAnimeFolderInpt = document.querySelector('.anime-folder-input')
+if (animeFiles.data.rootFolders.length) {
+  const rootFoldersPath = animeFiles.data.rootFolders.map(folder => folder.path)
 
-//   setAnimeFolderInpt.value = userConfig.data.animeFolder
-// }
+  rootFoldersPath.forEach(folderPath => addAnimeFolderToView(folderPath))
+} else {
+  const foldersList = document.querySelector('.folders-list')
+
+  foldersList.classList.add('hidden')
+}
 
 if (userConfig.getLineColor()) {
   const root = document.documentElement
@@ -435,7 +439,7 @@ function setEventListeners() {
     })[0].replace(/\\/g, '/')
 
     if (path) {
-      setAnimeFolderInpt.value = path
+      addAnimeFolderToView(path)
       ipcRenderer.send('setAnimeFolder', path)
     }
   })
@@ -454,6 +458,32 @@ function setEventListeners() {
 
   syncOnStartBtn.addEventListener('input', () => {
     userConfig.setSyncOnStart(syncOnStartBtn.checked)
+  })
+}
+
+function addAnimeFolderToView(path) {
+  const foldersList = document.querySelector('.folders-list')
+  const folderElement = document.createElement('div')
+  const folderPath = document.createElement('p')
+  const deleteBtn = document.createElement('p')
+
+  foldersList.classList.remove('hidden')
+  folderElement.classList.add('folder-element')
+  folderPath.innerHTML = path
+  deleteBtn.innerHTML = 'x'
+
+  folderElement.appendChild(folderPath)
+  folderElement.appendChild(deleteBtn)
+  foldersList.appendChild(folderElement)
+
+  deleteBtn.addEventListener('click', () => {
+    folderElement.remove()
+    
+    if (!foldersList.childElementCount) {
+      foldersList.classList.add('hidden')
+    }
+
+    ipcRenderer.send('removeAnimeFolder', path)
   })
 }
 
