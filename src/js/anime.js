@@ -132,6 +132,15 @@ if (userConfig.getLineColor()) {
   root.style.setProperty('--line-color', userConfig.getLineColor())
 }
 
+if (animeFiles.data.rootFolders.length) {
+  const animeSelFolderInpt = document.querySelector('.sel-folder-input')
+  const animeFolder = animeFiles.getFolderById(animeId)
+
+  if (animeFolder) {
+    animeSelFolderInpt.value = animeFolder
+  }
+}
+
 fetchData.fetchAnimeData(animeId)
   .then(handleResponse)
   .then(handleData)
