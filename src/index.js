@@ -97,10 +97,6 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
-if (userConfig.data.animeFolder) {
-  setAnimeFolder()
-}
-
 if (userConfig.getSyncOnStart()) {
   fetchData.fetchMediaCollection()
     .then(handleResponse)
@@ -193,17 +189,15 @@ ipcMain.on('app_version', (event) => {
 })
 
 ipcMain.on('setAnimeFolder', (_, args) => {
-  // if (args) {
-  //   userConfig.set('animeFolder', args)
-  //   setAnimeFolder()
-  // } else {
-  //   userConfig.delete('animeFolder')
-  //   storeAnimeFiles.removeFile()
-  //   storeAnimeFiles = new Store({
-  //     configName: 'anime-files',
-  //     defaults: {}
-  //   })
-  // }
+  if (args) {
+    animeFiles.setNewFolder(args)
+  } else {
+    animeFiles.resetData()
+  }
+})
+
+ipcMain.on('removeAnimeFolder', (_, args) => {
+  animeFiles.removeFolder(args)
 })
 
 ipcMain.on('playAnime', (_, args) => {
@@ -388,55 +382,6 @@ function updateAnimeData() {
     .then(handleResponse)
     .then(handleMediaCollectionData)
     .then(handleError)
-}
-
-function setAnimeFolder() {
-  // if (fs.existsSync(userConfig.data.animeFolder)) {
-  //   const allFiles = getFiles(userConfig.data.animeFolder)
-  //   const animeNames = [...new Set(allFiles.map(file => (file.animeTitle)))]
-
-  //   storeAnimeFiles.set('allFiles', allFiles)
-  //   storeAnimeFiles.set('animeNames', animeNames)
-
-  //   fs.watch(userConfig.data.animeFolder, () => {
-  //     setAnimeFolder()
-  //   })
-  // } else {
-  //   const opts = {
-  //     type: 'error',
-  //     message: `The folder ${userConfig.data.animeFolder} doesn't exist.`
-  //   }
-
-  //   mainWindow.webContents.send('clearSelFolderInpt')
-  //   dialog.showMessageBox(opts)
-  //   userConfig.delete('animeFolder')
-  // }
-}
-
-function getFiles(path) {
-  const entries = fs.readdirSync(path, { withFileTypes: true });
-
-  // Get files within the current directory and add a path key to the file objects
-  const files = entries
-    .filter(file => !file.isDirectory() && (file.name.split('.').pop() == 'mkv' ||
-      file.name.split('.').pop() == 'mp4' ||
-      file.name.split('.').pop() == 'avi'))
-    .map(file => ({
-      ...file, path: pathModule.join(path, file.name), animeTitle: anitomy.parseSync(file.name).anime_title,
-      episodeNumber: parseInt(anitomy.parseSync(file.name).episode_number, 10)
-    }));
-
-  // Get folders within the current directory
-  const folders = entries.filter(folder => folder.isDirectory());
-
-  for (const folder of folders)
-    /*
-      Add the found files within the subdirectory to the files array by calling the
-      current function itself
-    */
-    files.push(...getFiles(`${path}/${folder.name}/`));
-
-  return files;
 }
 
 function handleResponse(response) {
