@@ -537,7 +537,7 @@ function setEventListeners() {
   if (playBtn) {
     playBtn.addEventListener('click', () => {
       const args = {
-        nextEpisode: animeData.mediaListEntry.progress + 1 > animeData.episodes ? animeData.episodes : animeData.mediaListEntry.progress + 1,
+        nextEpisode: animeList.getAnimeProgress(animeId) + 1 > animeData.episodes ? animeData.episodes : animeList.getAnimeProgress(animeId) + 1,
         totalEpisodes: animeData.episodes,
         animeId: animeId,
         animeTitle: {

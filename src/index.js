@@ -200,91 +200,36 @@ ipcMain.on('removeAnimeFolder', (_, args) => {
   animeFiles.removeFolder(args)
 })
 
-ipcMain.on('playAnime', (_, args) => {
-  if (Object.keys(storeAnimeFiles.data) != 0) {
-    if (args.animeTitle.english == args.animeTitle.romaji) {
-      var bestMatch = stringSimilarity.findBestMatch(args.animeTitle.english, storeAnimeFiles.data.animeNames)
-    } else {
-      var matchEnglishTitle = stringSimilarity.findBestMatch(args.animeTitle.english, storeAnimeFiles.data.animeNames)
-      var matchRomajiTitle = stringSimilarity.findBestMatch(args.animeTitle.romaji, storeAnimeFiles.data.animeNames)
+ipcMain.on('playAnime', (event, args) => {
+  const episodePath = animeFiles.getEpisodePath(args.animeId, args.nextEpisode)
 
-      if (matchEnglishTitle.bestMatch.rating > matchRomajiTitle.bestMatch.rating) {
-        var bestMatch = matchEnglishTitle
-      } else {
-        var bestMatch = matchRomajiTitle
-      }
-    }
+  if (episodePath) {
+    const player = childProcess.spawn(`"${episodePath}"`, { shell: true })
 
-    if (bestMatch.bestMatch.rating > 0.5) {
-      const targetFile = storeAnimeFiles.data.allFiles.filter(
-        entry => entry.animeTitle == bestMatch.bestMatch.target && entry.episodeNumber == args.nextEpisode
-      )
+    updateDiscord(args.updateDiscord)
 
-      if (targetFile.length) {
-        updateDiscord(args.updateDiscord)
-
-        const player = childProcess.spawn(`"${targetFile[0].path}"`, { shell: true })
-
-        player.on('close', () => {
-          const opts = {
-            type: 'question',
-            buttons: ['No', 'Yes'],
-            defaultId: 0,
-            title: args.updateDiscord.details,
-            message: `Mark episode ${args.nextEpisode} as watched?`
-          }
-
-          updateDiscord({ details: '', state: 'Idling' })
-
-          if (dialog.showMessageBoxSync(null, opts)) {
-            if (args.nextEpisode < args.totalEpisodes) {
-              fetchData.pushEpisodeToAnilist(args.animeId, args.nextEpisode)
-                .then(handleResponse)
-                .then((_) => {
-                  console.log(1)
-                  mainWindow.webContents.send('episodeWatched', {
-                    animeId: args.animeId,
-                    episodeWatched: args.nextEpisode
-                  })
-
-                  updateAnimeData()
-                })
-            } else {
-              fetchData.pushAnimeFinishedToAnilist(args.animeId, args.totalEpisodes)
-                .then(handleResponse)
-                .then((_) => {
-                  mainWindow.webContents.send('animeFinished', {
-                    animeId: args.animeId
-                  })
-
-                  updateAnimeData()
-                })
-            }
-          }
-        })
-      } else {
-        const opts = {
-          type: 'info',
-          title: 'Play Anime',
-          message: `No episodes found for ${args.updateDiscord.details}`
-        }
-
-        dialog.showMessageBoxSync(null, opts)
-      }
-    } else {
+    player.on('close', () => {
       const opts = {
-        type: 'info',
-        title: 'Play Anime',
-        message: `No episodes found for ${args.updateDiscord.details}`
+        type: 'question',
+        buttons: ['No', 'Yes'],
+        defaultId: 0,
+        title: args.updateDiscord.details,
+        message: `Mark episode ${args.nextEpisode} as watched?`
       }
 
-      dialog.showMessageBoxSync(null, opts)
-    }
+      updateDiscord({ details: '', state: 'Idling' })
+
+      if (dialog.showMessageBoxSync(null, opts)) {
+        fetchData.pushEpisodeToAnilist(args.animeId, args.nextEpisode)
+        animeList.setAnimeProgress(args.animeId, args.nextEpisode)
+        event.reply('updateAnimeView')
+      }
+    })
   } else {
     const opts = {
       type: 'info',
       title: 'Play Anime',
-      message: 'No anime folder configured. You must point to a folder containing your anime files on Settings.'
+      message: `Couldn't find episode ${args.nextEpisode} of ${args.updateDiscord.details}.`
     }
 
     dialog.showMessageBoxSync(null, opts)
