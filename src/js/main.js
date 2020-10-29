@@ -436,7 +436,7 @@ function setEventListeners() {
   setAnimeFolderBtn.addEventListener('click', () => {
     const path = remote.dialog.showOpenDialogSync({
       properties: ['openDirectory']
-    })[0].replace(/\\/g, '/')
+    })[0]
 
     if (path) {
       addAnimeFolderToView(path)
