@@ -444,8 +444,14 @@ function setEventListeners() {
     }
   })
 
-  setAnimeFolderInpt.addEventListener('focusout', () => {
-    ipcRenderer.send('setAnimeFolder', setAnimeFolderInpt.value)
+  setAnimeFolderInpt.addEventListener('keydown', (event) => {
+    if (event.key == 'Enter') {
+      if (setAnimeFolderInpt.value) {
+        addAnimeFolderToView(setAnimeFolderInpt.value)
+        ipcRenderer.send('setAnimeFolder', setAnimeFolderInpt.value)
+        setAnimeFolderInpt.value = ''
+      }
+    }
   })
 
   for (let i = 0; i < colorsBtn.length; i++) {
@@ -478,7 +484,7 @@ function addAnimeFolderToView(path) {
 
   deleteBtn.addEventListener('click', () => {
     folderElement.remove()
-    
+
     if (!foldersList.childElementCount) {
       foldersList.classList.add('hidden')
     }
