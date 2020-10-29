@@ -24,6 +24,7 @@
 
 const { remote, ipcRenderer } = require('electron')
 
+const AnimeFiles = require('../../lib/anime-files')
 const UserConfig = require('../../lib/user-config')
 const FetchData = require('../../lib/fetch-data')
 const AnimeList = require('../../lib/anime-list')
@@ -50,6 +51,12 @@ const userConfig = new UserConfig({
 const animeList = new AnimeList({
   configName: 'anime-list',
   defaults: {}
+})
+
+// Load anime files data JSON
+const animeFiles = new AnimeFiles({
+  configName: 'anime-files',
+  defaults: { rootFolders: [] }
 })
 
 // Instantiate class to fetch data
@@ -123,6 +130,15 @@ if (userConfig.getUserAvatar()) {
 if (userConfig.getLineColor()) {
   const root = document.documentElement
   root.style.setProperty('--line-color', userConfig.getLineColor())
+}
+
+if (animeFiles.data.rootFolders.length) {
+  const animeSelFolderInpt = document.querySelector('.sel-folder-input')
+  const animeFolder = animeFiles.getFolderById(animeId)
+
+  if (animeFolder) {
+    animeSelFolderInpt.value = animeFolder
+  }
 }
 
 fetchData.fetchAnimeData(animeId)
@@ -510,18 +526,30 @@ function setEventListeners() {
   selFolderBtn.addEventListener('click', () => {
     const path = remote.dialog.showOpenDialogSync({
       properties: ['openDirectory']
-    })[0].replace(/\\/g, '/')
+    })[0]
 
     if (path) {
-      selFolderInput.value = path ? path : ''
-      saveAnimeFolder(path)
+      selFolderInput.value = path
+      ipcRenderer.send('setUniqueAnimeFolder', {
+        folderPath: path,
+        animeId: animeId
+      })
+    }
+  })
+
+  selFolderInput.addEventListener('focusout', () => {
+    if (selFolderInput.value) {
+      ipcRenderer.send('setUniqueAnimeFolder', {
+        folderPath: selFolderInput.value,
+        animeId: animeId
+      })
     }
   })
 
   if (playBtn) {
     playBtn.addEventListener('click', () => {
       const args = {
-        nextEpisode: animeData.mediaListEntry.progress + 1 > animeData.episodes ? animeData.episodes : animeData.mediaListEntry.progress + 1,
+        nextEpisode: animeList.getAnimeProgress(animeId) + 1 > animeData.episodes ? animeData.episodes : animeList.getAnimeProgress(animeId) + 1,
         totalEpisodes: animeData.episodes,
         animeId: animeId,
         animeTitle: {

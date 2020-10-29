@@ -24,6 +24,7 @@
 
 const { remote, ipcRenderer } = require('electron')
 
+const AnimeFiles = require('../../lib/anime-files')
 const UserConfig = require('../../lib/user-config')
 const AnimeList = require('../../lib/anime-list')
 const Utils = require('../../lib/utils')
@@ -46,6 +47,12 @@ const animeList = new AnimeList({
   defaults: {}
 })
 
+// Load anime files data JSON
+const animeFiles = new AnimeFiles({
+  configName: 'anime-files',
+  defaults: { rootFolders: [] }
+})
+
 if (userConfig.getUserAvatar()) {
   const userAvatar = document.querySelector('.user-avatar-img')
 
@@ -59,11 +66,15 @@ if (userConfig.getSyncOnStart()) {
   syncOnStartBtn.checked = userConfig.getSyncOnStart()
 }
 
-// if (userConfig.data.animeFolder) {
-//   const setAnimeFolderInpt = document.querySelector('.anime-folder-input')
+if (animeFiles.data.rootFolders.length) {
+  const rootFoldersPath = animeFiles.data.rootFolders.map(folder => folder.path)
 
-//   setAnimeFolderInpt.value = userConfig.data.animeFolder
-// }
+  rootFoldersPath.forEach(folderPath => addAnimeFolderToView(folderPath))
+} else {
+  const foldersList = document.querySelector('.folders-list')
+
+  foldersList.classList.add('hidden')
+}
 
 if (userConfig.getLineColor()) {
   const root = document.documentElement
@@ -425,16 +436,22 @@ function setEventListeners() {
   setAnimeFolderBtn.addEventListener('click', () => {
     const path = remote.dialog.showOpenDialogSync({
       properties: ['openDirectory']
-    })[0].replace(/\\/g, '/')
+    })[0]
 
     if (path) {
-      setAnimeFolderInpt.value = path
+      addAnimeFolderToView(path)
       ipcRenderer.send('setAnimeFolder', path)
     }
   })
 
-  setAnimeFolderInpt.addEventListener('focusout', () => {
-    ipcRenderer.send('setAnimeFolder', setAnimeFolderInpt.value)
+  setAnimeFolderInpt.addEventListener('keydown', (event) => {
+    if (event.key == 'Enter') {
+      if (setAnimeFolderInpt.value) {
+        addAnimeFolderToView(setAnimeFolderInpt.value)
+        ipcRenderer.send('setAnimeFolder', setAnimeFolderInpt.value)
+        setAnimeFolderInpt.value = ''
+      }
+    }
   })
 
   for (let i = 0; i < colorsBtn.length; i++) {
@@ -447,6 +464,32 @@ function setEventListeners() {
 
   syncOnStartBtn.addEventListener('input', () => {
     userConfig.setSyncOnStart(syncOnStartBtn.checked)
+  })
+}
+
+function addAnimeFolderToView(path) {
+  const foldersList = document.querySelector('.folders-list')
+  const folderElement = document.createElement('div')
+  const folderPath = document.createElement('p')
+  const deleteBtn = document.createElement('p')
+
+  foldersList.classList.remove('hidden')
+  folderElement.classList.add('folder-element')
+  folderPath.innerHTML = path
+  deleteBtn.innerHTML = 'x'
+
+  folderElement.appendChild(folderPath)
+  folderElement.appendChild(deleteBtn)
+  foldersList.appendChild(folderElement)
+
+  deleteBtn.addEventListener('click', () => {
+    folderElement.remove()
+
+    if (!foldersList.childElementCount) {
+      foldersList.classList.add('hidden')
+    }
+
+    ipcRenderer.send('removeAnimeFolder', path)
   })
 }
 
