@@ -196,6 +196,12 @@ ipcMain.on('setAnimeFolder', (_, args) => {
   }
 })
 
+ipcMain.on('setUniqueAnimeFolder', (_, args) => {
+  if (args) {
+    animeFiles.setUniqueAnimeFolder(args.folderPath, args.animeId)
+  }
+})
+
 ipcMain.on('removeAnimeFolder', (_, args) => {
   animeFiles.removeFolder(args)
 })

@@ -529,8 +529,20 @@ function setEventListeners() {
     })[0]
 
     if (path) {
-      selFolderInput.value = path ? path : ''
-      saveAnimeFolder(path)
+      selFolderInput.value = path
+      ipcRenderer.send('setUniqueAnimeFolder', {
+        folderPath: path,
+        animeId: animeId
+      })
+    }
+  })
+
+  selFolderInput.addEventListener('focusout', () => {
+    if (selFolderInput.value) {
+      ipcRenderer.send('setUniqueAnimeFolder', {
+        folderPath: selFolderInput.value,
+        animeId: animeId
+      })
     }
   })
 
