@@ -9,14 +9,14 @@
     <img src="https://img.shields.io/badge/license-GPL--3-blue?style=flat-square&logo=appveyor"/>
   </a>
   
-   <a href="https://github.com/bacelarhenrique/mondo/releases/download/v0.9.72/Mondo-Setup-0.9.72.exe">
+   <a href="https://github.com/bacelarhenrique/mondo/releases/download/v0.9.73/Mondo-Setup-0.9.73.exe">
     <img alt="GitHub release (latest by date including pre-releases)" src="https://img.shields.io/github/v/release/bacelarhenrique/mondo?include_prereleases&style=flat-square">
   </a>
   
   <img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/bacelarhenrique/mondo/total?style=flat-square">
   
   <a href="https://discord.gg/J6cA7Hq" target="_blank">
-    <img alt="Discord" src="https://img.shields.io/discord/767222327645437952?label=support&style=flat-square">
+    <img alt="Discord" src="https://img.shields.io/discord/767222327645437952?label=support&style=flat-square&logo=discord">
   </a>
 </p>
 
