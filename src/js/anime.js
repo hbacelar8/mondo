@@ -209,7 +209,7 @@ function addAnimeToPage() {
   animeCoverImg.src = animeData.coverImage.large
   animeTitleP.innerText = animeData.title.english ? animeData.title.english : animeData.title.romaji
   animeSynopsisP.innerText = animeData.description ? animeData.description.replace(/<br>|<\/br>|<i>|<\/i>|<strong>|<\/strong>|<em>|<\/em>/g, '') : ''
-  animeWatchBtn.innerHTML = `Watch Ep. ${progress == animeData.episodes ? progress : progress + 1}/${animeData.episodes}`
+  animeWatchBtn.innerHTML = `Watch Ep. ${progress == animeData.episodes ? progress : progress + 1}/${animeData.episodes ? animeData.episodes : '?'}`
   editAnimeBtn.innerHTML = MEDIA_ENTRY_STATUS[status] + '<i class="fas fa-pen"></i>'
   dropdownStatusBtn.innerHTML = MEDIA_ENTRY_STATUS[status]
   progressInput.value = progress
