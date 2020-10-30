@@ -69,7 +69,8 @@ const userConfig = new UserConfig({
       accessCode: null
     },
     gridSize: 0,
-    syncOnStart: false
+    syncOnStart: false,
+    updateDiscord: true
   }
 })
 
@@ -101,6 +102,16 @@ if (userConfig.getSyncOnStart()) {
     .then(handleResponse)
     .then(handleMediaCollectionData)
     .catch(handleError)
+}
+
+if (userConfig.getUpdateDiscord()) {
+  client.updatePresence({
+    state: 'Idling',
+    startTimestamp: Date.now(),
+    largeImageKey: 'mondo',
+    smallImageKey: 'ani',
+    instance: true
+  })
 }
 
 // This method will be called once Electron has finished initialization
@@ -162,14 +173,6 @@ app.on('ready', function () {
   })
 })
 
-client.updatePresence({
-  state: 'Idling',
-  startTimestamp: Date.now(),
-  largeImageKey: 'mondo',
-  smallImageKey: 'ani',
-  instance: true
-})
-
 ipcMain.on('restart-app', () => {
   autoUpdater.quitAndInstall()
 })
@@ -211,7 +214,9 @@ ipcMain.on('playAnime', (event, args) => {
   if (episodePath) {
     const player = childProcess.spawn(`"${episodePath}"`, { shell: true })
 
-    updateDiscord(args.updateDiscord)
+    if (userConfig.getUpdateDiscord()) {
+      updateDiscord(args.updateDiscord)
+    }
 
     player.on('close', () => {
       const opts = {
@@ -222,7 +227,9 @@ ipcMain.on('playAnime', (event, args) => {
         message: `Mark episode ${args.nextEpisode} as watched?`
       }
 
-      updateDiscord({ details: '', state: 'Idling' })
+      if (userConfig.getUpdateDiscord()) {
+        updateDiscord({ details: '', state: 'Idling' })
+      }
 
       if (dialog.showMessageBoxSync(null, opts)) {
         fetchData.pushEpisodeToAnilist(args.animeId, args.nextEpisode)
@@ -304,6 +311,10 @@ ipcMain.on('tokenError', () => {
   dialog.showMessageBox(opts)
   userConfig.resetData()
   animeList.resetData()
+})
+
+ipcMain.on('disableDiscord', () => {
+  client.disconnect()
 })
 
 function updateDiscord(opts) {

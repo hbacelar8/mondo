@@ -579,6 +579,36 @@ input:checked + .slider-switch:before {
     border-radius: 50%;
 }
 
+.general-config {
+    width: 800px;
+    margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.general-config .title {
+    position: relative;
+}
+
+.general-config .title::after {
+    content: "";
+    width: 800px;
+    height: 1px;
+    bottom: -5px;
+    left: 0;
+    position: absolute;
+    background-color: var(--line-color);
+}
+
+.general-config-content {
+    display: flex;
+    margin-top: 30px;
+    justify-content: space-between;
+}
+
 .anime-folder-menu {
     width: 800px;
     margin-bottom: 40px;
