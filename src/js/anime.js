@@ -147,7 +147,10 @@ fetchData.fetchAnimeData(animeId)
   .then(handleData)
   .catch(handleError)
 
+if (animeList.data.animeList) {
 addAnimeListCounters()
+}
+
 setWindowButtonsEvents()
 setIpcCallbacks()
 
@@ -197,9 +200,9 @@ function addAnimeToPage() {
   const animeWatchBtn = document.createElement('a')
   const editAnimeBtn = document.createElement('a')
 
-  const progress = animeList.getAnimeProgress(animeId)
-  const status = animeList.getAnimeStatus(animeId)
-  const score = animeList.getAnimeScore(animeId)
+  const progress = animeList.data.animeList ? animeList.getAnimeProgress(animeId) : 0
+  const status = animeList.data.animeList ? animeList.getAnimeStatus(animeId) : 'NONE'
+  const score = animeList.data.animeList ? animeList.getAnimeScore(animeId) : 0
 
   animeTitleP.classList.add('title')
   animeSynopsisP.classList.add('synopsis')

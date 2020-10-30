@@ -37,7 +37,8 @@ const userConfig = new UserConfig({
       username: null,
       accessCode: null
     },
-    gridSize: 0
+    gridSize: 0,
+    updateDiscord: true
   }
 })
 
