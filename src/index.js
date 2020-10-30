@@ -17,7 +17,6 @@
 
 const { app, BrowserWindow, ipcMain, dialog, remote } = require('electron')
 const client = require('discord-rich-presence')('763579990209855559')
-const stringSimilarity = require('string-similarity')
 const { autoUpdater } = require('electron-updater')
 const childProcess = require('child_process')
 const pathModule = require('path')
