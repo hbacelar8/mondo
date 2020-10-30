@@ -66,6 +66,12 @@ if (userConfig.getSyncOnStart()) {
   syncOnStartBtn.checked = userConfig.getSyncOnStart()
 }
 
+if (userConfig.getUpdateDiscord()) {
+  const updateDircordBtn = document.querySelector('.discord-checkbox')
+
+  updateDircordBtn.checked = userConfig.getUpdateDiscord()
+}
+
 if (animeFiles.data.rootFolders.length) {
   const rootFoldersPath = animeFiles.data.rootFolders.map(folder => folder.path)
 
@@ -231,6 +237,7 @@ function setEventListeners() {
   const disconnectBtn = document.querySelector('.disconnect-btn')
   const resyncBtn = document.querySelector('.resync-btn')
   const syncOnStartBtn = document.querySelector('.sync-checkbox')
+  const updateDircordBtn = document.querySelector('.discord-checkbox')
   const setAnimeFolderBtn = document.querySelector('.set-folder-btn')
   const setAnimeFolderInpt = document.querySelector('.anime-folder-input')
   const colorsBtn = document.querySelectorAll('.colors')
@@ -464,6 +471,14 @@ function setEventListeners() {
 
   syncOnStartBtn.addEventListener('input', () => {
     userConfig.setSyncOnStart(syncOnStartBtn.checked)
+  })
+
+  updateDircordBtn.addEventListener('input', () => {
+    userConfig.setUpdateDiscord(updateDircordBtn.checked)
+
+    if (!updateDircordBtn.checked) {
+      ipcRenderer.send('disableDiscord')
+    }
   })
 }
 
