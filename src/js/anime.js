@@ -205,6 +205,11 @@ function addAnimeToPage() {
   animeWatchBtn.classList.add('watch-btn')
   editAnimeBtn.classList.add('edit-btn')
 
+  if (status == 'NONE') {
+    animeWatchBtn.classList.add('hidden')
+    editAnimeBtn.style.top = '210px'
+  }
+
   animeBannerImg.src = animeData.bannerImage
   animeCoverImg.src = animeData.coverImage.large
   animeTitleP.innerText = animeData.title.english ? animeData.title.english : animeData.title.romaji
