@@ -85,7 +85,8 @@ const MEDIA_ENTRY_STATUS = {
   Completed: 'COMPLETED',
   Dropped: 'DROPPED',
   Paused: 'PAUSED',
-  Repeating: 'REPEATING'
+  Repeating: 'REPEATING',
+  Delete: 'Delete'
 }
 
 const MEDIA_SOURCE = {
@@ -518,13 +519,6 @@ function setEventListeners() {
     const newProgress = progressInput.value
     const newScore = scoreInput.value
 
-    ipcRenderer.send('pushEditAnimeToAnilist', {
-      animeId,
-      newStatus,
-      newProgress,
-      newScore
-    })
-
     if (animeList.getAnimeStatus(animeId) == 'NONE') {
       ipcRenderer.send('createAnimeEntry', {
         createdAt: Date.now(),
@@ -545,6 +539,20 @@ function setEventListeners() {
           status: newStatus,
           updatedAt: Date.now()
         }
+      })
+    }
+
+    if (newStatus == 'Delete') {
+      ipcRenderer.send('deleteAnimeEntry', {
+        animeId: animeId,
+        entryId: animeData.mediaListEntry.id
+      })
+    } else {
+      ipcRenderer.send('pushEditAnimeToAnilist', {
+        animeId,
+        newStatus,
+        newProgress,
+        newScore
       })
     }
 

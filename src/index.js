@@ -298,6 +298,12 @@ ipcMain.on('createAnimeEntry', (_, args) => {
   animeList.createAnimeEntry(args)
 })
 
+ipcMain.on('deleteAnimeEntry', (_, args) => {
+  console.log(args)
+  animeList.deleteAnimeEntry(args.animeId)
+  fetchData.pushAnimeDeletedToAnilist(args.entryId)
+})
+
 ipcMain.on('setPage', (_, page) => {
   pageToShow = page
 })
