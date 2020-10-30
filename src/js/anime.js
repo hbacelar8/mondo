@@ -55,7 +55,7 @@ const animeList = new AnimeList({
 
 // Load anime files data JSON
 const animeFiles = new AnimeFiles({
-  configName: 'anime-files',
+  configName: 'anime-files-v2',
   defaults: { rootFolders: [] }
 })
 
@@ -148,7 +148,7 @@ fetchData.fetchAnimeData(animeId)
   .catch(handleError)
 
 if (animeList.data.animeList) {
-addAnimeListCounters()
+  addAnimeListCounters()
 }
 
 setWindowButtonsEvents()

@@ -34,7 +34,11 @@ let pageToShow = '#watching'
 let lastUpdate = new Date(Date.now())
 
 const userDataPath = (app || remote.app).getPath('userData')
-if (fs.existsSync(pathModule.join(userDataPath, 'anime-folders.json')) || fs.existsSync(pathModule.join(userDataPath, 'anilist-data.json'))) {
+if (fs.existsSync(pathModule.join(userDataPath, 'anime-files.json')) || fs.existsSync(pathModule.join(userDataPath, 'anilist-data.json'))) {
+  if (fs.existsSync(pathModule.join(userDataPath, 'anime-files.json'))) {
+    fs.unlinkSync(pathModule.join(userDataPath, 'anime-files.json'))
+  }
+
   if (fs.existsSync(pathModule.join(userDataPath, 'anime-folders.json'))) {
     fs.unlinkSync(pathModule.join(userDataPath, 'anime-folders.json'))
   }
@@ -76,7 +80,7 @@ const userConfig = new UserConfig({
 
 // Load anime files data JSON
 const animeFiles = new AnimeFiles({
-  configName: 'anime-files',
+  configName: 'anime-files-v2',
   defaults: { rootFolders: [] }
 })
 
