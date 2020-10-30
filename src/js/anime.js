@@ -196,9 +196,9 @@ function addAnimeToPage() {
   const animeWatchBtn = document.createElement('a')
   const editAnimeBtn = document.createElement('a')
 
-  const progress = animeData.mediaListEntry ? animeData.mediaListEntry.progress : 0
-  const status = animeData.mediaListEntry ? animeData.mediaListEntry.status : 'NONE'
-  const score = animeData.mediaListEntry ? animeData.mediaListEntry.score : 0
+  const progress = animeList.getAnimeProgress(animeId)
+  const status = animeList.getAnimeStatus(animeId)
+  const score = animeList.getAnimeScore(animeId)
 
   animeTitleP.classList.add('title')
   animeSynopsisP.classList.add('synopsis')
