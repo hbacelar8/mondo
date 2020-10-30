@@ -294,6 +294,10 @@ ipcMain.on('pushEditAnimeToAnilist', (event, args) => {
     })
 })
 
+ipcMain.on('createAnimeEntry', (_, args) => {
+  animeList.createAnimeEntry(args)
+})
+
 ipcMain.on('setPage', (_, page) => {
   pageToShow = page
 })

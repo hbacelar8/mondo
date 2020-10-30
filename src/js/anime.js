@@ -525,6 +525,29 @@ function setEventListeners() {
       newScore
     })
 
+    if (animeList.getAnimeStatus(animeId) == 'NONE') {
+      ipcRenderer.send('createAnimeEntry', {
+        createdAt: Date.now(),
+        media: {
+          coverImage: {
+            large: animeData.coverImage.large
+          },
+          episodes: animeData.episodes,
+          id: parseInt(animeId, 10),
+          synonyms: animeData.synonyms,
+          title: {
+            english: animeData.title.english,
+            native: animeData.title.native,
+            romaji: animeData.title.romaji
+          },
+          progress: animeList.getAnimeProgress(animeId),
+          score: animeList.getAnimeScore(animeId),
+          status: newStatus,
+          updatedAt: Date.now()
+        }
+      })
+    }
+
     saveEditBtn.innerHTML = 'Saved'
   })
 
