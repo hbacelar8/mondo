@@ -197,29 +197,55 @@ function addAnimeToPage() {
   const dropdownStatusBtn = document.querySelector('.dropdown-status-btn')
   const progressInput = document.querySelector('.progress-input')
   const scoreInput = document.querySelector('.score-input')
-  const animeWatchBtn = document.createElement('a')
-  const editAnimeBtn = document.createElement('a')
+  const animeWatchDiv = document.querySelector('.watch-btn-div')
+  const editDiv = document.querySelector('.edit-btn-div')
+  const episodesDropMenu = document.querySelector('.episodes-menu-drop')
+  const editBtn = document.querySelector('.edit-btn')
 
   const progress = animeList.data.animeList ? animeList.getAnimeProgress(animeId) : 0
   const status = animeList.data.animeList ? animeList.getAnimeStatus(animeId) : 'NONE'
   const score = animeList.data.animeList ? animeList.getAnimeScore(animeId) : 0
 
+  for (let i = 1; i <= animeData.episodes; i++) {
+    const episodeBtn = document.createElement('div')
+
+    episodeBtn.innerHTML = `Episode ${i}`
+    episodesDropMenu.appendChild(episodeBtn)
+
+    episodeBtn.addEventListener('click', () => {
+      const args = {
+        nextEpisode: i,
+        totalEpisodes: animeData.episodes,
+        animeId: animeId,
+        animeTitle: {
+          english: animeData.title.english,
+          romaji: animeData.title.romaji
+        },
+        updateDiscord: {
+          details: animeData.title.english ? animeData.title.english : animeData.title.romaji,
+          state: `Episode ${animeData.mediaListEntry.progress + 1 > animeData.episodes ? animeData.episodes : animeData.mediaListEntry.progress + 1} of ${animeData.episodes}`
+        }
+      }
+
+      ipcRenderer.send('playAnime', args)
+      episodesDropMenu.style.maxHeight = '0px'
+    })
+  }
+
   animeTitleP.classList.add('title')
   animeSynopsisP.classList.add('synopsis')
-  animeWatchBtn.classList.add('watch-btn')
-  editAnimeBtn.classList.add('edit-btn')
 
-  if (status == 'NONE') {
-    animeWatchBtn.classList.add('hidden')
-    editAnimeBtn.style.top = '210px'
+  if (status != 'NONE') {
+    animeWatchDiv.style.display = 'inline-flex'
+    editDiv.style.top = '208px'
   }
 
   animeBannerImg.src = animeData.bannerImage
   animeCoverImg.src = animeData.coverImage.large
   animeTitleP.innerText = animeData.title.english ? animeData.title.english : animeData.title.romaji
   animeSynopsisP.innerText = animeData.description ? animeData.description.replace(/<br>|<\/br>|<i>|<\/i>|<strong>|<\/strong>|<em>|<\/em>/g, '') : ''
-  animeWatchBtn.innerHTML = `Watch Ep. ${progress == animeData.episodes ? progress : progress + 1}/${animeData.episodes ? animeData.episodes : '?'}`
-  editAnimeBtn.innerHTML = MEDIA_ENTRY_STATUS[status] + '<i class="fas fa-pen"></i>'
+  animeWatchDiv.getElementsByTagName('a')[0].innerHTML = `Watch ${progress == animeData.episodes ? progress : progress + 1}/${animeData.episodes ? animeData.episodes : '?'}`
+  editBtn.innerHTML = MEDIA_ENTRY_STATUS[status]
   dropdownStatusBtn.innerHTML = MEDIA_ENTRY_STATUS[status]
   progressInput.value = progress
   scoreInput.value = score
@@ -229,8 +255,7 @@ function addAnimeToPage() {
   animeCoverDiv.appendChild(animeCoverImg)
 
   if (userConfig.getUsername()) {
-    animeCoverDiv.appendChild(animeWatchBtn)
-    animeCoverDiv.appendChild(editAnimeBtn)
+    animeCoverDiv.appendChild(animeWatchDiv)
   }
 
   if (animeData.bannerImage) {
@@ -401,7 +426,10 @@ function setEventListeners() {
   const saveEditBtn = document.querySelector('.save-btn')
   const selFolderBtn = document.querySelector('.sel-folder-btn')
   const selFolderInput = document.querySelector('.sel-folder-input')
-  const playBtn = document.querySelector('.watch-btn')
+  const watchBtn = document.querySelector('.watch-btn')
+  const episodesDropDown = document.querySelector('.fa-angle-down')
+  const statusDropDown = document.querySelector('.fa-pen')
+  const statusDropDownOpts = document.querySelector('.status-menu-drop').children
 
   updateCloseBtn.addEventListener('click', () => {
     const updateNotification = document.querySelector('.update-frame')
@@ -585,8 +613,8 @@ function setEventListeners() {
     }
   })
 
-  if (playBtn) {
-    playBtn.addEventListener('click', () => {
+  if (watchBtn) {
+    watchBtn.addEventListener('click', () => {
       const args = {
         nextEpisode: animeList.getAnimeProgress(animeId) + 1 > animeData.episodes ? animeData.episodes : animeList.getAnimeProgress(animeId) + 1,
         totalEpisodes: animeData.episodes,
@@ -605,6 +633,39 @@ function setEventListeners() {
     })
   }
 
+  episodesDropDown.addEventListener('click', () => {
+    const dropDownMenu = document.querySelector('.episodes-menu-drop')
+
+    if (dropDownMenu.style.maxHeight == '300px') {
+      dropDownMenu.style.maxHeight = '0px'
+    } else {
+      dropDownMenu.style.maxHeight = '300px'
+    }
+  })
+
+  statusDropDown.addEventListener('click', () => {
+    const statusDownMenu = document.querySelector('.status-menu-drop')
+
+    if (statusDownMenu.style.maxHeight == '300px') {
+      statusDownMenu.style.maxHeight = '0px'
+    } else {
+      statusDownMenu.style.maxHeight = '300px'
+    }
+  })
+
+  for (let opt of statusDropDownOpts) {
+    opt.addEventListener('click', () => {
+      if (MEDIA_ENTRY_STATUS[opt.innerHTML] != animeList.getAnimeStatus(animeId)) {
+        ipcRenderer.send('pushEditAnimeToAnilist', ({
+          animeId: animeId,
+          newStatus: MEDIA_ENTRY_STATUS[opt.innerHTML],
+          newProgress: animeList.getAnimeProgress(animeId),
+          newScore: animeList.getAnimeScore(animeId)
+        }))
+      }
+    })
+  }
+
   document.addEventListener('keydown', (event) => {
     if (event.key == 'Escape') {
       editBox.style.height = '0'
@@ -613,8 +674,19 @@ function setEventListeners() {
   })
 
   document.addEventListener('click', (event) => {
+    const episodesDropDownMenu = document.querySelector('.episodes-menu-drop')
+    const statusDropDownMenu = document.querySelector('.status-menu-drop')
+
     if (!dropdownStatusBtn.contains(event.target)) {
       dropdownStatusMenu.style.height = '0'
+    }
+
+    if (!episodesDropDownMenu.contains(event.target) && !episodesDropDown.contains(event.target)) {
+      episodesDropDownMenu.style.maxHeight = '0px'
+    }
+
+    if (!statusDropDownMenu.contains(event.target) && !statusDropDown.contains(event.target)) {
+      statusDropDownMenu.style.maxHeight = '0px'
     }
   })
 }
@@ -724,8 +796,8 @@ function setIpcCallbacks() {
 
     animeList.resyncFile()
 
-    watchBtn.innerHTML = `Watch Ep. ${animeList.getAnimeProgress(animeId) == animeData.episodes ? 1 : animeList.getAnimeProgress(animeId) + 1}/${animeData.episodes}`
-    editBtn.innerHTML = MEDIA_ENTRY_STATUS[animeList.getAnimeStatus(animeId)] + '<i class="fas fa-pen"></i>'
+    watchBtn.innerHTML = `Watch ${animeList.getAnimeProgress(animeId) == animeData.episodes ? 1 : animeList.getAnimeProgress(animeId) + 1}/${animeData.episodes}`
+    editBtn.innerHTML = MEDIA_ENTRY_STATUS[animeList.getAnimeStatus(animeId)]
     statusBtn.innerHTML = MEDIA_ENTRY_STATUS[animeList.getAnimeStatus(animeId)]
     progressInput.value = animeList.getAnimeProgress(animeId)
     scoreInput.value = animeList.getAnimeScore(animeId)
