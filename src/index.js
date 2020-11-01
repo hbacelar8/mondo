@@ -223,22 +223,24 @@ ipcMain.on('playAnime', (event, args) => {
     }
 
     player.on('close', () => {
-      const opts = {
-        type: 'question',
-        buttons: ['No', 'Yes'],
-        defaultId: 0,
-        title: args.updateDiscord.details,
-        message: `Mark episode ${args.nextEpisode} as watched?`
-      }
-
-      if (userConfig.getUpdateDiscord()) {
-        updateDiscord({ details: '', state: 'Idling' })
-      }
-
-      if (dialog.showMessageBoxSync(null, opts)) {
-        fetchData.pushEpisodeToAnilist(args.animeId, args.nextEpisode)
-        animeList.setAnimeProgress(args.animeId, args.nextEpisode)
-        event.reply('updateAnimeView')
+      if (args.nextEpisode - 1 >= animeList.getAnimeProgress(args.animeId)) {
+        const opts = {
+          type: 'question',
+          buttons: ['No', 'Yes'],
+          defaultId: 0,
+          title: args.updateDiscord.details,
+          message: `Mark episode ${args.nextEpisode} as watched?`
+        }
+  
+        if (userConfig.getUpdateDiscord()) {
+          updateDiscord({ details: '', state: 'Idling' })
+        }
+  
+        if (dialog.showMessageBoxSync(null, opts)) {
+          fetchData.pushEpisodeToAnilist(args.animeId, args.nextEpisode)
+          animeList.setAnimeProgress(args.animeId, args.nextEpisode)
+          event.reply('updateAnimeView')
+        }
       }
     })
   } else {
