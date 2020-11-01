@@ -136,10 +136,6 @@ hr {
     transform: scale(1.1);
 }
 
-.hidden {
-    display: none;
-}
-
 .side-bar {
     width: 230px;
     height: 100%;
@@ -253,6 +249,7 @@ hr {
     height: 2px;
     left: 10%;
     bottom: 0;
+    z-index: -1;
     position: absolute;
     background-color: var(--line-color);
 }
@@ -278,34 +275,152 @@ hr {
     object-fit: cover;
 }
 
-.cover a {
+.cover .watch-btn-div {
     width: 100%;
-    top: 210px;
+    top: 208px;
     border-radius: 5px;
     font-size: 0.8rem;
     font-weight: 600;
-    padding: 3px;
-    cursor: pointer;
+    padding: 2px;
+    justify-content: space-between;
+    display: none;
     text-align: center;
     position: absolute;
     background-color: var(--line-color);
     transition: .2s;
 }
 
-.cover .edit-btn {
-    top: 250px;
-}
-
-.cover a:hover {
-    transform: translateX(5px);
-}
-
-.cover i {
+.cover .edit-btn-div {
+    width: 100%;
+    top: 165px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 2px;
+    justify-content: space-between;
+    display: inline-flex;
+    text-align: center;
     position: absolute;
-    align-items: center;
-    right: 10px;
-    top: 8px;
+    background-color: var(--line-color);
+}
+
+.watch-btn-div a,
+.edit-btn-div a {
+    margin: auto;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: color .1s;
+}
+
+.watch-btn-div a:hover,
+.edit-btn-div a:hover {
+    color: var(--darker-bg-color);
+}
+
+.watch-dropdown {
+    width: 40px;
+    position: relative;
+    background-color: var(--line-color);
+    transition: color .1s;
+}
+
+.watch-dropdown::after {
+    content: "";
+    width: 1px;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    background-color: var(--lighter-bg-color);
+}
+
+.watch-dropdown i {
+    cursor: pointer;
+    transform: translate(2px, 1px)
+}
+
+.watch-dropdown i:hover {
+    color: var(--darker-bg-color);
+}
+
+.episodes-menu-drop {
+    width: 100%;
+    top: 41px;
+    left: 0;
+    max-height: 0px;
+    border-radius: 5px;
+    position: absolute;
+    overflow: hidden;
+    overflow-y: auto;
+    white-space: nowrap;
+    background-color: var(--lighter-bg-color);
+    transition: .2s;
+}
+
+.episodes-menu-drop div {
+    font-size: 0.8rem;
+    padding: 5px 10px 5px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: .1s;
+}
+
+.episodes-menu-drop div:hover {
+    color: var(--line-color);
+}
+
+.edit-btn-div {
+    transform: translateY(42px);
+}
+
+.status-dropdown {
+    width: 40px;
+    position: relative;
+    background-color: var(--line-color);
+    transition: color .1s;
+}
+
+.status-dropdown::after {
+    content: "";
+    width: 1px;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    background-color: var(--lighter-bg-color);
+}
+
+.status-dropdown i {
+    cursor: pointer;
     font-size: 0.7rem;
+}
+
+.status-dropdown i:hover {
+    color: var(--darker-bg-color);
+}
+
+.status-menu-drop {
+    width: 100%;
+    top: 41px;
+    left: 0;
+    max-height: 0px;
+    border-radius: 5px;
+    position: absolute;
+    overflow: hidden;
+    white-space: nowrap;
+    background-color: var(--lighter-bg-color);
+    transition: .2s;
+}
+
+.status-menu-drop div {
+    font-size: 0.8rem;
+    padding: 5px 10px 5px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: .1s;
+}
+
+.status-menu-drop div:hover {
+    color: var(--line-color);
 }
 
 .info {
@@ -727,6 +842,10 @@ hr {
     border: 3px solid #fff;
     border-color: #fff transparent #fff transparent;
     animation: lds-dual-ring 1.2s linear infinite;
+}
+
+.hidden {
+    display: none;
 }
 
 @keyframes lds-dual-ring {
