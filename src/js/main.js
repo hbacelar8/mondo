@@ -130,6 +130,10 @@ function addAnimesToView() {
   for (let [index, status] of Object.keys(animeStatus).entries()) {
     const subList = animeList.getAnimeList().filter(anime => anime.status == status)
 
+    if (status == 'CURRENT') {
+      subList.sort(Utils.compareParams('updatedAt', 'desc'))
+    }
+
     if (subList.length) {
       subList.forEach((entry) => {
         const animeWrap = document.getElementsByClassName('anime-wrap')[index]
