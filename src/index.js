@@ -23,6 +23,7 @@ const pathModule = require('path')
 const fs = require('fs')
 
 const WindowConfig = require('../lib/window-config')
+const AnimeSeasons = require('../lib/anime-seasons')
 const UserConfig = require('../lib/user-config')
 const AnimeFiles = require('../lib/anime-files')
 const AnimeList = require('../lib/anime-list')
@@ -95,6 +96,16 @@ const fetchData = new FetchData({
   username: userConfig.getUsername(),
   accessCode: userConfig.getAccessCode()
 })
+
+const animeSeasons = new AnimeSeasons()
+animeSeasons.fetchAllSeasons()
+
+var animeSeasonsInterval = setInterval(() => {
+  if (animeSeasons.isFetchDone()) {
+    updateAnimeSeasons()
+    clearInterval(animeSeasonsInterval)
+  }
+}, 500)
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -359,6 +370,10 @@ function updateAnimeData() {
     .then(handleResponse)
     .then(handleMediaCollectionData)
     .then(handleError)
+}
+
+function updateAnimeSeasons() {
+  mainWindow.webContents.send('addSeasonsToView', animeSeasons.data)
 }
 
 function handleResponse(response) {

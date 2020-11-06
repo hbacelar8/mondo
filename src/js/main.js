@@ -225,6 +225,252 @@ function addAnimeListCounters() {
   counters[4].innerHTML = animeList.getAnimeList().filter(anime => anime.status == 'DROPPED').length
 }
 
+function addSeasonsToView(seasons) {
+  console.log(seasons)
+
+  for (let [seasonNumber, seasonValue] of Object.entries(seasons)) {
+    const seasonDiv = document.getElementById(seasonNumber)
+
+    const releases = {
+      tvReleases: {
+        name: 'TV',
+        list: seasonValue.list.filter(anime => anime.format == 'TV').sort(Utils.compareParams('meanScore', 'desc'))
+      },
+      leftovers: {
+        name: 'LEFTOVERS',
+        list: seasonValue.list.filter(anime => anime.format == 'LEFTOVER').sort(Utils.compareParams('meanScore', 'desc'))
+      },
+      tvShortReleases: {
+        name: 'TV SHORT',
+        list: seasonValue.list.filter(anime => anime.format == 'TV_SHORT').sort(Utils.compareParams('meanScore', 'desc'))
+      },
+      movieReleases: {
+        name: 'MOVIES',
+        list: seasonValue.list.filter(anime => anime.format == 'MOVIE').sort(Utils.compareParams('meanScore', 'desc'))
+      },
+      ovaOnaSpecialReleases: {
+        name: 'ONA / OVA / SPECIAL',
+        list: seasonValue.list.filter(anime => anime.format == 'ONA' || anime.format == 'OVA' || anime.format == 'SPECIAL').sort(Utils.compareParams('meanScore', 'desc'))
+      }
+    }
+
+    for (let [_, value] of Object.entries(releases)) {
+      if (!value.list.length) {
+        continue
+      }
+
+      const releaseTypeP = document.createElement('p')
+
+      releaseTypeP.classList.add('season-media-type')
+      releaseTypeP.innerHTML = value.name
+
+      seasonDiv.appendChild(releaseTypeP)
+
+      for (let anime of value.list) {
+        const mediaCard = document.createElement('div')
+        const mediaCardImg = document.createElement('div')
+        const mediaCardBody = document.createElement('div')
+        const cardBodyHeader = document.createElement('div')
+        const cardBodyMain = document.createElement('div')
+        const cardBodyFooter = document.createElement('div')
+
+        mediaCard.classList.add('season-media-card')
+        mediaCardImg.classList.add('media-img')
+        mediaCardBody.classList.add('card-body')
+        cardBodyHeader.classList.add('card-body-header')
+        cardBodyMain.classList.add('card-body-main')
+        cardBodyFooter.classList.add('card-body-footer')
+
+        // Media Image Div
+        const mediaImg = document.createElement('img')
+        const mediaTitle = document.createElement('p')
+        const mediaStudio = document.createElement('span')
+
+        mediaImg.src = anime.coverImage.large
+        mediaTitle.innerHTML = anime.title.english ? anime.title.english : anime.title.romaji
+        mediaStudio.innerHTML = anime.studios.nodes[0] ? anime.studios.nodes[0].name : ''
+        mediaStudio.style.color = anime.coverImage.color
+
+        mediaTitle.addEventListener('mouseenter', () => {
+          mediaTitle.style.color = anime.coverImage.color
+        })
+
+        mediaTitle.addEventListener('mouseleave', () => {
+          mediaTitle.style.color = 'unset'
+        })
+
+        mediaTitle.addEventListener('click', () => {
+          window.location.href = `anime.html?id=${anime.id}`
+        })
+
+        mediaCardImg.appendChild(mediaImg)
+        mediaCardImg.appendChild(mediaTitle)
+        mediaCardImg.appendChild(mediaStudio)
+        mediaCard.appendChild(mediaCardImg)
+
+        // Media Header Div
+        const mediaEpisode = document.createElement('p')
+        const mediaAiringTime = document.createElement('p')
+        const mediaSource = document.createElement('p')
+        const mediaEmoji = document.createElement('i')
+        const mediaMeanScore = document.createElement('p')
+
+        switch (seasonNumber) {
+          case '#season1':
+            if (anime.nextAiringEpisode) {
+              if (anime.episodes) {
+                mediaEpisode.innerHTML = `Ep ${anime.nextAiringEpisode.episode} of ${anime.episodes} airing in`
+              } else {
+                mediaEpisode.innerHTML = `Ep ${anime.nextAiringEpisode.episode} airing in`
+              }
+
+              setInterval(() => {
+                mediaAiringTime.innerHTML = Utils.getTimeToNextEpisode(anime.nextAiringEpisode.airingDate - Date.now())
+              }, 1000);
+            } else {
+              if (anime.episodes) {
+                mediaEpisode.innerHTML = anime.episodes > 1 ? `${anime.episodes} Episodes aired on` : `${anime.episodes} Episode aired on`
+              } else {
+                mediaEpisode.innerHTML = 'Aired on'
+              }
+
+              mediaAiringTime.innerHTML = Utils.getAiringDate(anime.startDate)
+            }
+            break
+
+          case '#season2':
+            if (anime.nextAiringEpisode) {
+              if (anime.episodes) {
+                mediaEpisode.innerHTML = `Ep ${anime.nextAiringEpisode.episode} of ${anime.episodes} airing in`
+              } else {
+                mediaEpisode.innerHTML = `Ep ${anime.nextAiringEpisode.episode} airing in`
+              }
+
+              setInterval(() => {
+                mediaAiringTime.innerHTML = Utils.getTimeToNextEpisode(anime.nextAiringEpisode.airingDate - Date.now())
+              }, 1000);
+            } else {
+              if (anime.episodes) {
+                mediaEpisode.innerHTML = anime.episodes > 1 ? `${anime.episodes} Episodes aired on` : `${anime.episodes} Episode aired on`
+              } else {
+                mediaEpisode.innerHTML = 'Aired on'
+              }
+
+              mediaAiringTime.innerHTML = Utils.getAiringDate(anime.startDate)
+            }
+            break
+
+          default:
+            if (anime.episodes) {
+              if (anime.startDate.day) {
+                mediaEpisode.innerHTML = anime.episodes > 1 ? `${anime.episodes} Episodes airing on` : `${anime.episodes} Episode airing on`
+              } else if (anime.startDate.month || anime.startDate.year) {
+                mediaEpisode.innerHTML = anime.episodes > 1 ? `${anime.episodes} Episodes airing in` : `${anime.episodes} Episode airing in`
+              } else {
+                mediaEpisode.innerHTML = ''
+              }
+            } else {
+              if (anime.startDate.day || anime.startDate.month) {
+                mediaEpisode.innerHTML = 'Airing on'
+              } else if (anime.startDate.year) {
+                mediaEpisode.innerHTML = 'Airing in'
+              } else {
+                mediaEpisode.innerHTML = ''
+              }
+            }
+
+            mediaAiringTime.innerHTML = Utils.getAiringDate(anime.startDate)
+            break
+        }
+
+        mediaSource.innerHTML = anime.source ? 'SOURCE • ' + anime.source.replace('_', ' ') : ''
+        mediaEmoji.classList.add('far')
+        mediaMeanScore.innerHTML = anime.meanScore + '%'
+        cardBodyHeader.appendChild(mediaEpisode)
+        cardBodyHeader.appendChild(mediaAiringTime)
+        cardBodyHeader.appendChild(mediaSource)
+
+        if (anime.meanScore) {
+          if (anime.meanScore >= 75) {
+            mediaEmoji.classList.add('fa-smile-beam')
+          } else if (anime.meanScore >= 60) {
+            mediaEmoji.classList.add('fa-meh')
+            mediaEmoji.style.color = '#cc862b'
+          } else {
+            mediaEmoji.classList.add('fa-frown')
+            mediaEmoji.style.color = '#c44545'
+          }
+
+          cardBodyHeader.appendChild(mediaEmoji)
+          cardBodyHeader.appendChild(mediaMeanScore)
+        }
+
+        mediaCardBody.appendChild(cardBodyHeader)
+
+        // Media Main Div
+        const mediaSynopsis = document.createElement('p')
+
+        mediaSynopsis.innerHTML = anime.description ? anime.description.replace(/<br>|<\/br>|<i>|<\/i>|<strong>|<\/strong>|<em>|<\/em>|<dogeza>|<\/dogeza>/g, '') : 'No synopsis available.'
+        cardBodyMain.appendChild(mediaSynopsis)
+        mediaCardBody.appendChild(cardBodyMain)
+
+        // Media Footer Div
+        const mediaAddBtn = document.createElement('i')
+        const mediaAddDiv = document.createElement('div')
+        const mediaAddWatching = document.createElement('p')
+        const mediaAddPlanning = document.createElement('p')
+
+        for (let [count, genre] of anime.genres.entries()) {
+          const animeGenre = document.createElement('div')
+
+          animeGenre.classList.add('media-genre')
+          animeGenre.innerHTML = genre.toLowerCase()
+          animeGenre.style.backgroundColor = anime.coverImage.color
+          cardBodyFooter.appendChild(animeGenre)
+
+          if (count == 2) {
+            break
+          }
+        }
+
+        mediaAddBtn.classList.add('far')
+        mediaAddBtn.classList.add('fa-plus-square')
+        mediaAddDiv.classList.add('media-add-div')
+        mediaAddWatching.innerHTML = '<i class="far fa-caret-square-right"></i>Add to Watching'
+        mediaAddPlanning.innerHTML = '<i class="far fa-question-circle"></i>Add to Planning'
+        mediaAddDiv.appendChild(mediaAddWatching)
+        mediaAddDiv.appendChild(mediaAddPlanning)
+        cardBodyFooter.appendChild(mediaAddBtn)
+        cardBodyFooter.appendChild(mediaAddDiv)
+        mediaCardBody.appendChild(cardBodyFooter)
+
+        mediaAddBtn.addEventListener('mouseenter', () => {
+          mediaAddDiv.style.zIndex = '1'
+          mediaAddDiv.style.opacity = '1'
+
+          mediaAddDiv.addEventListener('mouseenter', () => {
+            mediaAddDiv.style.zIndex = '1'
+            mediaAddDiv.style.opacity = '1'
+          })
+
+          mediaAddDiv.addEventListener('mouseleave', () => {
+            mediaAddDiv.style.zIndex = '-1'
+            mediaAddDiv.style.opacity = '0'
+          })
+        })
+
+        mediaAddBtn.addEventListener('mouseleave', () => {
+          mediaAddDiv.style.zIndex = '-1'
+          mediaAddDiv.style.opacity = '0'
+        })
+
+        mediaCard.appendChild(mediaCardBody)
+        seasonDiv.appendChild(mediaCard)
+      }
+    }
+  }
+}
+
 function setEventListeners() {
   const updateCloseBtn = document.querySelector('.close-update-btn')
   const updateRestartBtn = document.querySelector('.restart-update-btn')
@@ -602,6 +848,18 @@ function setIpcCallbacks() {
     data = args.data.Page.media
 
     addSearchResultsToView(data)
+  })
+
+  ipcRenderer.on('addSeasonsToView', (_, args) => {
+    const seasonLinks = document.querySelector('.seasons-lists-menu').children
+    var counter = 0;
+
+    for (let season of Object.values(args)) {
+      seasonLinks[counter].dataset.seasonName = `${season.name.charAt(0) + season.name.slice(1).toLowerCase()} ${season.year}`
+      counter++
+    }
+
+    addSeasonsToView(args)
   })
 
   ipcRenderer.on('updateUpdateTime', (_, lastUpdate) => {
