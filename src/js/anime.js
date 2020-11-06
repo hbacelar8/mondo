@@ -276,7 +276,7 @@ function addOverviewToPage() {
   const overviewDiv = document.querySelector('.overview')
 
   const overviewData = {
-    airing: animeData.nextAiringEpisode ? `Ep. ${animeData.nextAiringEpisode.episode}: ${Utils.convertSecondsToDHM(animeData.nextAiringEpisode.timeUntilAiring)}` : null,
+    airing: animeData.nextAiringEpisode ? `Ep. ${animeData.nextAiringEpisode.episode}: ${Utils.getTimeToNextEpisode(animeData.nextAiringEpisode.timeUntilAiring, 'sec')}` : null,
     format: animeData.format,
     episodes: animeData.episodes,
     Episode_Duration: animeData.duration ? animeData.duration + 'mins' : null,
@@ -299,6 +299,8 @@ function addOverviewToPage() {
           var div = document.createElement('div')
           var p1 = document.createElement('p')
           var p2 = document.createElement('p')
+
+          p2.classList.add('airingP')
           p2.style.color = getComputedStyle(document.body).getPropertyValue('--line-color')
 
           p1.innerText = 'Airing'
@@ -307,6 +309,12 @@ function addOverviewToPage() {
           div.appendChild(p1)
           div.appendChild(p2)
           overviewDiv.appendChild(div)
+
+          setInterval(() => {
+            const airingP = document.querySelector('.airingP')
+
+            airingP.innerText = `Ep. ${animeData.nextAiringEpisode.episode}: ${Utils.getTimeToNextEpisode(animeData.nextAiringEpisode.timeUntilAiring--, 'sec')}`
+          }, 1000);
         }
         break
 
