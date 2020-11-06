@@ -151,22 +151,26 @@ body {
     border-radius: 50%;
 }
 
-.anime-lists {
+.anime-lists,
+.seasons-lists {
     margin: 10px 0 20px 15px;
     position: relative;
 }
 
-.anime-lists-btn {
+.anime-lists-btn,
+.seasons-lists-btn {
     font-size: 0.55rem;
     font-weight: 800;
     color: var(--line-color);
 }
 
-.anime-lists-menu {
+.anime-lists-menu,
+.seasons-lists-menu {
     padding-top: 5px;
 }
 
-.anime-lists-menu a {
+.anime-lists-menu a,
+.seasons-lists-menu a {
     display: block;
     margin: 10px 20px 0 0;
     font-size: 0.7rem;
@@ -176,21 +180,25 @@ body {
     position: relative;
 }
 
-.anime-lists-menu p {
+.anime-lists-menu p,
+.seasons-lists-menu p {
     display: inline-block;
     font-size: 0.6rem;
     right: 0;
     position: absolute;
 }
 
-.anime-lists-menu i {
+.anime-lists-menu i,
+.seasons-lists-menu i {
     margin-right: 15px;
     font-size: 0.65rem;
     color: rgba(169, 169, 169, 0.5);
     transition: 0.3s;
 }
 
-.anime-lists-menu a:hover > .far {
+.anime-lists-menu a:hover > .far,
+.seasons-lists-menu a:hover > .far,
+.seasons-lists-menu a:hover > .fas {
     color: rgba(255, 255, 255, 0.8);
 }
 
@@ -430,6 +438,206 @@ input[type=range]::-webkit-slider-thumb {
     right: 5px;
     bottom: 3px;
     position: absolute;
+}
+
+.season-wrap {
+    display: grid;
+    margin: 20px;
+    gap: 40px;
+    grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+    justify-items: center;
+    position: relative;
+}
+
+.season-media-type {
+    justify-self: left;
+    grid-column: 1/-1;
+}
+
+.season-media-card {
+    width: 510px;
+    height: 265px;
+    border-radius: 4px;
+    position: relative;
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    box-shadow: 0 4px 6px rgba(49, 54, 68, .05), 0 5px 20px rgba(49, 54, 68, .08);;
+}
+
+.season-media-card .card-body {
+    display: grid;
+    grid-template-rows: 70px 160px minmax(0, 1fr);
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    position: relative;
+}
+
+.season-media-card .media-img {
+    width: 100%;
+    height: 265px;
+}
+
+.media-img img {
+    width: 100%;
+    height: 100%;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    object-fit: cover;
+}
+
+.media-img p {
+    width: 180px;
+    min-height: 70px;
+    background-color: rgba(0, 0, 0, 0.85);
+    bottom: 0;
+    padding: 5px 5px 30px 10px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-bottom-left-radius: 3px;
+    text-align: left;
+    position: absolute;
+    overflow: hidden;
+    cursor: pointer;
+    transition: color .2s;
+}
+
+.media-img span {
+    width: 150px;
+    font-size: 0.5rem;
+    font-weight: 700;
+    left: 10px;
+    margin-bottom: 5px;
+    bottom: 0;
+    position: absolute;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.card-body-header {
+    padding: 5px;
+    padding-left: 10px;
+    border-top-right-radius: 3px;
+    background-color: var(--lighter-bg-color);
+}
+
+.card-body-header p:nth-of-type(1) {
+    font-size: 0.5rem;
+}
+
+.card-body-header p:nth-of-type(2) {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.card-body-header p:nth-of-type(3) {
+    font-size: 0.4rem;
+}
+
+.card-body-header p:nth-of-type(4) {
+    top: 13px;
+    right: 10px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    position: absolute;
+}
+
+.card-body-header i {
+    top: 10px;
+    right: 50px;
+    color: green;
+    position: absolute;
+}
+
+.card-body-main {
+    padding: 10px;
+    border-right: 1px solid var(--lighter-bg-color);
+    overflow: hidden;
+    background-color: var(--darker-bg-color);
+}
+
+.card-body-main:hover {
+    overflow: auto;
+}
+
+.card-body-main p:first-of-type {
+    font-size: 0.55rem;
+}
+
+.card-body-footer {
+    border-bottom-right-radius: 3px;
+    background-color: var(--lighter-bg-color);
+}
+
+.card-body-footer .media-genre {
+    font-size: 0.6rem;
+    margin-left: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 15px;
+    text-align: center;
+    background-color: turquoise;
+    display: inline-flex;
+}
+
+.card-body-footer .media-add-div {
+    width: 180px;
+    bottom: 38px;
+    right: 10px;
+    border-radius: 5px;
+    position: absolute;
+    opacity: 0;
+    background-color: var(--lighter-bg-color);
+    transition: .3s;
+    transition-delay: .2s;
+    z-index: -1;
+}
+
+.media-add-div p {
+    padding: 5px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.media-add-div p:nth-of-type(1) {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.media-add-div p:nth-of-type(2) {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.media-add-div p:hover {
+    background-color: var(--line-color);
+}
+
+.media-add-div i {
+    margin-left: 5px;
+    margin-right: 10px;
+    font-size: 0.6rem;
+}
+
+.media-add-div p:nth-of-type(1) i {
+    color: green;
+}
+
+.media-add-div p:nth-of-type(2) i {
+    color: yellow;
+}
+
+.card-body-footer .fa-plus-square {
+    width: 25px;
+    bottom: 5px;
+    right: 5px;
+    position: absolute;
+    cursor: pointer;
+}
+
+.card-body-footer .fa-plus-square:hover ~ .media-add-div {
+    opacity: 1;
 }
 
 /* -------- Settings CSS -------- */
