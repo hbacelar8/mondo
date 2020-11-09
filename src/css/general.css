@@ -1,0 +1,208 @@
+* {
+    margin: 0;
+    padding: 0;
+    color: white;
+    font-size: 24px;
+    font-family: 'Nunito', sans-serif;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+}
+
+:root {
+    --darker-bg-color: #292e37;
+    --lighter-bg-color: #353b48;
+    --lighter-bg-color-rgb: 53, 59, 72;
+    --line-color: #487eb0;
+}
+
+*:focus {
+    outline: none;
+}
+
+body {
+    background-color: var(--darker-bg-color);
+}
+
+/* ----------- Scrollbar -----------*/
+/* width */
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: var(--lighter-bg-color);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--line-color);
+    border-radius: 2px;
+}
+/* ----------- Scrollbar -----------*/
+
+.taskbar {
+    width: calc(100% - 230px);
+    height: 35px;
+    position: fixed;
+    right: 0;
+    -webkit-app-region: drag;
+    z-index: 1;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    background-blend-mode: exclusion;
+    background: rgba(53, 59, 72, 0.6);
+}
+
+.window-btns {
+    width: 120px;
+    height: 35px;
+    right: 0;
+    z-index: 1;
+    display: flex;
+    position: fixed;
+    justify-content: space-evenly;
+    -webkit-app-region: no-drag;
+}
+
+.window-btns div {
+    width: 100%;
+    transition: 0.2s;
+    cursor: pointer;
+    text-align: center;
+}
+
+.window-btns i {
+    font-size: 0.4rem;
+    transform: translateY(-3px);
+}
+
+.min:hover,
+.max:hover {
+    background-color: var(--line-color);
+}
+
+.close:hover {
+    background-color: #870202;
+}
+
+.update-frame {
+    width: 260px;
+    height: 160px;
+    right: 30px;
+    bottom: 25px;
+    border-radius: 10px;
+    padding: 20px 10px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    position: fixed;
+    background-color: var(--lighter-bg-color);
+}
+
+.update-frame p {
+    font-size: 0.8rem;
+}
+
+.update-frame a {
+    width: 100px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 3px;
+    margin: auto;
+    cursor: pointer;
+    text-align: center;
+    background-color: var(--line-color);
+    transition: .2s;
+}
+
+.update-frame a:hover {
+    transform: scale(1.1);
+}
+
+.side-bar {
+    width: 230px;
+    height: 100%;
+    font-size: 1.5rem;
+    position: fixed;
+    white-space: nowrap;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-blend-mode: exclusion;
+    background: rgba(53, 59, 72, 0.6);
+}
+
+.user-avatar-div {
+    width: 100%;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.user-avatar-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.anime-lists {
+    margin: 10px 0 20px 15px;
+    position: relative;
+}
+
+.anime-lists-btn {
+    font-size: 0.55rem;
+    font-weight: 800;
+    color: var(--line-color);
+}
+
+.anime-lists-menu {
+    padding-top: 5px;
+}
+
+.anime-lists-menu a {
+    display: block;
+    margin: 10px 20px 0 0;
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    cursor: pointer;
+    position: relative;
+}
+
+.anime-lists-menu p {
+    display: inline-block;
+    font-size: 0.6rem;
+    right: 0;
+    position: absolute;
+}
+
+.anime-lists-menu i {
+    margin-right: 15px;
+    font-size: 0.65rem;
+    color: rgba(169, 169, 169, 0.5);
+    transition: 0.3s;
+}
+
+.anime-lists-menu a:hover > .far {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.settings-btn {
+    margin: 20px 0 20px 15px;
+    font-size: 0.8rem;
+    bottom: 0;
+    cursor: pointer;
+    position: absolute;
+}
+
+.settings-btn i {
+    margin-right: 10px;
+    font-size: 0.8rem;
+}

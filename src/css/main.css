@@ -1,212 +1,3 @@
-* {
-    margin: 0;
-    padding: 0;
-    color: white;
-    font-size: 24px;
-    font-family: 'Nunito', sans-serif;
-    box-sizing: border-box;
-    text-decoration: none;
-    list-style: none;
-}
-
-:root {
-    --darker-bg-color: #292e37;
-    --lighter-bg-color: #353b48;
-    --lighter-bg-color-rgb: 53, 59, 72;
-    --line-color: #487eb0;
-}
-
-*:focus {
-    outline: none;
-}
-
-body {
-    background-color: var(--darker-bg-color);
-}
-
-/* ----------- Scrollbar -----------*/
-/* width */
-::-webkit-scrollbar {
-    width: 7px;
-    height: 7px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-    background: var(--lighter-bg-color);
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-    background: var(--line-color);
-    border-radius: 2px;
-}
-/* ----------- Scrollbar -----------*/
-
-.taskbar {
-    width: calc(100% - 230px);
-    height: 35px;
-    position: fixed;
-    right: 0;
-    -webkit-app-region: drag;
-    z-index: 1;
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
-    background-blend-mode: exclusion;
-    background: rgba(53, 59, 72, 0.6);
-}
-
-.window-btns {
-    width: 120px;
-    height: 35px;
-    right: 0;
-    z-index: 1;
-    display: flex;
-    position: fixed;
-    justify-content: space-evenly;
-    -webkit-app-region: no-drag;
-}
-
-.window-btns div {
-    width: 100%;
-    transition: 0.2s;
-    cursor: pointer;
-    text-align: center;
-}
-
-.window-btns i {
-    font-size: 0.4rem;
-    transform: translateY(-3px);
-}
-
-.min:hover,
-.max:hover {
-    background-color: var(--line-color);
-}
-
-.close:hover {
-    background-color: #870202;
-}
-
-.update-frame {
-    width: 260px;
-    height: 160px;
-    right: 30px;
-    bottom: 25px;
-    border-radius: 10px;
-    padding: 20px 10px 10px 10px;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    position: fixed;
-    background-color: var(--lighter-bg-color);
-}
-
-.update-frame p {
-    font-size: 0.8rem;
-}
-
-.update-frame a {
-    width: 100px;
-    padding-left: 10px;
-    padding-right: 10px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 3px;
-    margin: auto;
-    cursor: pointer;
-    text-align: center;
-    background-color: var(--line-color);
-    transition: .2s;
-}
-
-.update-frame a:hover {
-    transform: scale(1.1);
-}
-
-.side-bar {
-    width: 230px;
-    height: 100%;
-    font-size: 1.5rem;
-    position: fixed;
-    white-space: nowrap;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    background-blend-mode: exclusion;
-    background: rgba(53, 59, 72, 0.6);
-}
-
-.user-avatar-div {
-    width: 100%;
-    margin-top: 30px;
-    text-align: center;
-}
-
-.user-avatar-img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.anime-lists {
-    margin: 10px 0 20px 15px;
-    position: relative;
-}
-
-.anime-lists-btn {
-    font-size: 0.55rem;
-    font-weight: 800;
-    color: var(--line-color);
-}
-
-.anime-lists-menu {
-    padding-top: 5px;
-}
-
-.anime-lists-menu a {
-    display: block;
-    margin: 10px 20px 0 0;
-    font-size: 0.7rem;
-    font-weight: 300;
-    letter-spacing: 1px;
-    cursor: pointer;
-    position: relative;
-}
-
-.anime-lists-menu p {
-    display: inline-block;
-    font-size: 0.6rem;
-    right: 0;
-    position: absolute;
-}
-
-.anime-lists-menu i {
-    margin-right: 15px;
-    font-size: 0.65rem;
-    color: rgba(169, 169, 169, 0.5);
-    transition: 0.3s;
-}
-
-.anime-lists-menu a:hover > .far {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.settings-btn {
-    margin: 20px 0 20px 15px;
-    font-size: 0.8rem;
-    bottom: 0;
-    cursor: pointer;
-    position: absolute;
-}
-
-.settings-btn i {
-    margin-right: 10px;
-    font-size: 0.8rem;
-}
-
 .main {
     height: 100vh;
     margin-left: 230px;
@@ -215,12 +6,12 @@ body {
     grid-template-rows: 200px auto;
 }
 
-.header-wrap {
+.main .header-wrap {
     margin-top: 50px;
     position: relative;
 }
 
-.header-wrap::after {
+.main .header-wrap::after {
     content: "";
     width: 80%;
     height: 2px;
@@ -229,6 +20,29 @@ body {
     background-color: var(--line-color);
     position: absolute;
     margin-left: -40%;
+}
+
+.main .header-wrap .header {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.main .header-wrap .header h1 {
+    margin-left: 50px;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.anime-search {
+    right: 0;
+    margin-right: 50px;
+    position: absolute;
+    border: 1px solid var(--line-color);
+    background: transparent;
+    border-radius: 30px;
+    padding: 5px 20px 5px 20px;
+    font-size: 0.8rem;
 }
 
 .grid-slider {
@@ -264,11 +78,11 @@ input[type=range]::-webkit-slider-thumb {
     left: 0;
 }
 
-.options-container {
+.main .options-container {
     position: relative;
 }
 
-.sort-btn {
+.main .options-container .sort-btn {
     width: 200px;
     right: 10%;
     bottom: -70px;
@@ -286,7 +100,7 @@ input[type=range]::-webkit-slider-thumb {
     cursor: pointer;
 }
 
-.sort-btn i {
+.main .options-container .sort-btn i {
     font-size: 0.8rem;
     right: 15px;
     transform: translateY(3px) rotate(0deg);
@@ -294,7 +108,7 @@ input[type=range]::-webkit-slider-thumb {
     position: absolute;
 }
 
-.options {
+.main .options-container .options {
     width: 200px;
     max-height: 0;
     right: 10%;
@@ -312,7 +126,7 @@ input[type=range]::-webkit-slider-thumb {
     transition: 0.3s;
 }
 
-.options a {
+.main .options-container .options a {
     font-size: 0.8rem;
     font-weight: 500;
     padding-left: 15px;
@@ -322,34 +136,11 @@ input[type=range]::-webkit-slider-thumb {
     cursor: pointer;
 }
 
-.options a:hover {
+.main .options-container .options a:hover {
     background-color: var(--line-color);
 }
 
-.header {
-    display: flex;
-    align-items: center;
-    position: relative;
-}
-
-.header h1 {
-    margin-left: 50px;
-    font-size: 2rem;
-    font-weight: 600;
-}
-
-.anime-search {
-    right: 0;
-    margin-right: 50px;
-    position: absolute;
-    border: 1px solid var(--line-color);
-    background: transparent;
-    border-radius: 30px;
-    padding: 5px 20px 5px 20px;
-    font-size: 0.8rem;
-}
-
-.content {
+.main .content {
     margin: 20px;
 }
 
@@ -430,372 +221,6 @@ input[type=range]::-webkit-slider-thumb {
     right: 5px;
     bottom: 3px;
     position: absolute;
-}
-
-/* -------- Settings CSS -------- */
-
-.settings-content {
-    width: 900px;
-    margin: 0 auto 35px auto;
-    padding-top: 50px;
-    border-radius: 10px;
-    position: relative;
-    background-color: var(--lighter-bg-color);
-}
-
-.anilist-connection {
-    width: 800px;
-    margin-bottom: 40px;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.anilist-connection .title {
-    position: relative;
-}
-
-.anilist-connection .title::after {
-    content: "";
-    width: 800px;
-    height: 1px;
-    bottom: -5px;
-    left: 0;
-    position: absolute;
-    background-color: var(--line-color);
-}
-
-.anilist-connection a {
-    font-size: 0.85rem;
-}
-
-.anilist-connection p {
-    font-size: 0.9rem;
-    margin-left: auto;
-}
-
-.connect-view, 
-.disconnect-view {
-    width: 100%;
-    margin-top: 30px;
-    gap: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
-
-.connect-view .btn,
-.disconnect-view .btn {
-    width: 200px;
-    height: 36px;
-    padding-left: 5px;
-    padding-right: 5px;
-    border-radius: 5px;
-    text-align: center;
-    background-color: transparent;
-    border: 1px solid var(--line-color);
-    cursor: pointer;
-    transition: .4s;
-}
-
-.connect-view .btn:hover,
-.disconnect-view .btn:hover {
-    background-color: var(--line-color);
-}
-
-.connect-view .login-input {
-    width: 100%;
-    height: 30px;
-    font-size: 0.6rem;
-    border-radius: 5px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid var(--line-color);
-    color: black;
-    padding-left: 5px;
-}
-
-.sync-on-start-div {
-    display: flex;
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    margin-left: 10px;
-    width: 60px;
-    height: 30px;
-    transform: translateY(1px);
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider-switch {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--darker-bg-color);
-    -webkit-transition: .4s;
-    transition: .4s;
-}
-
-.slider-switch:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
-
-input:checked +  .slider-switch {
-    background-color: var(--line-color);
-}
-
-input:checked + .slider-switch:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
-}
-
-.slider-switch.round {
-    border-radius: 34px;
-}
-
-.slider-switch.round:before {
-    width: 23px;
-    height: 23px;
-    border-radius: 50%;
-}
-
-.general-config {
-    width: 800px;
-    margin-bottom: 40px;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.general-config .title {
-    position: relative;
-}
-
-.general-config .title::after {
-    content: "";
-    width: 800px;
-    height: 1px;
-    bottom: -5px;
-    left: 0;
-    position: absolute;
-    background-color: var(--line-color);
-}
-
-.general-config-content {
-    display: flex;
-    margin-top: 30px;
-    justify-content: space-between;
-}
-
-.anime-folder-menu {
-    width: 800px;
-    margin-bottom: 40px;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.anime-folder-menu .title {
-    position: relative;
-}
-
-.anime-folder-menu .title::after {
-    content: "";
-    width: 800px;
-    height: 1px;
-    bottom: -5px;
-    left: 0;
-    position: absolute;
-    background-color: var(--line-color);
-}
-
-.anime-folder-div {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    margin-top: 30px;
-}
-
-.anime-folder-div .btn {
-    width: 200px;
-    height: 36px;
-    padding-left: 5px;
-    padding-right: 5px;
-    border-radius: 5px;
-    text-align: center;
-    background-color: transparent;
-    border: 1px solid var(--line-color);
-    cursor: pointer;
-    transition: .4s;
-}
-
-.anime-folder-div .btn:hover {
-    background-color: var(--line-color);
-}
-
-.anime-folder-div .anime-folder-input {
-    width: 100%;
-    height: 30px;
-    font-size: 0.6rem;
-    border-radius: 5px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid var(--line-color);
-    color: black;
-    padding-left: 5px;
-}
-
-.folders-list {
-    margin-top: 30px;
-    padding: 5px 10px 5px 10px;
-    border-radius: 10px;
-    max-height: 100px;
-    overflow: auto;
-    background-color: var(--darker-bg-color);
-}
-
-.folder-element {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.folder-element p {
-    font-size: 0.65rem;
-}
-
-.folder-element p:last-of-type {
-    cursor: pointer;
-}
-
-.folder-element p:last-of-type:hover {
-    color: var(--line-color);
-}
-
-.color-menu {
-    width: 800px;
-    margin-bottom: 40px;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.color-menu .title {
-    position: relative;
-}
-
-.color-menu .title::after {
-    content: "";
-    width: 800px;
-    height: 1px;
-    bottom: -5px;
-    left: 0;
-    position: absolute;
-    background-color: var(--line-color);
-}
-
-.colors-div {
-    margin-top: 30px;
-    display: flex;
-}
-
-.colors-div div {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
-    border-radius: 4px;
-    transition: .2s;
-    cursor: pointer;
-}
-
-.colors-div div:hover {
-    width: 60px;
-}
-
-.update-menu {
-    width: 800px;
-    margin-bottom: 40px;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.update-menu .title {
-    position: relative;
-}
-
-.update-menu .title::after {
-    content: "";
-    width: 800px;
-    height: 1px;
-    bottom: -5px;
-    left: 0;
-    position: absolute;
-    background-color: var(--line-color);
-}
-
-.update-menu-div {
-    width: 100%;
-    margin-top: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-}
-
-.update-menu p, a {
-    font-size: 0.85rem;
-}
-
-.update-menu p:nth-of-type(even) {
-    margin-left: auto;
-}
-
-.update-menu .btn {
-    width: 200px;
-    height: 36px;
-    padding-left: 5px;
-    padding-right: 5px;
-    border-radius: 5px;
-    grid-column-start: 1;
-    grid-column-end: 3;
-    text-align: center;
-    margin: auto;
-    background-color: transparent;
-    border: 1px solid var(--line-color);
-    cursor: pointer;
-    transition: .4s;
-}
-
-.update-menu .btn:hover {
-    background-color: var(--line-color);
 }
 
 .hidden {

@@ -1,0 +1,368 @@
+/* -------- Settings CSS -------- */
+.settings-content {
+    width: 900px;
+    margin: 0 auto 35px auto;
+    padding-top: 50px;
+    border-radius: 10px;
+    position: relative;
+    background-color: var(--lighter-bg-color);
+}
+
+.anilist-connection {
+    width: 800px;
+    margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.anilist-connection .title {
+    position: relative;
+}
+
+.anilist-connection .title::after {
+    content: "";
+    width: 800px;
+    height: 1px;
+    bottom: -5px;
+    left: 0;
+    position: absolute;
+    background-color: var(--line-color);
+}
+
+.anilist-connection a {
+    font-size: 0.85rem;
+}
+
+.anilist-connection p {
+    font-size: 0.9rem;
+    margin-left: auto;
+}
+
+.connect-view, 
+.disconnect-view {
+    width: 100%;
+    margin-top: 30px;
+    gap: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+.connect-view .btn,
+.disconnect-view .btn {
+    width: 200px;
+    height: 36px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 5px;
+    text-align: center;
+    background-color: transparent;
+    border: 1px solid var(--line-color);
+    cursor: pointer;
+    transition: .4s;
+}
+
+.connect-view .btn:hover,
+.disconnect-view .btn:hover {
+    background-color: var(--line-color);
+}
+
+.connect-view .login-input {
+    width: 100%;
+    height: 30px;
+    font-size: 0.6rem;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--line-color);
+    color: black;
+    padding-left: 5px;
+}
+
+.sync-on-start-div {
+    display: flex;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    margin-left: 10px;
+    width: 60px;
+    height: 30px;
+    transform: translateY(1px);
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-switch {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--darker-bg-color);
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider-switch:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked +  .slider-switch {
+    background-color: var(--line-color);
+}
+
+input:checked + .slider-switch:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+.slider-switch.round {
+    border-radius: 34px;
+}
+
+.slider-switch.round:before {
+    width: 23px;
+    height: 23px;
+    border-radius: 50%;
+}
+
+.general-config {
+    width: 800px;
+    margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.general-config .title {
+    position: relative;
+}
+
+.general-config .title::after {
+    content: "";
+    width: 800px;
+    height: 1px;
+    bottom: -5px;
+    left: 0;
+    position: absolute;
+    background-color: var(--line-color);
+}
+
+.general-config-content {
+    display: flex;
+    margin-top: 30px;
+    justify-content: space-between;
+}
+
+.anime-folder-menu {
+    width: 800px;
+    margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.anime-folder-menu .title {
+    position: relative;
+}
+
+.anime-folder-menu .title::after {
+    content: "";
+    width: 800px;
+    height: 1px;
+    bottom: -5px;
+    left: 0;
+    position: absolute;
+    background-color: var(--line-color);
+}
+
+.anime-folder-div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 30px;
+}
+
+.anime-folder-div .btn {
+    width: 200px;
+    height: 36px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 5px;
+    text-align: center;
+    background-color: transparent;
+    border: 1px solid var(--line-color);
+    cursor: pointer;
+    transition: .4s;
+}
+
+.anime-folder-div .btn:hover {
+    background-color: var(--line-color);
+}
+
+.anime-folder-div .anime-folder-input {
+    width: 100%;
+    height: 30px;
+    font-size: 0.6rem;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--line-color);
+    color: black;
+    padding-left: 5px;
+}
+
+.folders-list {
+    margin-top: 30px;
+    padding: 5px 10px 5px 10px;
+    border-radius: 10px;
+    max-height: 100px;
+    overflow: auto;
+    background-color: var(--darker-bg-color);
+}
+
+.folder-element {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.folder-element p {
+    font-size: 0.65rem;
+}
+
+.folder-element p:last-of-type {
+    cursor: pointer;
+}
+
+.folder-element p:last-of-type:hover {
+    color: var(--line-color);
+}
+
+.color-menu {
+    width: 800px;
+    margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.color-menu .title {
+    position: relative;
+}
+
+.color-menu .title::after {
+    content: "";
+    width: 800px;
+    height: 1px;
+    bottom: -5px;
+    left: 0;
+    position: absolute;
+    background-color: var(--line-color);
+}
+
+.colors-div {
+    margin-top: 30px;
+    display: flex;
+}
+
+.colors-div div {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    border-radius: 4px;
+    transition: .2s;
+    cursor: pointer;
+}
+
+.colors-div div:hover {
+    width: 60px;
+}
+
+.update-menu {
+    width: 800px;
+    margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.update-menu .title {
+    position: relative;
+}
+
+.update-menu .title::after {
+    content: "";
+    width: 800px;
+    height: 1px;
+    bottom: -5px;
+    left: 0;
+    position: absolute;
+    background-color: var(--line-color);
+}
+
+.update-menu-div {
+    width: 100%;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+}
+
+.update-menu p, a {
+    font-size: 0.85rem;
+}
+
+.update-menu p:nth-of-type(even) {
+    margin-left: auto;
+}
+
+.update-menu .btn {
+    width: 200px;
+    height: 36px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 5px;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    text-align: center;
+    margin: auto;
+    background-color: transparent;
+    border: 1px solid var(--line-color);
+    cursor: pointer;
+    transition: .4s;
+}
+
+.update-menu .btn:hover {
+    background-color: var(--line-color);
+}
+
+.hidden {
+    display: none;
+}
