@@ -26,8 +26,11 @@ const { remote, ipcRenderer } = require('electron')
 
 const AnimeFiles = require('../../lib/anime-files')
 const UserConfig = require('../../lib/user-config')
+const AnimePage = require('../../lib/anime-page')
 const AnimeList = require('../../lib/anime-list')
 const Utils = require('../../lib/utils')
+
+var torrents
 
 // Load user information JSON
 const userConfig = new UserConfig({
@@ -53,6 +56,8 @@ const animeFiles = new AnimeFiles({
   configName: 'anime-files-v2',
   defaults: { rootFolders: [] }
 })
+
+const animePage = new AnimePage()
 
 if (userConfig.getUserAvatar()) {
   const userAvatar = document.querySelector('.user-avatar-img')
@@ -104,7 +109,6 @@ if (animeList.getAnimeList()) {
   addNoListToView()
 }
 
-ipcRenderer.send('getPage')
 ipcRenderer.send('app_version')
 
 setIpcCallbacks()
@@ -117,6 +121,8 @@ setWindowButtonsEvents()
  *                                                                  *
  * ******************************************************************
  */
+
+/** Main Page Functions */
 
 function addAnimesToView() {
   const animeStatus = {
@@ -156,8 +162,18 @@ function addAnimesToView() {
         newAnimeDiv.appendChild(newAnimeSpan2)
 
         newAnimeDiv.addEventListener('click', function () {
-          ipcRenderer.send('setPage', animeStatus[status])
-          window.location.href = `anime.html?id=${entry.media.id}`
+          const animeData = animePage.getAnimeData(entry.media.id)
+
+          if (animeData) {
+            showAnimePage(animeData)
+          } else {
+            animePage.fetchAnimePage(entry.media.id, userConfig.getUsername(), userConfig.getAccessCode())
+              .then(handleResponse)
+              .then((data) => {
+                animePage.setAnimeData(data.data.Media)
+                showAnimePage(data.data.Media)
+              })
+          }
         })
 
         animeWrap.appendChild(newAnimeDiv)
@@ -307,6 +323,8 @@ function setEventListeners() {
 
   for (let i = 0; i < menuTabs.length; i++) {
     menuTabs[i].addEventListener('click', function () {
+      const mainPage = document.querySelector('.main')
+      const animeMainPage = document.querySelector('.main-anime')
       const target = document.getElementById(menuTabs[i].dataset.tabTarget)
       const pageTitle = document.querySelector('.header').children[0]
       const gridSlider = document.querySelector('.grid-slider')
@@ -339,6 +357,8 @@ function setEventListeners() {
       }
 
       target.classList.remove('hidden')
+      mainPage.classList.remove('hidden')
+      animeMainPage.classList.add('hidden')
     })
   }
 
@@ -619,4 +639,439 @@ function setIpcCallbacks() {
   ipcRenderer.on('reload', () => {
     location.reload()
   })
+}
+
+/** Anime Page Functions */
+
+function showAnimePage(animeData) {
+  const mainPage = document.querySelector('.main')
+  const animeMainPage = document.querySelector('.main-anime')
+
+  resetAnimePage()
+  addAnimeToPage(animeData)
+  addOverviewToPage(animeData)
+  addRelationsToPage(animeData)
+  setAnimePageEventListeners()
+
+  animePage.getAnimeTorrents(animeData.title)
+    .then(addTorrentsToPage)
+
+  mainPage.classList.add('hidden')
+  animeMainPage.classList.remove('hidden')
+}
+
+function resetAnimePage() {
+  const bannerImg = document.querySelector('.banner-img')
+  const coverImg = document.querySelector('.cover-img')
+  const title = document.querySelector('.anime-title')
+  const synopsis = document.querySelector('.synopsis')
+  const overviewTab = document.querySelector('.overview')
+  const animeRelationsTab = document.querySelector('.anime-relations')
+  const torrentsTable = document.querySelector('.table-content')
+  const animeFolder = document.querySelector('.sel-folder-input')
+
+  bannerImg.src = ''
+  coverImg.src = ''
+  title.innerHTML = ''
+  synopsis.innerHTML = ''
+  overviewTab.innerHTML = ''
+  animeRelationsTab.innerHTML = ''
+  torrentsTable.innerHTML = ''
+  animeFolder.value = ''
+}
+
+function addAnimeToPage(animeData) {
+  const animeBanner = document.querySelector('.banner-img')
+  const animeCover = document.querySelector('.cover-img')
+  const animeAboutDiv = document.querySelector('.anime-about')
+  const animeTitle = document.querySelector('.anime-title')
+  const animeSynopsis = document.querySelector('.synopsis')
+  const readMoreBtn = document.querySelector('.read-more')
+  const animeWatchBtn = document.querySelector('.watch-btn')
+  const animeEditBtn = document.querySelector('.edit-btn')
+  const tableThs = document.getElementsByTagName('TH')
+  const status = animeList.getAnimeStatus(animeData.id)
+
+  animeBanner.src = animeData.bannerImage
+  animeCover.src = animeData.coverImage.large
+  animeTitle.innerHTML = animeData.title.english ? animeData.title.english : animeData.title.romaji
+  animeSynopsis.innerText = animeData.description ? animeData.description.replace(/<br>|<\/br>|<i>|<\/i>|<strong>|<\/strong>|<em>|<\/em>/g, '') : ''
+  animeWatchBtn.innerHTML = `Watch ${progress == animeData.episodes ? progress : progress + 1}/${animeData.episodes ? animeData.episodes : '?'}`
+  animeEditBtn.innerHTML = MEDIA_ENTRY_STATUS[status]
+
+  for (let i = 0; i < tableThs.length; i++) {
+    if (i != 4) {
+      tableThs[i].setAttribute('data-after', '▲')
+    }
+  }
+
+  if (!animeData.bannerImage) {
+    const mainDiv = document.querySelector('.main')
+    mainDiv.style.transform = 'translateY(-200px)'
+  }
+
+  if (animeAboutDiv.scrollHeight - animeAboutDiv.clientHeight) {
+    readMoreBtn.style.display = 'block'
+  } else {
+    readMoreBtn.style.display = 'none'
+  }
+}
+
+function addOverviewToPage(animeData) {
+  const overviewDiv = document.querySelector('.overview')
+  const overviewData = animePage.getOverviewData(animeData.id)
+
+  for (let [key, value] of Object.entries(overviewData)) {
+    switch (key) {
+      case 'timeToNextEpisode':
+        if (value.value) {
+          var div = document.createElement('div')
+          var p1 = document.createElement('p')
+          var p2 = document.createElement('p')
+          p2.style.color = getComputedStyle(document.body).getPropertyValue('--line-color')
+
+          p1.innerText = value.name
+          p2.innerText = value.value
+
+          div.appendChild(p1)
+          div.appendChild(p2)
+          overviewDiv.appendChild(div)
+        }
+        break
+
+      case 'status':
+        var div = document.createElement('div')
+        var p1 = document.createElement('p')
+        var p2 = document.createElement('p')
+
+        p1.innerText = value.name
+        p2.innerText = MEDIA_STATUS[value.value]
+
+        div.appendChild(p1)
+        div.appendChild(p2)
+        overviewDiv.appendChild(div)
+        break
+
+      case 'season':
+        if (value.value) {
+          var div = document.createElement('div')
+          var p1 = document.createElement('p')
+          var p2 = document.createElement('p')
+
+          p1.innerText = value.name
+          p2.innerText = MEDIA_SEASON[value.value[0]] + ', ' + value.value[1]
+
+          div.appendChild(p1)
+          div.appendChild(p2)
+          overviewDiv.appendChild(div)
+        }
+        break
+
+      case 'source':
+        if (value.value) {
+          var div = document.createElement('div')
+          var p1 = document.createElement('p')
+          var p2 = document.createElement('p')
+
+          p1.innerText = value.name
+          p2.innerText = MEDIA_SOURCE[value.value]
+
+          div.appendChild(p1)
+          div.appendChild(p2)
+          overviewDiv.appendChild(div)
+        }
+        break
+
+      default:
+        if (value.value) {
+          var div = document.createElement('div')
+          var p1 = document.createElement('p')
+          var p2 = document.createElement('p')
+
+          p1.innerText = value.name
+          p2.innerText = value.value
+
+          div.appendChild(p1)
+          div.appendChild(p2)
+          overviewDiv.appendChild(div)
+        }
+        break
+    }
+  }
+}
+
+function addRelationsToPage(animeData) {
+  const animeRelationsDiv = document.querySelector('.anime-relations')
+
+  for (let i = 0; i < animeData.relations.edges.length; i++) {
+    if (animeData.relations.edges[i].relationType == 'ADAPTATION') {
+      continue
+    }
+
+    const relationDiv = document.createElement('div')
+    const relationImg = document.createElement('img')
+    const relationP = document.createElement('p')
+
+    relationDiv.classList.add('relation-div')
+    relationImg.src = animeData.relations.edges[i].node.coverImage.large
+    relationP.innerText = RELATION_TYPE[animeData.relations.edges[i].relationType]
+    relationDiv.id = animeData.relations.edges[i].node.id
+
+    relationDiv.appendChild(relationImg)
+    relationDiv.appendChild(relationP)
+    animeRelationsDiv.appendChild(relationDiv)
+  }
+}
+
+function addTorrentsToPage(data) {
+  const table = document.querySelector('.table-content')
+  const loadingIcon = document.querySelector('.lds-dual-ring')
+
+  torrents = data
+
+  console.log(torrents)
+
+  // // Avoid updating global variable torrents when sorting
+  // if (torrents.length != data.length || torrents.length == 75) {
+  //   Array.prototype.push.apply(torrents, data)
+  // }
+
+  for (let i = 0; i < data.length; i++) {
+    let tr = document.createElement('tr')
+    let sourceTd = document.createElement('td')
+    let nameTd = document.createElement('td')
+    let episodeTd = document.createElement('td')
+    let videoTd = document.createElement('td')
+    let linkTd = document.createElement('td')
+    let sizeTd = document.createElement('td')
+    let seedTd = document.createElement('td')
+    let leechTd = document.createElement('td')
+    let downloadTd = document.createElement('td')
+    let downloadLink = document.createElement('a')
+    let magneticLink = document.createElement('a')
+
+    sourceTd.innerHTML = data[i].source
+    nameTd.innerHTML = data[i].name
+    episodeTd.innerHTML = data[i].episode
+    videoTd.innerHTML = data[i].video
+    sizeTd.innerHTML = data[i].size
+    seedTd.innerHTML = data[i].seeds
+    leechTd.innerHTML = data[i].leechs
+    downloadTd.innerHTML = data[i].downloadNumber
+    downloadLink.href = data[i].downloadLink
+    magneticLink.href = data[i].magneticLink
+    downloadLink.innerHTML = '<i class="fas fa-download"></i>'
+    magneticLink.innerHTML = '<i class="fas fa-magnet"></i>'
+
+    linkTd.appendChild(downloadLink)
+    linkTd.appendChild(magneticLink)
+
+    tr.appendChild(sourceTd)
+    tr.appendChild(nameTd)
+    tr.appendChild(episodeTd)
+    tr.appendChild(videoTd)
+    tr.appendChild(linkTd)
+    tr.appendChild(sizeTd)
+    tr.appendChild(seedTd)
+    tr.appendChild(leechTd)
+    tr.appendChild(downloadTd)
+
+    table.appendChild(tr)
+  }
+
+  loadingIcon.style.display = 'none'
+}
+
+function setAnimePageEventListeners() {
+  const animeAboutDiv = document.querySelector('.anime-about')
+  const readMoreBtnP = document.querySelector('.read-more')
+  const readMoreBtnA = document.querySelector('.button')
+  const menuTabs = document.getElementsByClassName('anime-tab')
+  const tabContent = document.getElementsByClassName('main-anime-tab-content')
+  const relations = document.getElementsByClassName('relation-div')
+  const tableThs = document.getElementsByTagName('TH')
+  const editBtn = document.querySelector('.edit-btn')
+  const selFolderBtn = document.querySelector('.sel-folder-btn')
+  const selFolderInput = document.querySelector('.sel-folder-input')
+  const watchBtn = document.querySelector('.watch-btn')
+  const episodesDropDown = document.querySelector('.fa-angle-down')
+  const statusDropDown = document.querySelector('.fa-pen')
+
+  readMoreBtnA.addEventListener('click', function () {
+    animeAboutDiv.style.height = 'unset'
+    readMoreBtnP.style.display = 'none'
+  })
+
+  for (let i = 0; i < menuTabs.length; i++) {
+    menuTabs[i].addEventListener('click', function () {
+      const target = document.querySelector(menuTabs[i].dataset.tabTarget)
+
+      for (let i = 0; i < tabContent.length; i++) {
+        tabContent[i].classList.remove('active')
+      }
+
+      target.classList.add('active')
+    })
+  }
+
+  window.addEventListener('resize', function () {
+    animeAboutDiv.style.height = '185px'
+
+    if (animeAboutDiv.scrollHeight - animeAboutDiv.clientHeight) {
+      readMoreBtnP.style.display = 'block'
+    } else {
+      readMoreBtnP.style.display = 'none'
+    }
+  })
+
+  for (let i = 0; i < relations.length; i++) {
+    relations[i].addEventListener('click', () => {
+      window.location.href = `anime.html?id=${relations[i].id}`
+    })
+  }
+
+  for (let i = 0; i < tableThs.length; i++) {
+    if (i != 4) {
+      tableThs[i].addEventListener('click', () => {
+        const torrentsTable = document.querySelector('.table-content')
+
+        torrentsTable.innerHTML = ''
+
+        if (tableThs[i].getAttribute('data-after') == '▲') {
+          tableThs[i].setAttribute('data-after', '▼')
+          console.log(tableThs[i].getAttribute('data-after'))
+
+          addTorrentsToPage(torrents.sort(Utils.compareParams(tableThs[i].id, 'desc')))
+        } else {
+          tableThs[i].setAttribute('data-after', '▲')
+          console.log(tableThs[i].getAttribute('data-after'))
+
+          addTorrentsToPage(torrents.sort(Utils.compareParams(tableThs[i].id, 'asc')))
+        }
+      })
+    }
+  }
+
+  if (editBtn) {
+    editBtn.addEventListener('click', () => {
+      editBox.style.height = '430px'
+    })
+  }
+
+  selFolderBtn.addEventListener('click', () => {
+    const path = remote.dialog.showOpenDialogSync({
+      properties: ['openDirectory']
+    })[0]
+
+    if (path) {
+      selFolderInput.value = path
+      ipcRenderer.send('setUniqueAnimeFolder', {
+        folderPath: path,
+        animeId: animeId
+      })
+    }
+  })
+
+  selFolderInput.addEventListener('focusout', () => {
+    if (selFolderInput.value) {
+      ipcRenderer.send('setUniqueAnimeFolder', {
+        folderPath: selFolderInput.value,
+        animeId: animeId
+      })
+    }
+  })
+
+  if (watchBtn) {
+    watchBtn.addEventListener('click', () => {
+      const args = {
+        nextEpisode: animeList.getAnimeProgress(animeId) + 1 > animeData.episodes ? animeData.episodes : animeList.getAnimeProgress(animeId) + 1,
+        totalEpisodes: animeData.episodes,
+        animeId: animeId,
+        animeTitle: {
+          english: animeData.title.english,
+          romaji: animeData.title.romaji
+        },
+        updateDiscord: {
+          details: animeData.title.english ? animeData.title.english : animeData.title.romaji,
+          state: `Episode ${animeData.mediaListEntry.progress + 1 > animeData.episodes ? animeData.episodes : animeData.mediaListEntry.progress + 1} of ${animeData.episodes}`
+        }
+      }
+
+      ipcRenderer.send('playAnime', args)
+    })
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key == 'Escape') {
+      editBox.style.height = '0'
+      saveEditBtn.innerHTML = 'Save'
+    }
+  })
+
+  document.addEventListener('click', (event) => {
+    const episodesDropDownMenu = document.querySelector('.episodes-menu-drop')
+    const statusDropDownMenu = document.querySelector('.status-menu-drop')
+  })
+}
+
+function handleResponse(response) {
+  return response.json().then(function (json) {
+    return response.ok ? json : Promise.reject(json);
+  });
+}
+
+const MEDIA_STATUS = {
+  FINISHED: 'Finished',
+  RELEASING: 'Releasing',
+  NOT_YET_RELEASED: 'Not Yet Released',
+  CANCELLED: 'Cancelled'
+}
+
+const MEDIA_ENTRY_STATUS = {
+  CURRENT: 'Watching',
+  PLANNING: 'Planning',
+  COMPLETED: 'Completed',
+  DROPPED: 'Dropped',
+  PAUSED: 'Paused',
+  REPEATING: 'Repeating',
+  NONE: 'Edit',
+  Watching: 'CURRENT',
+  Planning: 'PLANNING',
+  Completed: 'COMPLETED',
+  Dropped: 'DROPPED',
+  Paused: 'PAUSED',
+  Repeating: 'REPEATING',
+  Delete: 'Delete'
+}
+
+const MEDIA_SOURCE = {
+  ORIGINAL: 'Original',
+  MANGA: 'Manga',
+  LIGHT_NOVEL: 'Light Novel',
+  VISUAL_NOVEL: 'Visual Novel',
+  VIDEO_GAME: 'Video Game',
+  OTHER: 'Other',
+  NOVEL: 'Novel',
+  DOUJINSHI: 'Doujinshi',
+  ANIME: 'Anime'
+}
+
+const MEDIA_SEASON = {
+  WINTER: 'Winter',
+  SPRING: 'Spring',
+  SUMMER: 'Summer',
+  FALL: 'Fall'
+}
+
+const RELATION_TYPE = {
+  ADAPTATION: 'Adaptation',
+  PREQUEL: 'Prequel',
+  SEQUEL: 'Sequel',
+  ALTERNATIVE: 'Alternative',
+  SPIN_OFF: 'Spin Off',
+  SIDE_STORY: 'Side Story',
+  CHARACTER: 'Character',
+  SUMMARY: 'Summary',
+  OTHER: 'Other',
+  PARENT: 'Parent'
 }

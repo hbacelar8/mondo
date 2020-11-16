@@ -1,229 +1,18 @@
-* {
-    margin: 0;
-    padding: 0;
-    color: white;
-    font-size: 24px;
-    font-family: 'Nunito', sans-serif;
-    box-sizing: border-box;
-    text-decoration: none;
-    list-style: none;
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
-:root {
-    --darker-bg-color: #292e37;
-    --lighter-bg-color: #353b48;
-    --lighter-bg-color-rgb: 53, 59, 72;
-    --line-color: #487eb0;
-}
-
-*:focus {
-    outline: none;
-}
-
-body {
-    background-color: var(--darker-bg-color);
-}
-
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
-}
-
-hr {
-    border: 0;
-	border-top: 1px solid #487eb0;
-}
-
-/* ----------- Scrollbar -----------*/
-/* width */
-::-webkit-scrollbar {
-    width: 7px;
-    height: 7px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-    background: var(--lighter-bg-color);
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-    background: var(--line-color);
-    border-radius: 2px;
-}
-/* ----------- Scrollbar -----------*/
-
-.taskbar {
-    width: calc(100% - 230px);
-    height: 35px;
-    position: fixed;
-    right: 0;
-    -webkit-app-region: drag;
-    z-index: 1;
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
-    background-blend-mode: exclusion;
-    background: rgba(53, 59, 72, 0.2);
-}
-
-.window-btns {
-    width: 120px;
-    height: 35px;
-    right: 0;
-    z-index: 1;
-    display: flex;
-    position: fixed;
-    justify-content: space-evenly;
-    -webkit-app-region: no-drag;
-}
-
-.window-btns div {
-    width: 100%;
-    transition: 0.2s;
-    cursor: pointer;
-    text-align: center;
-}
-
-.window-btns i {
-    font-size: 0.4rem;
-    transform: translateY(-3px);
-}
-
-.min:hover,
-.max:hover {
-    background-color: var(--line-color);
-}
-
-.close:hover {
-    background-color: #870202;
-}
-
-.update-frame {
-    width: 260px;
-    height: 160px;
-    right: 25px;
-    bottom: 25px;
-    border-radius: 10px;
-    padding: 20px 10px 10px 10px;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    position: fixed;
-    background-color: var(--lighter-bg-color);
-}
-
-.update-frame p {
-    font-size: 0.8rem;
-}
-
-.update-frame a {
-    width: 100px;
-    padding-left: 10px;
-    padding-right: 10px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 3px;
-    margin: auto;
-    cursor: pointer;
-    text-align: center;
-    background-color: var(--line-color);
-    transition: .2s;
-}
-
-.update-frame a:hover {
-    transform: scale(1.1);
-}
-
-.side-bar {
-    width: 230px;
-    height: 100%;
-    font-size: 1.5rem;
-    z-index: 1;
-    position: fixed;
-    white-space: nowrap;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    background-blend-mode: exclusion;
-    background: rgba(53, 59, 72, 0.6);
-}
-
-.user-avatar-div {
-    width: 100%;
-    margin-top: 30px;
-    text-align: center;
-}
-
-.user-avatar-img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.anime-lists {
-    margin: 10px 0 20px 15px;
-}
-
-.anime-lists-btn {
-    font-size: 0.55rem;
-    font-weight: 800;
-    color: var(--line-color);
-}
-
-.anime-lists-menu {
-    padding-top: 5px;
-}
-
-.anime-lists-menu a {
-    display: block;
-    margin: 10px 20px 0 0;
-    font-size: 0.7rem;
-    font-weight: 300;
-    letter-spacing: 1px;
-    position: relative;
-}
-
-.anime-lists-menu p {
-    display: inline-block;
-    font-size: 0.6rem;
-    right: 0;
-    position: absolute;
-}
-
-.anime-lists-menu i {
-    margin-right: 15px;
-    font-size: 0.65rem;
-    color: rgba(169, 169, 169, 0.5);
-    transition: 0.3s;
-}
-
-.anime-lists-menu a:hover > .far {
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.settings-btn {
-    margin: 20px 0 20px 15px;
-    font-size: 0.8rem;
-    bottom: 0;
-    position: absolute;
-}
-
-.settings-btn i {
-    margin-right: 10px;
-    font-size: 0.8rem;
-}
-
-.main {
+.main-anime {
     height: 100vh;
     margin-left: 230px;
     min-width: 600px;
     display: grid;
 }
 
-.header {
+.main-anime .header {
     display: grid;
     grid-template-rows: 400px auto;
 }
@@ -428,7 +217,7 @@ hr {
     position: relative;
 }
 
-.about {
+.anime-about {
     height: 185px;
     margin-top: 10px;
     margin-left: 20px;
@@ -437,7 +226,7 @@ hr {
     position: relative;
 }
 
-.title {
+.anime-title {
     font-weight: 600;
 }
 
@@ -465,7 +254,7 @@ hr {
     cursor: pointer;
 }
 
-.about:hover .button {
+.anime-about:hover .button {
     opacity: 1;
 }
 
@@ -475,14 +264,14 @@ hr {
     position: relative;
 }
 
-.tab {
+.anime-tab {
     margin-right: 30px;
     font-size: 0.6rem;
     transition: 0.3s;
     cursor: pointer;
 }
 
-.tab:hover {
+.anime-tab:hover {
     color: var(--line-color);
 }
 
@@ -490,11 +279,11 @@ hr {
     margin: 20px;
 }
 
-.tab-content {
+.main-anime-tab-content {
     display: none;
 }
 
-.tab-content.active {
+.main-anime-tab-content.active {
     display: block;
 }
 
@@ -686,145 +475,6 @@ hr {
     padding-left: 5px;
 }
 
-.edit-box {
-    width: 350px;
-    height: 0px;
-    left: calc(50% - 175px);
-    top: calc(50% - 175px);
-    outline: 1px solid var(--line-color);
-    outline-offset: -3px;
-    position: fixed;
-    background-color: var(--lighter-bg-color);
-    transition: 0.2s;
-    overflow: hidden;
-    display: grid;
-    grid-template-rows: 1fr 1fr 1fr;
-    row-gap: 5px;
-}
-
-.edit-box p {
-    position: absolute;
-    right: 15px;
-    top: 5px;
-    cursor: pointer;
-}
-
-.edit-box i {
-    font-size: 0.6rem;
-}
-
-.dropdown-status {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 20px;
-}
-
-.dropdown-status::before {
-    content: "Status";
-    font-size: 0.5rem;
-    margin-bottom: 1px;
-    color: whitesmoke;
-    transform: translateX(-80px);
-}
-
-.dropdown-status-btn {
-    width: 200px;
-    height: 35px;
-    border: none;
-    background-color: var(--darker-bg-color);
-    border-radius: 4px;
-    font-size: 0.6rem;
-    cursor: pointer;
-}
-
-.dropdown-status-menu {
-    width: 200px;
-    height: 0;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--darker-bg-color);
-    overflow: auto;
-    transition: 0.2s;
-}
-
-.dropdown-status-menu a {
-    width: 100%;
-    font-size: 0.6rem;
-    padding: 5px;
-    cursor: pointer;
-    text-align: center;
-}
-
-.dropdown-status-menu a:hover {
-    background-color: var(--lighter-bg-color);
-}
-
-.progress-input-div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.progress-input-div::before {
-    content: "Episode Progress";
-    font-size: 0.5rem;
-    margin-bottom: 1px;
-    color: whitesmoke;
-    transform: translateX(-50px);
-}
-
-.edit-box input {
-    width: 200px;
-    height: 35px;
-    border: none;
-    background-color: var(--darker-bg-color);
-    border-radius: 4px;
-    font-size: 0.6rem;
-    text-align: center;
-}
-
-.score-input-div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.score-input-div::before {
-    content: "Score";
-    font-size: 0.5rem;
-    margin-bottom: 1px;
-    color: whitesmoke;
-    transform: translateX(-80px);
-}
-
-.save-btn-div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.save-btn-div a {
-    width: 100px;
-    padding-left: 10px;
-    padding-right: 10px;
-    transform: translateY(-10px);
-    margin-bottom: 10px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 3px;
-    cursor: pointer;
-    text-align: center;
-    background-color: var(--line-color);
-    transition: .2s;
-}
-
 .lds-dual-ring {
     display: block;
     width: 80px;
@@ -862,7 +512,7 @@ hr {
         margin-right: 20px;
     }
 
-    /* .read-more {
+    .read-more {
         display: block;
-    } */
+    }
 }

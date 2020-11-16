@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/general.css">
     <link rel="stylesheet" href="../css/settings.css">
+    <link rel="stylesheet" href="../css/anime.css">
 
     <script src="../js/main.js" defer></script>
 </head>
@@ -66,7 +67,7 @@
         </div>
 
         <div class="content">
-            <div class="anime-wrap tab-content hidden" id="#watching"></div>
+            <div class="anime-wrap tab-content" id="#watching"></div>
             <div class="anime-wrap tab-content hidden" id="#completed"></div>
             <div class="anime-wrap tab-content hidden" id="#planning"></div>
             <div class="anime-wrap tab-content hidden" id="#paused"></div>
@@ -145,6 +146,94 @@
                     <p class="last-update-time"></p>
                     <div class="update-btn btn">
                         <a>Check for Updates</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-anime hidden">
+        <div class="header">
+            <div class="banner">
+                <img class="banner-img" alt="">
+            </div>
+
+            <div class="cover-info-wrap">
+                <div class="cover">
+                    <img class="cover-img" alt="">
+                    <div class="watch-btn-div">
+                        <a class="watch-btn"></a>
+                        <!-- <div class="watch-dropdown">
+                            <i class="fas fa-angle-down"></i>
+                        </div>
+                        <div class="episodes-menu-drop"></div> -->
+                    </div>
+                    <div class="edit-btn-div">
+                        <a class="edit-btn"></a>
+                        <!-- <div class="status-dropdown">
+                            <i class="fas fa-pen"></i>
+                        </div>
+                        <div class="status-menu-drop">
+                            <div>Watching</div>
+                            <div>Completed</div>
+                            <div>Planning</div>
+                            <div>Paused</div>
+                            <div>Dropped</div>
+                            <div>Delete</div>
+                        </div> -->
+                    </div>
+                </div>
+
+                <div class="info">
+                    <div class="anime-about">
+                        <p class="anime-title"></p>
+                        <p class="synopsis"></p>
+                        <p class="read-more"><a class="button">Read More</a></p>
+                    </div>
+                    <div class="tab-menu">
+                        <a class="anime-tab" data-tab-target="#overview">Overview</a>
+                        <a class="anime-tab" data-tab-target="#anime-relations">Anime Relations</a>
+                        <a class="anime-tab" data-tab-target="#download">Download</a>
+                        <a class="anime-tab" data-tab-target="#anime-config">Configure</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="main-anime-tab-content active" id="overview">
+                <div class="overview"></div>
+            </div>
+            <div class="main-anime-tab-content" id="anime-relations">
+                <div class="anime-relations"></div>
+            </div>
+            <div class="main-anime-tab-content" id="download">
+                <div class="download">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th id="source">Source</th>
+                                <th id="name">Name</th>
+                                <th id="episode">Episode</th>
+                                <th id="video">Video</th>
+                                <th id="link">Link</th>
+                                <th id="size">Size</th>
+                                <th id="seeds">Seeds</th>
+                                <th id="leechs">Leechs</th>
+                                <th id="downloadNumber">Downloads</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-content"></tbody>
+                    </table>
+                    <div class="lds-dual-ring"></div>
+                </div>
+            </div>
+            <div class="main-anime-tab-content" id="anime-config">
+                <div class="anime-config">
+                    <div class="sel-folder-div">
+                        <div class="title">Anime Folder</div>
+                        <div class="btn"><button class="sel-folder-btn">Select Folder</button></div>
+                        <div class="inpt"><input class="sel-folder-input" type="text"></div>
                     </div>
                 </div>
             </div>
