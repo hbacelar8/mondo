@@ -1,3 +1,5 @@
+**Project Archived!** - I'll no longer be updating this project.
+
 <h1 align="center">Mondo</h1>
 
 <p align="center">
@@ -15,11 +17,6 @@
   
   <img alt="GitHub All Releases" src="https://img.shields.io/github/downloads/bacelarhenrique/mondo/total?style=flat-square">
 </p>
-
-<img alt="mondo1" src="https://i.ibb.co/4NKzXb6/mondo1.png">
-<img alt="mondo2" src="https://i.ibb.co/qdTX0tr/mondo2.png">
-<img alt="mondo3" src="https://i.ibb.co/jkb90Yy/mondo3.png">
-<img alt="mondo4" src="https://i.ibb.co/nzXTdZY/mondo4.png">
 
 ---
 
